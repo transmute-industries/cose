@@ -17,14 +17,16 @@ const prettyHeaderKey = (k: string) => {
     [`4`]: 'kid',
     // new
     [`100`]: 'receipt',
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } as any)[`${k}`]
 }
-
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const prettyHeaderValue = (v: any) => {
   const value = ({
     [`-7`]: '"ES256"',
     [`-35`]: '"ES384"',
     [`-36`]: '"ES512"',
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } as any)[`${v}`]
   return value ? value : `h'${toHexString(new TextEncoder().encode(v))}'`
 }

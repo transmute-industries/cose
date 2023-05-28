@@ -29,31 +29,83 @@ const cose = require('@transmute/cose')
 
 ### Usage
 
+See also [RFC9162](https://datatracker.ietf.org/doc/rfc9162/).
+
+#### Setup
+
 ```ts
 import cose from '@transmute/cose'
+const signer = await cose.signer({
+  privateKeyJwk: {
+    kty: 'EC',
+    crv: 'P-256',
+    alg: 'ES256',
+    d: 'o_95vWSheg19YU7viU3PmW_kRIWk14HiVLXDXiZjEL0',
+    x: 'LYdh0ITBGLOUpywy0adFxXyaIaQapIEOLgfw7933TRE',
+    y: 'I6R3hgQZf2topOWa0VBjEugRgHISJ39LvOlfVX29P0w',
+  },
+})
+const verifier = await cose.verifier({
+  publicKeyJwk: {
+    kty: 'EC',
+    crv: 'P-256',
+    alg: 'ES256',
+    x: 'LYdh0ITBGLOUpywy0adFxXyaIaQapIEOLgfw7933TRE',
+    y: 'I6R3hgQZf2topOWa0VBjEugRgHISJ39LvOlfVX29P0w',
+  },
+})
+```
 
-const entries: Uint8Array[] = []
-for (let i = 0; i < 10; i++) {
-  entries.push(cose.strToBin(`${String.fromCharCode(65 + i)}`))
-}
-const root = cose.treeHead(entries)
-const inclusionProof = cose.inclusionProof(entries[2], entries)
-const leaf = cose.leaf(entries[2])
-const verifiedInclusionProof = cose.verifyInclusionProof(
-  root,
-  leaf,
-  inclusionProof,
-)
-// expect(verifiedInclusionProof).toBe(true)
-entries.push(cose.strToBin('Spicy update 🔥'))
-const root2 = cose.treeHead(entries)
-const consistencyProof = cose.consistencyProof(inclusionProof, entries)
-const verifiedConsistencyProof = cose.verifyConsistencyProof(
-  root,
-  root2,
-  consistencyProof,
-)
-// expect(verifiedConsistencyProof).toBe(true)
+#### Issue Inclusion Proof
+
+```ts
+const message0 = cose.cbor.encode(0)
+const message1 = cose.cbor.encode('1')
+const message2 = cose.cbor.encode([2, 2])
+const message3 = cose.cbor.encode({ 3: 3 })
+
+const entries = [message0, message1, message2, message3]
+const leaves = entries.map(cose.merkle.leaf)
+const old_root = await cose.merkle.root({ leaves })
+
+const signed_inclusion_proof = await cose.merkle.inclusion_proof({
+  leaf_index: 2,
+  leaves,
+  signer,
+})
+```
+
+#### Verify Inclusion Proof
+
+```ts
+const verified_inclusion_proof = await cose.merkle.verify_inclusion_proof({
+  leaf: cose.merkle.leaf(entries[2]),
+  signed_inclusion_proof,
+  verifier,
+})
+```
+
+#### Issue Consistency Proof
+
+```ts
+const message4 = cose.cbor.encode(['🔥', 4])
+const message5 = cose.cbor.encode({ five: '💀' })
+const leaves2 = entries.map(cose.merkle.leaf)
+const signed_consistency_proof = await cose.merkle.consistency_proof({
+  signed_inclusion_proof,
+  leaves: leaves2,
+  signer,
+})
+```
+
+#### Verify Consistency Proof
+
+```ts
+const verified = await cose.merkle.verify_consistency_proof({
+  old_root,
+  signed_consistency_proof,
+  verifier,
+})
 ```
 
 ## Develop
