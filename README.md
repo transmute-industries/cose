@@ -29,7 +29,10 @@ const cose = require('@transmute/cose')
 
 ### Usage
 
-See also [RFC9162](https://datatracker.ietf.org/doc/rfc9162/).
+See also :
+
+- [RFC9162](https://datatracker.ietf.org/doc/rfc9162/).
+- [draft-steele-cose-merkle-tree-proofs](https://github.com/ietf-scitt/draft-steele-cose-merkle-tree-proofs).
 
 #### Setup
 
