@@ -2,7 +2,7 @@ import { CoMETRE } from '@transmute/rfc9162'
 
 import cbor from '../cbor'
 import { RequestInclusionProofVerification } from '../types'
-
+import attachPayload from '../attachPayload'
 export const verify_inclusion_proof = async ({
   leaf,
   signed_inclusion_proof,
@@ -21,9 +21,11 @@ export const verify_inclusion_proof = async ({
       inclusion_path,
     },
   )
-  decoded[2] = validated_root // attach payload from validated merkle root
-  const encoded = cbor.encode(decoded)
-  const verified_root = await verifier.verify(encoded)
+  if (validated_root === false) {
+    return false
+  }
+  const attached = attachPayload(signed_inclusion_proof, validated_root)
+  const verified_root = await verifier.verify(attached)
   if (verified_root) {
     // console.log(verified_root)
     return true

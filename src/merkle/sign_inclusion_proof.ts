@@ -2,7 +2,7 @@ import { CoMETRE } from '@transmute/rfc9162'
 import unprotectedHeader from '../unprotectedHeader'
 import cbor from '../cbor'
 import { RequestInclusionProof } from '../types'
-
+import detachPayload from '../detachPayload'
 export const sign_inclusion_proof = async ({
   leaf_index,
   leaves,
@@ -30,5 +30,6 @@ export const sign_inclusion_proof = async ({
     ]),
   )
   const updated = unprotectedHeader.set(signed_root, u)
-  return updated
+  const { signed } = detachPayload(updated)
+  return new Uint8Array(signed)
 }

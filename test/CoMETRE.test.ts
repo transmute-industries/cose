@@ -61,19 +61,20 @@ it('inclusion proof', async () => {
     verifier,
   })
   expect(verified_inclusion_proof).toBe(true)
-  const verified_root = await verifier.verify(signed_inclusion_proof)
   const old_root = await cose.merkle.root({ leaves })
+  const attached = cose.attachPayload(signed_inclusion_proof, old_root)
+  const verified_root = await verifier.verify(attached)
   expect(verified_root).toEqual(old_root)
 })
 
 it('consistency proof', async () => {
+  const old_root = await cose.merkle.root({ leaves })
   const new_root = await cose.merkle.root({ leaves: leaves2 })
   const signed_consistency_proof = await cose.merkle.consistency_proof({
     signed_inclusion_proof,
     leaves: leaves2,
     signer,
   })
-  const old_root = await verifier.verify(signed_inclusion_proof)
   const verified = await cose.merkle.verify_consistency_proof({
     old_root,
     signed_consistency_proof,
