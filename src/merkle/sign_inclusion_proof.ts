@@ -24,7 +24,9 @@ export const sign_inclusion_proof = async ({
       kid:
         log_id +
         '/' +
-        `${prefix}:${tree_alg.toLowerCase()}:${RFC9162.binToHex(leaf)}`,
+        `${prefix}:${tree_alg.toLowerCase()}:${leaf_index}:${RFC9162.binToHex(
+          leaf,
+        )}`,
     },
     payload: root,
   })
