@@ -13,7 +13,7 @@ const prettyHeaderKey = (k: string) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return ({
     [`1`]: 'alg',
-    [`3`]: 'ctyp',
+    [`3`]: 'content_type',
     [`4`]: 'kid',
     // new
     [`100`]: 'inclusion-proof',
