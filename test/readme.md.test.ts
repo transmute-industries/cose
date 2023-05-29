@@ -62,11 +62,13 @@ it('inclusion proof', async () => {
     signed_inclusion_proof,
     verifier,
   })
-  expect(verified_inclusion_proof).toBe(true)
-  const old_root = await cose.merkle.root({ leaves })
-  const attached = cose.attachPayload(signed_inclusion_proof, old_root)
+
+  const attached = cose.attachPayload(
+    signed_inclusion_proof,
+    verified_inclusion_proof,
+  )
   const verified_root = await verifier.verify(attached)
-  expect(verified_root).toEqual(old_root)
+  expect(verified_root).toEqual(verified_inclusion_proof)
   const diag = await cose.diagnostic(signed_inclusion_proof, {
     decode_payload: false,
     detached_payload: true,

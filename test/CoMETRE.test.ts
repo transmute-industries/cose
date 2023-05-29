@@ -62,7 +62,10 @@ it('inclusion proof', async () => {
     signed_inclusion_proof,
     verifier,
   })
-  expect(verified_inclusion_proof).toBe(true)
+
+  expect(cose.binToHex(verified_inclusion_proof)).toBe(
+    '0bdaaed3b6301858b0acbda1e0c3aa55f2de037ced44253ae6797b5a32568964',
+  )
   const old_root = await cose.merkle.root({ leaves })
   const attached = cose.attachPayload(signed_inclusion_proof, old_root)
   const verified_root = await verifier.verify(attached)

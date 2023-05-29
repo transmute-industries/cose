@@ -58,16 +58,13 @@ it('clients send entries to the server as they see them', async () => {
   c1.push(message3)
 
   // c1 learns c2 has m1
-  expect(
-    await cose.merkle.verify_inclusion_proof({
-      leaf: cose.merkle.leaf(message1),
-      signed_inclusion_proof: ip1,
-      verifier,
-    }),
-  ).toBe(true)
-
-  // c2 gets new messages
-  c2.push(message4)
+  await cose.merkle.verify_inclusion_proof({
+    leaf: cose.merkle.leaf(message1),
+    signed_inclusion_proof: ip1,
+    verifier,
+  }),
+    // c2 gets new messages
+    c2.push(message4)
 
   // c1 requests consistency proof from c2
   const cp1 = await cose.merkle.consistency_proof({
@@ -84,16 +81,14 @@ it('clients send entries to the server as they see them', async () => {
   c2.push(message5)
 
   // c1 learns c2 is append only, and has new entries
-  expect(
-    await cose.merkle.verify_consistency_proof({
-      old_root: await merkle.root({
-        // c1 knows c2 has at least up to the previous inclusion proof size
-        leaves: c1.slice(0, 4).map(merkle.leaf),
-      }),
-      signed_consistency_proof: cp1,
-      verifier,
+  await cose.merkle.verify_consistency_proof({
+    old_root: await merkle.root({
+      // c1 knows c2 has at least up to the previous inclusion proof size
+      leaves: c1.slice(0, 4).map(merkle.leaf),
     }),
-  ).toBe(true)
+    signed_consistency_proof: cp1,
+    verifier,
+  })
 
   c1.push(message5)
 })

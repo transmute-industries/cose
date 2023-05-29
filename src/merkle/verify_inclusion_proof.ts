@@ -21,14 +21,7 @@ export const verify_inclusion_proof = async ({
       inclusion_path,
     },
   )
-  if (validated_root === false) {
-    return false
-  }
   const attached = attachPayload(signed_inclusion_proof, validated_root)
   const verified_root = await verifier.verify(attached)
-  if (verified_root) {
-    // console.log(verified_root)
-    return true
-  }
-  return false
+  return verified_root
 }
