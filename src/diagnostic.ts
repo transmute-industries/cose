@@ -72,6 +72,7 @@ const diagnosticUnprotectedHeader = (decoded: any) => {
 
 const default_options = {
   decode_payload: true,
+  detached_payload: false,
 }
 const alternateDiagnostic = async (
   data: Uint8Array,
@@ -86,11 +87,16 @@ const alternateDiagnostic = async (
   diagnostic += '\n'
   diagnostic += unprotectedHeader
   diagnostic += '\n'
-  diagnostic += '  ' + '# Protected Payload\n'
-  diagnostic += '  ' + diagnosticData(value[2]) + ',\n'
-  if (options.decode_payload) {
-    diagnostic += '  ' + '# ' + new TextDecoder().decode(value[2]) + '\n'
+  if (options.detached_payload) {
+    diagnostic += '  ' + '# Detached Payload\n'
+  } else {
+    diagnostic += '  ' + '# Protected Payload\n'
+    diagnostic += '  ' + diagnosticData(value[2]) + ',\n'
+    if (options.decode_payload) {
+      diagnostic += '  ' + '# ' + new TextDecoder().decode(value[2]) + '\n'
+    }
   }
+
   diagnostic += '\n'
   diagnostic += '  ' + '# Signature\n'
   diagnostic += '  ' + diagnosticData(value[3]) + '\n'

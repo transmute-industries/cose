@@ -67,7 +67,12 @@ it('inclusion proof', async () => {
   const attached = cose.attachPayload(signed_inclusion_proof, old_root)
   const verified_root = await verifier.verify(attached)
   expect(verified_root).toEqual(old_root)
-  expect(await cose.diagnostic(signed_inclusion_proof)).toBe(`# COSE_Sign1
+  expect(
+    await cose.diagnostic(signed_inclusion_proof, {
+      decode_payload: false,
+      detached_payload: true,
+    }),
+  ).toBe(`# COSE_Sign1
 18([
 
   # Protected Header
@@ -85,9 +90,7 @@ it('inclusion proof', async () => {
       100 : h'3133312c342c322c3133302c3231362c36342c38382c33322c3136332c3135302c38352c3231322c3139342c3134312c32312c3135312c32342c3139312c3139352c34312c3132372c3134372c3231352c3135362c3130342c3133382c32382c32332c302c3139372c38302c38302c3131332c3134372c3133312c3131302c3231302c3135342c3135302c3133382c3231362c36342c38382c33322c38372c32342c3132352c3235352c31312c34352c322c3133312c3132372c3137332c3139362c3133312c3132322c3231352c3138362c3235332c3130332c372c35362c3138352c3133362c3132352c3130372c3134372c3232322c3234362c3234352c39342c33312c37322c3132332c313737' 
   },
 
-  # Protected Payload
-  h'',
-  # 
+  # Detached Payload
 
   # Signature
   h'523824dadbc1c3b9f048d26cd3273e05999d2937702ad0501945872cd1f1744714e86504427490984eb60efff4d84dc5731fbc1e598712cd5f7128fe52629be6'
@@ -112,7 +115,10 @@ it('consistency proof', async () => {
   const verified_root = await verifier.verify(signed_consistency_proof)
   expect(verified_root).toEqual(new_root)
   expect(
-    await cose.diagnostic(signed_consistency_proof, { decode_payload: false }),
+    await cose.diagnostic(signed_consistency_proof, {
+      decode_payload: false,
+      detached_payload: false,
+    }),
   ).toBe(`# COSE_Sign1
 18([
 
