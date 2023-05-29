@@ -48,7 +48,7 @@ it('unprotected header', async () => {
 
   # Unprotected Header
   {
-      # "kid" : "42"    
+      # "kid" : "h'3432'"    
       4 : h'3432' 
   },
 

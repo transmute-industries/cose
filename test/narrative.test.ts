@@ -47,6 +47,7 @@ it('clients send entries to the server as they see them', async () => {
 
   // c1 requests inclusion proof for m1 from c2
   const ip1 = await cose.merkle.inclusion_proof({
+    log_id: 'urn:trans:c2',
     leaf_index: 1,
     leaves: c2.map(merkle.leaf),
     signer,
@@ -70,6 +71,7 @@ it('clients send entries to the server as they see them', async () => {
 
   // c1 requests consistency proof from c2
   const cp1 = await cose.merkle.consistency_proof({
+    log_id: 'urn:trans:c2',
     signed_inclusion_proof: ip1,
     leaves: c2.map(merkle.leaf),
     signer,

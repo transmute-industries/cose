@@ -1,5 +1,6 @@
 import cose, { CoseSigner, CoseVerifier } from '../src'
 
+const log_id = `https://transparency.example`
 let signer: CoseSigner
 let verifier: CoseVerifier
 
@@ -26,7 +27,7 @@ beforeAll(async () => {
 })
 
 it('sanity', async () => {
-  const protectedHeader = { alg: 'ES256' }
+  const protectedHeader = { alg: 'ES256', kid: log_id }
   const message = 'hello'
   const payload = new TextEncoder().encode(message)
   const signed = await signer.sign({ protectedHeader, payload })
@@ -37,10 +38,12 @@ it('sanity', async () => {
 18([
 
   # Protected Header
-  h'a10126', 
+  h'a2012604581c68747470733a2f2f7472616e73706172656e63792e6578616d706c65', 
   # {
   #   "alg" : "ES256",
-  #   1 : -7
+  #   1 : -7,
+  #   "kid" : h'68747470733a2f2f7472616e73706172656e63792e6578616d706c65',
+  #   4 : https://transparency.example
   # }
 
   # Unprotected Header
@@ -51,6 +54,6 @@ it('sanity', async () => {
   # hello
 
   # Signature
-  h'bfd4fc1bf92161f22b5f2526fccae9875bb28158498b30e079771dcf3e74f13c903a5c44230f170cd1f0ab2d3cb5f97e84c003274fa0367b538b1992ec633a0e'
+  h'6026a1a9641353aa553a74166d01b156cc21c954740059020525bc4d71480a9226dbb9e1e22904da90d2de6f782fa8607c75d1e9137dbfded94a165dbd5f7ad2'
 ])`)
 })

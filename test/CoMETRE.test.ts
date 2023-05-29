@@ -1,5 +1,6 @@
 import cose, { CoseSigner, CoseVerifier } from '../src'
 
+const log_id = `https://transparency.example`
 let signer: CoseSigner
 let verifier: CoseVerifier
 
@@ -51,6 +52,7 @@ let signed_inclusion_proof: Uint8Array
 
 it('inclusion proof', async () => {
   signed_inclusion_proof = await cose.merkle.inclusion_proof({
+    log_id,
     leaf_index: 2,
     leaves,
     signer,
@@ -71,6 +73,7 @@ it('consistency proof', async () => {
   const old_root = await cose.merkle.root({ leaves })
   const new_root = await cose.merkle.root({ leaves: leaves2 })
   const signed_consistency_proof = await cose.merkle.consistency_proof({
+    log_id,
     signed_inclusion_proof,
     leaves: leaves2,
     signer,

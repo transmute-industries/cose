@@ -9,7 +9,7 @@ export const verify_consistency_proof = async ({
   verifier,
 }: RequestConsistencyProofVerification) => {
   const decoded = cbor.decode(signed_consistency_proof)
-  const [log_id, tree_size_1, tree_size_2, consistency_path] = cbor.decode(
+  const [tree_size_1, tree_size_2, consistency_path] = cbor.decode(
     decoded.value[1].get(200),
   )
   const new_root = await verifier.verify(signed_consistency_proof)
@@ -17,7 +17,7 @@ export const verify_consistency_proof = async ({
     old_root,
     new_root,
     {
-      log_id,
+      log_id: '',
       tree_size_1,
       tree_size_2,
       consistency_path,

@@ -16,7 +16,8 @@ const prettyHeaderKey = (k: string) => {
     [`3`]: 'ctyp',
     [`4`]: 'kid',
     // new
-    [`100`]: 'receipt',
+    [`100`]: 'inclusion-proof',
+    [`200`]: 'consistency-proof',
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } as any)[`${k}`]
 }
@@ -58,7 +59,7 @@ const diagnosticUnprotectedHeader = (decoded: any) => {
   const lines = []
   for (const [k, v] of decoded.entries()) {
     lines.push(
-      `    # "${prettyHeaderKey(k)}" : "${v}"    
+      `    # "${prettyHeaderKey(k)}" : "${prettyHeaderValue(v)}"    
       ${k} : ${prettyHeaderValue(v)} `,
     )
   }
@@ -69,7 +70,13 @@ const diagnosticUnprotectedHeader = (decoded: any) => {
 `
 }
 
-const alternateDiagnostic = async (data: Uint8Array) => {
+const default_options = {
+  decode_payload: true,
+}
+const alternateDiagnostic = async (
+  data: Uint8Array,
+  options = default_options,
+) => {
   let diagnostic = ''
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { tag, value } = cbor.decode(data, { dictionary: 'map' } as any)
@@ -81,7 +88,9 @@ const alternateDiagnostic = async (data: Uint8Array) => {
   diagnostic += '\n'
   diagnostic += '  ' + '# Protected Payload\n'
   diagnostic += '  ' + diagnosticData(value[2]) + ',\n'
-  diagnostic += '  ' + '# ' + new TextDecoder().decode(value[2]) + '\n'
+  if (options.decode_payload) {
+    diagnostic += '  ' + '# ' + new TextDecoder().decode(value[2]) + '\n'
+  }
   diagnostic += '\n'
   diagnostic += '  ' + '# Signature\n'
   diagnostic += '  ' + diagnosticData(value[3]) + '\n'
