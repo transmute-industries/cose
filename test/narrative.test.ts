@@ -47,7 +47,8 @@ it('clients send entries to the server as they see them', async () => {
 
   // c1 requests inclusion proof for m1 from c2
   const ip1 = await cose.merkle.inclusion_proof({
-    log_id: 'urn:trans:c2',
+    alg: signer.alg,
+    kid: 'urn:trans:c2',
     leaf_index: 1,
     leaves: c2.map(merkle.leaf),
     signer,
@@ -68,7 +69,8 @@ it('clients send entries to the server as they see them', async () => {
 
   // c1 requests consistency proof from c2
   const cp1 = await cose.merkle.consistency_proof({
-    log_id: 'urn:trans:c2',
+    alg: signer.alg,
+    kid: 'urn:trans:c2',
     signed_inclusion_proof: ip1,
     leaves: c2.map(merkle.leaf),
     signer,
@@ -83,6 +85,8 @@ it('clients send entries to the server as they see them', async () => {
   // c1 learns c2 is append only, and has new entries
   await cose.merkle.verify_consistency_proof({
     old_root: await merkle.root({
+      alg: signer.alg,
+      kid: 'urn:trans:c2',
       // c1 knows c2 has at least up to the previous inclusion proof size
       leaves: c1.slice(0, 4).map(merkle.leaf),
     }),

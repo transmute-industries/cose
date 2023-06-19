@@ -52,7 +52,8 @@ let signed_inclusion_proof: Uint8Array
 
 it('inclusion proof', async () => {
   signed_inclusion_proof = await cose.merkle.inclusion_proof({
-    log_id,
+    alg: signer.alg,
+    kid: 'https://ts.example/urn:ietf:params:trans:inclusion:rfc9162_sha256:2:e7f16481e965db422b1d7dadf5c7f205ad6600445f5f9404a76cc85caab81688',
     leaf_index: 2,
     leaves,
     signer,
@@ -99,10 +100,17 @@ it('inclusion proof', async () => {
 })
 
 it('consistency proof', async () => {
-  const old_root = await cose.merkle.root({ leaves })
-  const new_root = await cose.merkle.root({ leaves: leaves2 })
+  const old_root = await cose.merkle.root({
+    alg: signer.alg,
+    kid: log_id, leaves
+  })
+  const new_root = await cose.merkle.root({
+    alg: signer.alg,
+    kid: log_id, leaves: leaves2
+  })
   const signed_consistency_proof = await cose.merkle.consistency_proof({
-    log_id,
+    alg: signer.alg,
+    kid: 'https://ts.example/urn:ietf:params:trans:consistency:rfc9162_sha256:2:e7f16481e965db422b1d7dadf5c7f205ad6600445f5f9404a76cc85caab81688',
     signed_inclusion_proof,
     leaves: leaves2,
     signer,

@@ -1,12 +1,11 @@
-import { RFC9162, CoMETRE } from '@transmute/rfc9162'
+import { CoMETRE } from '@transmute/rfc9162'
 import unprotectedHeader from '../unprotectedHeader'
 import cbor from '../cbor'
 import { RequestInclusionProof } from '../types'
 import detachPayload from '../detachPayload'
-
-const { tree_alg } = CoMETRE.RFC9162_SHA256
 export const sign_inclusion_proof = async ({
-  log_id,
+  kid,
+  alg,
   leaf_index,
   leaves,
   signer,
@@ -16,17 +15,10 @@ export const sign_inclusion_proof = async ({
     leaf_index,
     leaves,
   )
-  const prefix = `urn:ietf:params:trans:inclusion`
-  const leaf = leaves[leaf_index]
   const signed_root = await signer.sign({
     protectedHeader: {
-      alg: signer.alg,
-      kid:
-        log_id +
-        '/' +
-        `${prefix}:${tree_alg.toLowerCase()}:${leaf_index}:${RFC9162.binToHex(
-          leaf,
-        )}`,
+      alg,
+      kid,
     },
     payload: root,
   })

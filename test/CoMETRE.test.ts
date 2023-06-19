@@ -52,7 +52,8 @@ let signed_inclusion_proof: Uint8Array
 
 it('inclusion proof', async () => {
   signed_inclusion_proof = await cose.merkle.inclusion_proof({
-    log_id,
+    alg: signer.alg,
+    kid: log_id,
     leaf_index: 2,
     leaves,
     signer,
@@ -66,17 +67,27 @@ it('inclusion proof', async () => {
   expect(cose.binToHex(verified_inclusion_proof)).toBe(
     '0bdaaed3b6301858b0acbda1e0c3aa55f2de037ced44253ae6797b5a32568964',
   )
-  const old_root = await cose.merkle.root({ leaves })
+  const old_root = await cose.merkle.root({
+    alg: signer.alg,
+    kid: log_id, leaves
+  })
   const attached = cose.attachPayload(signed_inclusion_proof, old_root)
   const verified_root = await verifier.verify(attached)
   expect(verified_root).toEqual(old_root)
 })
 
 it('consistency proof', async () => {
-  const old_root = await cose.merkle.root({ leaves })
-  const new_root = await cose.merkle.root({ leaves: leaves2 })
+  const old_root = await cose.merkle.root({
+    alg: signer.alg,
+    kid: log_id, leaves
+  })
+  const new_root = await cose.merkle.root({
+    alg: signer.alg,
+    kid: log_id, leaves: leaves2
+  })
   const signed_consistency_proof = await cose.merkle.consistency_proof({
-    log_id,
+    alg: signer.alg,
+    kid: log_id,
     signed_inclusion_proof,
     leaves: leaves2,
     signer,

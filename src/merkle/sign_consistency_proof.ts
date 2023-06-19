@@ -1,11 +1,11 @@
-import { RFC9162, CoMETRE } from '@transmute/rfc9162'
+import { CoMETRE } from '@transmute/rfc9162'
 import unprotectedHeader from '../unprotectedHeader'
 import cbor from '../cbor'
 import { RequestConsistencyProof } from '../types'
 
-const { tree_alg } = CoMETRE.RFC9162_SHA256
 export const sign_consistency_proof = async ({
-  log_id,
+  kid,
+  alg,
   leaves,
   signed_inclusion_proof,
   signer,
@@ -23,18 +23,11 @@ export const sign_consistency_proof = async ({
     },
     leaves,
   )
-  const prefix = `urn:ietf:params:trans:consistency`
-  const leaf = leaves[leaf_index]
   const new_root = CoMETRE.RFC9162_SHA256.root(leaves)
   const signed_root = await signer.sign({
     protectedHeader: {
-      alg: signer.alg,
-      kid:
-        log_id +
-        '/' +
-        `${prefix}:${tree_alg.toLowerCase()}:${leaf_index}:${RFC9162.binToHex(
-          leaf,
-        )}`,
+      alg,
+      kid
     },
     payload: new_root,
   })

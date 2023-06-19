@@ -3,6 +3,7 @@ import { CoMETRE } from '@transmute/rfc9162'
 import { RequestSignedMerkleRoot } from '../types'
 
 export const sign_root = async ({
+  alg, kid,
   leaves,
   signer,
 }: RequestSignedMerkleRoot) => {
@@ -11,7 +12,7 @@ export const sign_root = async ({
     return root
   }
   const signed_root = await signer.sign({
-    protectedHeader: { alg: signer.alg },
+    protectedHeader: { alg, kid },
     payload: root,
   })
   return signed_root
