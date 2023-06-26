@@ -65,8 +65,10 @@ it('inclusion proof', async () => {
   })
 
   const attached = cose.attachPayload(
-    signed_inclusion_proof,
-    verified_inclusion_proof,
+    {
+      signature: signed_inclusion_proof,
+      payload: verified_inclusion_proof,
+    }
   )
   const verified_root = await verifier.verify(attached)
   expect(verified_root).toEqual(verified_inclusion_proof)

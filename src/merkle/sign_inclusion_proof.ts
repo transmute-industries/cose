@@ -32,6 +32,6 @@ export const sign_inclusion_proof = async ({
     ]),
   )
   const updated = unprotectedHeader.set(signed_root, u)
-  const { signed } = detachPayload(updated)
-  return new Uint8Array(signed)
+  const { signature } = detachPayload(updated)
+  return signature
 }
