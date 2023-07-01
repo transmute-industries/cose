@@ -31,7 +31,7 @@ it('sanity', async () => {
   const message = 'hello'
   const payload = new TextEncoder().encode(message)
   const signed = await signer.sign({ protectedHeader, payload })
-  const result = cose.detachPayload(signed)
+  const result = await cose.detachPayload(signed)
 
   expect(await cose.diagnostic(result.signature)).toBe(`# COSE_Sign1
 18([
@@ -55,7 +55,7 @@ it('sanity', async () => {
   # Signature
   h'6026a1a9641353aa553a74166d01b156cc21c954740059020525bc4d71480a9226dbb9e1e22904da90d2de6f782fa8607c75d1e9137dbfded94a165dbd5f7ad2'
 ])`)
-  const signed2 = cose.attachPayload(result)
+  const signed2 = await cose.attachPayload(result)
   expect(await cose.diagnostic(signed2)).toBe(`# COSE_Sign1
 18([
 

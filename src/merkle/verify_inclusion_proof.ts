@@ -21,7 +21,7 @@ export const verify_inclusion_proof = async ({
       inclusion_path,
     },
   )
-  const attached = attachPayload({
+  const attached = await attachPayload({
     signature: signed_inclusion_proof,
     payload: validated_root
   })

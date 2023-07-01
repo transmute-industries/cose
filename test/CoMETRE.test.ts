@@ -71,7 +71,7 @@ it('inclusion proof', async () => {
     alg: signer.alg,
     kid: log_id, leaves
   })
-  const attached = cose.attachPayload({
+  const attached = await cose.attachPayload({
     signature: signed_inclusion_proof,
     payload: old_root
   })

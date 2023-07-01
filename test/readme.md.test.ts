@@ -64,7 +64,7 @@ it('inclusion proof', async () => {
     verifier,
   })
 
-  const attached = cose.attachPayload(
+  const attached = await cose.attachPayload(
     {
       signature: signed_inclusion_proof,
       payload: verified_inclusion_proof,

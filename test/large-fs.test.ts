@@ -1,3 +1,4 @@
+import fs from 'fs'
 import cose, { CoseSigner, CoseVerifier } from '../src'
 
 const log_id = `https://transparency.example`
@@ -29,14 +30,11 @@ beforeAll(async () => {
 
 it('Buffer sanity', async () => {
   const protectedHeader = { alg: 'ES256', kid: log_id }
-  const message = 'hello'
-  const content = Buffer.from(new TextEncoder().encode(message))
+  const content = fs.readFileSync('1765337807_A cyberpunk painting of trees made of light, zeros_xl-beta-v2-2-2.png')
   const payload = content
   const signed = await signer.sign({ protectedHeader, payload })
-  //
   const detached = await cose.detachPayload(signed)
   const attached = await cose.attachPayload(detached)
-  //
   const verified = await verifier.verify(attached)
   const recovered = Buffer.from(verified)
   expect(recovered).toEqual(payload)
