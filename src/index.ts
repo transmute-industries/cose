@@ -12,9 +12,12 @@ import detached from './detached'
 import { RFC9162 } from '@transmute/rfc9162'
 
 import getKid from './getKid'
+import getContentType from './getContentType'
+
 const cose = {
   detached,
   getKid,
+  getContentType,
   binToHex: RFC9162.binToHex,
   hexToBin: RFC9162.hexToBin,
   cbor,
