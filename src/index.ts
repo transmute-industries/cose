@@ -11,8 +11,10 @@ import detached from './detached'
 
 import { RFC9162 } from '@transmute/rfc9162'
 
+import getKid from './getKid'
 const cose = {
   detached,
+  getKid,
   binToHex: RFC9162.binToHex,
   hexToBin: RFC9162.hexToBin,
   cbor,
