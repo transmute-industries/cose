@@ -1,13 +1,13 @@
 import fs from 'fs'
-import cose, { CoseSigner, CoseVerifier } from '../src'
+import cose, { CoseDetachedSigner, CoseDetachedVerifier } from '../src'
 
 const log_id = `https://transparency.example`
 
-let signer: CoseSigner
-let verifier: CoseVerifier
+let signer: CoseDetachedSigner
+let verifier: CoseDetachedVerifier
 
 beforeAll(async () => {
-  signer = await cose.signer({
+  signer = await cose.detached.signer({
     privateKeyJwk: {
       kty: 'EC',
       crv: 'P-256',
@@ -17,7 +17,7 @@ beforeAll(async () => {
       y: 'I6R3hgQZf2topOWa0VBjEugRgHISJ39LvOlfVX29P0w',
     },
   })
-  verifier = await cose.verifier({
+  verifier = await cose.detached.verifier({
     publicKeyJwk: {
       kty: 'EC',
       crv: 'P-256',
@@ -28,14 +28,10 @@ beforeAll(async () => {
   })
 })
 
-it('Buffer sanity', async () => {
+it('detached api large objects', async () => {
   const protectedHeader = { alg: 'ES256', kid: log_id }
   const content = fs.readFileSync('1765337807_A cyberpunk painting of trees made of light, zeros_xl-beta-v2-2-2.png')
-  const payload = content
-  const signed = await signer.sign({ protectedHeader, payload })
-  const detached = await cose.detachPayload(signed)
-  const attached = await cose.attachPayload(detached)
-  const verified = await verifier.verify(attached)
-  const recovered = Buffer.from(verified)
-  expect(recovered).toEqual(payload)
+  const { payload, signature, } = await signer.sign({ protectedHeader, payload: content })
+  const verified = await verifier.verify({ payload, signature, })
+  expect(verified).toBe(true)
 })
