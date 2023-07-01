@@ -5,8 +5,8 @@ const getContentType = (message: Uint8Array): string => {
     value: [encodedProtectedHeader],
   } = cbor.decode(message)
   const protectedHeader = cbor.decode(encodedProtectedHeader)
-  const contentTypeTag = protectedHeader.get(3)
-  return new TextDecoder().decode(contentTypeTag)
+  const contentTypeTag = 3;
+  return protectedHeader.get(contentTypeTag)
 }
 
 export default getContentType
