@@ -25,6 +25,16 @@ beforeAll(async () => {
   })
 })
 
+
+const mapsAreEqual = (m1: Map<any, any>, m2: Map<any, any>) => m1.size === m2.size && Array.from(m1.keys()).every((key) => {
+  const condition = m1.get(key) === m2.get(key)
+  if (!condition) {
+    console.log(m1.get(key))
+    console.log(m2.get(key))
+  }
+  return condition
+});
+
 it('unprotected header', async () => {
   const protectedHeader = { alg: 'ES256', content_type: 'application/jwk+json' }
   const message = JSON.stringify({
@@ -35,10 +45,14 @@ it('unprotected header', async () => {
     y: 'I6R3hgQZf2topOWa0VBjEugRgHISJ39LvOlfVX29P0w',
   })
   const payload = new TextEncoder().encode(message)
+  // no unprotected header required...
   const signed = await signer.sign({ protectedHeader, payload })
-  const m = new Map()
-  m.set(cose.unprotectedHeader.kid, 42)
-  const updated = cose.unprotectedHeader.set(signed, m)
+  const m1 = cose.unprotectedHeader.get(signed)
+  const m2 = new Map()
+  // ensure an undefined unprotected year yields an empty map...
+  expect(mapsAreEqual(m1, m2)).toBe(true)
+  m2.set(cose.unprotectedHeader.kid, 42)
+  const updated = cose.unprotectedHeader.set(signed, m2)
   const verified = await verifier.verify(updated)
   expect(new TextDecoder().decode(verified)).toEqual(message)
   const diag = await cose.diagnostic(updated)

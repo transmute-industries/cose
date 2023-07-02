@@ -15,15 +15,15 @@ export const sign_inclusion_proof = async ({
     leaf_index,
     leaves,
   )
-  const signed_root = await signer.sign({
+  const signedMerkleRoot = await signer.sign({
     protectedHeader: {
       alg,
       kid,
     },
     payload: root,
   })
-  const u = new Map()
-  u.set(
+  const signedInclusionProofUnprotectedHeader = new Map()
+  signedInclusionProofUnprotectedHeader.set(
     unprotectedHeader.inclusion_proof,
     cbor.encode([
       inclusion_proof.tree_size,
@@ -31,7 +31,8 @@ export const sign_inclusion_proof = async ({
       inclusion_proof.inclusion_path,
     ]),
   )
-  const updated = unprotectedHeader.set(signed_root, u)
-  const { signature } = await detachPayload(updated)
+  const signedInclusionProof = unprotectedHeader.set(signedMerkleRoot, signedInclusionProofUnprotectedHeader)
+  // TODO: remove this and require a detached signer?
+  const { signature } = await detachPayload(signedInclusionProof)
   return signature
 }

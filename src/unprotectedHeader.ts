@@ -9,14 +9,23 @@ const unprotectedHeaderTags = {
   // will be registered in https://github.com/ietf-scitt/draft-steele-cose-merkle-tree-proofs
   inclusion_proof: 100,
   consistency_proof: 200,
+
+  // will be registered in https://datatracker.ietf.org/doc/draft-birkholz-scitt-receipts/
+  receipt: 300 // signed inclusion proof with extra data ... (uses tag 100)
 }
 
 const unprotectedHeader = {
   ...unprotectedHeaderTags,
-  set: (message: Uint8Array, updated: UnprotectedHeader) => {
+  get: (message: Uint8Array): UnprotectedHeader => {
     const decoded = cbor.decode(message)
-    decoded.value[1] = updated
-    return cbor.encode(decoded)
+    const unprotectedMap = decoded.value[1] as UnprotectedHeader
+    return unprotectedMap.size === undefined ? new Map() : unprotectedMap
+  },
+  set: (message: Uint8Array, unprotectedMap: UnprotectedHeader): Uint8Array => {
+    const decoded = cbor.decode(message)
+    decoded.value[1] = unprotectedMap
+    const updatedMessage = new Uint8Array(cbor.encode(decoded))
+    return updatedMessage
   },
 }
 

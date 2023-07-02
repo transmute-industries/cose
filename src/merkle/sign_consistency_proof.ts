@@ -24,15 +24,15 @@ export const sign_consistency_proof = async ({
     leaves,
   )
   const new_root = CoMETRE.RFC9162_SHA256.root(leaves)
-  const signed_root = await signer.sign({
+  const signedMerkleRoot = await signer.sign({
     protectedHeader: {
       alg,
       kid
     },
     payload: new_root,
   })
-  const u = new Map()
-  u.set(
+  const signedConsistencyProofUnprotectedHeader = new Map()
+  signedConsistencyProofUnprotectedHeader.set(
     unprotectedHeader.consistency_proof,
     cbor.encode([
       consistency_proof.tree_size_1,
@@ -40,6 +40,6 @@ export const sign_consistency_proof = async ({
       consistency_proof.consistency_path,
     ]),
   )
-  const updated = unprotectedHeader.set(signed_root, u)
-  return updated
+  const signedConsistencyProof = unprotectedHeader.set(signedMerkleRoot, signedConsistencyProofUnprotectedHeader)
+  return signedConsistencyProof
 }
