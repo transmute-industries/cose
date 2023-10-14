@@ -30,7 +30,7 @@ it('sweep test', async () => {
   const leaves: Uint8Array[] = []
   for (let i = 0; i < 10; i++) {
     const message = `${i}`
-    const leaf = cose.merkle.leaf(cose.cbor.encode(message))
+    const leaf = cose.merkle.leaf(cose.cbor.web.encode(message))
     leaves.push(leaf)
     const proof = await cose.merkle.inclusion_proof({
       alg: signer.alg,
