@@ -26,12 +26,12 @@ beforeAll(async () => {
   })
 })
 
-const message0 = cose.cbor.encode(0)
-const message1 = cose.cbor.encode('1')
-const message2 = cose.cbor.encode([2, 2])
-const message3 = cose.cbor.encode({ 3: 3 })
-const message4 = cose.cbor.encode(['🔥', 4])
-const message5 = cose.cbor.encode({ five: '💀' })
+const message0 = cose.cbor.web.encode(0)
+const message1 = cose.cbor.web.encode('1')
+const message2 = cose.cbor.web.encode([2, 2])
+const message3 = cose.cbor.web.encode({ 3: 3 })
+const message4 = cose.cbor.web.encode(['🔥', 4])
+const message5 = cose.cbor.web.encode({ five: '💀' })
 
 const c1: Uint8Array[] = []
 const c2: Uint8Array[] = []
