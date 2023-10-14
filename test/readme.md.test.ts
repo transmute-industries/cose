@@ -26,26 +26,26 @@ beforeAll(async () => {
   })
 })
 
-const message0 = cose.cbor.encode(0)
-const message1 = cose.cbor.encode('1')
-const message2 = cose.cbor.encode([2, 2])
-const message3 = cose.cbor.encode({ 3: 3 })
+const message0 = cose.cbor.web.encode(0)
+const message1 = cose.cbor.web.encode('1')
+const message2 = cose.cbor.web.encode([2, 2])
+const message3 = cose.cbor.web.encode({ 3: 3 })
 const entries = [message0, message1, message2, message3]
 const leaves = entries.map(cose.merkle.leaf)
 
-const message4 = cose.cbor.encode(['🔥', 4])
-const message5 = cose.cbor.encode({ five: '💀' })
+const message4 = cose.cbor.web.encode(['🔥', 4])
+const message5 = cose.cbor.web.encode({ five: '💀' })
 entries.push(message4)
 entries.push(message5)
 const leaves2 = entries.map(cose.merkle.leaf)
 
 it('message sanity', async () => {
-  expect(cose.cbor.decode(message0)).toEqual(0)
-  expect(cose.cbor.decode(message1)).toEqual('1')
-  expect(cose.cbor.decode(message2)).toEqual([2, 2])
-  expect(cose.cbor.decode(message3)).toEqual({ 3: 3 })
-  expect(cose.cbor.decode(message4)).toEqual(['🔥', 4])
-  expect(cose.cbor.decode(message5)).toEqual({ five: '💀' })
+  expect(cose.cbor.web.decode(message0)).toEqual(0)
+  expect(cose.cbor.web.decode(message1)).toEqual('1')
+  expect(cose.cbor.web.decode(message2)).toEqual([2, 2])
+  expect(cose.cbor.web.decode(message3)).toEqual({ 3: 3 })
+  expect(cose.cbor.web.decode(message4)).toEqual(['🔥', 4])
+  expect(cose.cbor.web.decode(message5)).toEqual({ five: '💀' })
 })
 
 let signed_inclusion_proof: Uint8Array
@@ -76,6 +76,7 @@ it('inclusion proof', async () => {
     decode_payload: false,
     detached_payload: true,
   })
+  // TODO: fix me to align with https://github.com/transmute-industries/cose/issues/5
   expect(diag).toBe(`# COSE_Sign1
 18([
 
@@ -90,8 +91,8 @@ it('inclusion proof', async () => {
 
   # Unprotected Header
   {
-      # "inclusion-proof" : "h'3133312c342c322c3133302c3231362c36342c38382c33322c3136332c3135302c38352c3231322c3139342c3134312c32312c3135312c32342c3139312c3139352c34312c3132372c3134372c3231352c3135362c3130342c3133382c32382c32332c302c3139372c38302c38302c3131332c3134372c3133312c3131302c3231302c3135342c3135302c3133382c3231362c36342c38382c33322c38372c32342c3132352c3235352c31312c34352c322c3133312c3132372c3137332c3139362c3133312c3132322c3231352c3138362c3235332c3130332c372c35362c3138352c3133362c3132352c3130372c3134372c3232322c3234362c3234352c39342c33312c37322c3132332c313737'"    
-      100 : h'3133312c342c322c3133302c3231362c36342c38382c33322c3136332c3135302c38352c3231322c3139342c3134312c32312c3135312c32342c3139312c3139352c34312c3132372c3134372c3231352c3135362c3130342c3133382c32382c32332c302c3139372c38302c38302c3131332c3134372c3133312c3131302c3231302c3135342c3135302c3133382c3231362c36342c38382c33322c38372c32342c3132352c3235352c31312c34352c322c3133312c3132372c3137332c3139362c3133312c3132322c3231352c3138362c3235332c3130332c372c35362c3138352c3133362c3132352c3130372c3134372c3232322c3234362c3234352c39342c33312c37322c3132332c313737' 
+      # "inclusion-proof" : "h'efbfbd0402efbfbdefbfbd405820efbfbdefbfbd55efbfbdc28d15efbfbd18efbfbdefbfbd297fefbfbdd79c68efbfbd1c1700efbfbd505071efbfbdefbfbd6ed29aefbfbdefbfbdefbfbd40582057187defbfbd0b2d02efbfbd7fefbfbdc4837ad7baefbfbd670738efbfbdefbfbd7d6befbfbdefbfbdefbfbdefbfbd5e1f487befbfbd'"    
+      100 : h'efbfbd0402efbfbdefbfbd405820efbfbdefbfbd55efbfbdc28d15efbfbd18efbfbdefbfbd297fefbfbdd79c68efbfbd1c1700efbfbd505071efbfbdefbfbd6ed29aefbfbdefbfbdefbfbd40582057187defbfbd0b2d02efbfbd7fefbfbdc4837ad7baefbfbd670738efbfbdefbfbd7d6befbfbdefbfbdefbfbdefbfbd5e1f487befbfbd' 
   },
 
   # Detached Payload
@@ -129,6 +130,7 @@ it('consistency proof', async () => {
     decode_payload: false,
     detached_payload: false,
   })
+  // TODO: fix me to align with https://github.com/transmute-industries/cose/issues/5
   expect(diag).toBe(`# COSE_Sign1
 18([
 
@@ -143,8 +145,8 @@ it('consistency proof', async () => {
 
   # Unprotected Header
   {
-      # "consistency-proof" : "h'3133312c342c362c3133302c3231362c36342c38382c33322c31312c3231382c3137342c3231312c3138322c34382c32342c38382c3137362c3137322c3138392c3136312c3232342c3139352c3137302c38352c3234322c3232322c332c3132342c3233372c36382c33372c35382c3233302c3132312c3132332c39302c35302c38362c3133372c3130302c3231362c36342c38382c33322c3131372c3234312c3131392c3235332c352c3230372c34302c3231352c3136322c3134302c3130392c3232362c3234302c33362c37362c3137392c35392c3137332c3231352c37392c3235302c3233342c3232352c3131352c332c35392c3135372c3230362c34362c3131352c3136382c313731'"    
-      200 : h'3133312c342c362c3133302c3231362c36342c38382c33322c31312c3231382c3137342c3231312c3138322c34382c32342c38382c3137362c3137322c3138392c3136312c3232342c3139352c3137302c38352c3234322c3232322c332c3132342c3233372c36382c33372c35382c3233302c3132312c3132332c39302c35302c38362c3133372c3130302c3231362c36342c38382c33322c3131372c3234312c3131392c3235332c352c3230372c34302c3231352c3136322c3134302c3130392c3232362c3234302c33362c37362c3137392c35392c3137332c3231352c37392c3235302c3233342c3232352c3131352c332c35392c3135372c3230362c34362c3131352c3136382c313731' 
+      # "consistency-proof" : "h'efbfbd0406efbfbdefbfbd4058200bdaaed3b6301858efbfbdefbfbdefbfbdefbfbdefbfbdc3aa55efbfbdefbfbd037cefbfbd44253aefbfbd797b5a3256efbfbd64efbfbd40582075efbfbd77efbfbd05efbfbd28d7a2efbfbd6defbfbdefbfbd244cefbfbd3befbfbdefbfbd4fefbfbdefbfbdefbfbd73033befbfbdefbfbd2e73efbfbdefbfbd'"    
+      200 : h'efbfbd0406efbfbdefbfbd4058200bdaaed3b6301858efbfbdefbfbdefbfbdefbfbdefbfbdc3aa55efbfbdefbfbd037cefbfbd44253aefbfbd797b5a3256efbfbd64efbfbd40582075efbfbd77efbfbd05efbfbd28d7a2efbfbd6defbfbdefbfbd244cefbfbd3befbfbdefbfbd4fefbfbdefbfbdefbfbd73033befbfbdefbfbd2e73efbfbdefbfbd' 
   },
 
   # Protected Payload
