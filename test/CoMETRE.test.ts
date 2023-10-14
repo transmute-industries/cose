@@ -26,26 +26,26 @@ beforeAll(async () => {
   })
 })
 
-const message0 = cose.cbor.encode(0)
-const message1 = cose.cbor.encode('1')
-const message2 = cose.cbor.encode([2, 2])
-const message3 = cose.cbor.encode({ 3: 3 })
+const message0 = cose.cbor.web.encode(0)
+const message1 = cose.cbor.web.encode('1')
+const message2 = cose.cbor.web.encode([2, 2])
+const message3 = cose.cbor.web.encode({ 3: 3 })
 const entries = [message0, message1, message2, message3]
 const leaves = entries.map(cose.merkle.leaf)
 
-const message4 = cose.cbor.encode(['🔥', 4])
-const message5 = cose.cbor.encode({ five: '💀' })
+const message4 = cose.cbor.web.encode(['🔥', 4])
+const message5 = cose.cbor.web.encode({ five: '💀' })
 entries.push(message4)
 entries.push(message5)
 const leaves2 = entries.map(cose.merkle.leaf)
 
 it('message sanity', async () => {
-  expect(cose.cbor.decode(message0)).toEqual(0)
-  expect(cose.cbor.decode(message1)).toEqual('1')
-  expect(cose.cbor.decode(message2)).toEqual([2, 2])
-  expect(cose.cbor.decode(message3)).toEqual({ 3: 3 })
-  expect(cose.cbor.decode(message4)).toEqual(['🔥', 4])
-  expect(cose.cbor.decode(message5)).toEqual({ five: '💀' })
+  expect(cose.cbor.web.decode(message0)).toEqual(0)
+  expect(cose.cbor.web.decode(message1)).toEqual('1')
+  expect(cose.cbor.web.decode(message2)).toEqual([2, 2])
+  expect(cose.cbor.web.decode(message3)).toEqual({ 3: 3 })
+  expect(cose.cbor.web.decode(message4)).toEqual(['🔥', 4])
+  expect(cose.cbor.web.decode(message5)).toEqual({ five: '💀' })
 })
 
 let signed_inclusion_proof: Uint8Array

@@ -25,7 +25,7 @@ export const sign_inclusion_proof = async ({
   const signedInclusionProofUnprotectedHeader = new Map()
   signedInclusionProofUnprotectedHeader.set(
     unprotectedHeader.inclusion_proof,
-    cbor.encode([
+    cbor.web.encode([
       inclusion_proof.tree_size,
       inclusion_proof.leaf_index,
       inclusion_proof.inclusion_path,
