@@ -3,9 +3,8 @@ import cbor from '../../cbor'
 
 import { makeRfcCodeBlock } from './makeRfcCodeBlock'
 import { maxBstrTruncateLength, maxLineLength, commentOffset } from './constants'
-import { truncateBstr } from './truncateBstr'
 
-import { beautifyInclusionProof } from './inclusion-proof'
+import { beautifyInclusionProofs } from './inclusion-proof'
 
 // https://www.iana.org/assignments/cose/cose.xhtml
 const protectedHeaderTagToDescription = (tag: number) => {
@@ -25,6 +24,10 @@ const beautifyProtectedHeader = async (data: Buffer | Uint8Array) => {
   result = result.replace(/, /g, `,\n${mapItemSpacer}`)
   result = result.replace('}', `\n}`)
   result = result.split('\n').map((line: string) => {
+    if (line.trim() === '{') {
+      line = `{                                     / Protected header                      /`
+      return line
+    }
     if (line.includes(`h'`) && line.length > maxBstrTruncateLength) {
       line = line.replace(/h'(.{8}).+(.{8})'/g, `h'$1...$2'`)
     }
@@ -53,23 +56,31 @@ const coseSign1IndexToDescription = (index: number) => {
 
 
 const beautifyUnprotectedHeader = async (unprotectedHeader: Map<number, unknown>) => {
+  const blocks = [] as string[]
+  let result = "      {},                     / Unprotected header as a map           /"
   if (unprotectedHeader.size) {
     const lines = []
     for (const [key, value] of unprotectedHeader.entries()) {
       if (key === 100) {
-        lines.push(await beautifyInclusionProof(value as Buffer))
+        const result = await beautifyInclusionProofs(value as Buffer)
+        lines.push(result.headerTag)
+        for (const p of result.proofs) {
+          blocks.push(makeRfcCodeBlock(p))
+        }
       } else {
         console.log('unknown tag ', key)
       }
     }
-    return `      {
+    result = `      {
       ${lines.join('      \n')}
       },`
   }
-  return "      {},                     / Unprotected header as a map           /"
+
+  return { prettyUnprotectedHeader: result, blocks }
 }
 
 const beautifyCoseSign1Object = async (data: Buffer | Uint8Array) => {
+  const allBlocks = [] as string[]
   const decoded = await cbor.web.decode(data);
   const diagnostic = await cbor.web.diagnose(data)
   const tagSpacer = `    `;
@@ -86,8 +97,11 @@ const beautifyCoseSign1Object = async (data: Buffer | Uint8Array) => {
       return line
     }
     if (index === 3) {
-      line = await beautifyUnprotectedHeader(decoded.value[1])
-      return line
+      const { prettyUnprotectedHeader, blocks } = await beautifyUnprotectedHeader(decoded.value[1])
+      for (const b of blocks) {
+        allBlocks.push(b)
+      }
+      return prettyUnprotectedHeader
     }
     const commentPlaceholder = `/ ${coseSign1IndexToDescription(index)}`
     let commentSpacer = maxLineLength - line.length - commentOffset
@@ -96,14 +110,14 @@ const beautifyCoseSign1Object = async (data: Buffer | Uint8Array) => {
     return lineWithComment + ' '.repeat(maxLineLength - lineWithComment.length) + `/`
   }))
   result = result.join('\n')
-  return result
+  return { envelope: result, blocks: allBlocks }
 }
 
 export const beautifyCoseSign1 = async (data: Buffer | Uint8Array) => {
   const decoded = await cbor.web.decode(data);
   const [encodedProtectedHeader] = decoded.value
   const protectedHeader = await beautifyProtectedHeader(encodedProtectedHeader)
-  const envelope = await beautifyCoseSign1Object(data)
-  return [protectedHeader, envelope].map(makeRfcCodeBlock).join('\n\n')
+  const { envelope, blocks } = await beautifyCoseSign1Object(data)
+  return [...blocks, makeRfcCodeBlock(protectedHeader), makeRfcCodeBlock(envelope)].join('\n\n')
 }
 

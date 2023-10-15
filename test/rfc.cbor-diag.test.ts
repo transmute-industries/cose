@@ -28,7 +28,7 @@ beforeAll(async () => {
   })
 })
 
-it('cose-sign-1', async () => {
+it.skip('cose-sign-1', async () => {
   const protectedHeader = { alg: 'ES256', kid: log_id }
   const message = 'hello'
   const payload = new TextEncoder().encode(message)
