@@ -7,6 +7,8 @@ import {
   Payload,
 } from './types'
 
+import { typedArrayToBuffer } from './utils'
+
 const signer = async ({ privateKeyJwk }: { privateKeyJwk: PrivateKeyJwk }) => {
   return {
     alg: privateKeyJwk.alg,
@@ -21,7 +23,7 @@ const signer = async ({ privateKeyJwk }: { privateKeyJwk: PrivateKeyJwk }) => {
     }): Promise<Uint8Array> => {
       const signature = await cose.sign.create(
         { p: protectedHeader, u: unprotectedHeader },
-        payload,
+        typedArrayToBuffer(payload),
         {
           key: {
             d: base64url.decode(privateKeyJwk.d),

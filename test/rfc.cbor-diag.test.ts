@@ -31,7 +31,7 @@ beforeAll(async () => {
 it('sanity', async () => {
   const protectedHeader = { alg: 'ES256', kid: log_id }
   const message = 'hello'
-  const payload = Buffer.from(new TextEncoder().encode(message))
+  const payload = new TextEncoder().encode(message)
   const signed = await signer.sign({ protectedHeader, payload })
   const verified = await verifier.verify(signed)
   expect(new TextDecoder().decode(verified)).toEqual(message)

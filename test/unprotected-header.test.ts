@@ -80,6 +80,6 @@ it('unprotected header', async () => {
   # {"kty":"EC","crv":"P-256","alg":"ES256","x":"LYdh0ITBGLOUpywy0adFxXyaIaQapIEOLgfw7933TRE","y":"I6R3hgQZf2topOWa0VBjEugRgHISJ39LvOlfVX29P0w"}
 
   # Signature
-  h'0f92a5be044fa3fd787a77e934147c8a44c3713ff345f6e4b7ce551038428ec3f369c336b736c1ea34ab70e3d72937c409b45dcd7e043a523b7209f8b78e8280'
+  h'6a2c8ef02ca0d75c42ae71a409b1bd7778eeed417df341205f1aacf1f81a92a24940fff06d250a57d6ed1f625b71f05d1cf56d129954a8eab447ac4ed57b328f'
 ])`)
 })
