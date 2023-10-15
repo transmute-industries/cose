@@ -26,11 +26,12 @@ export const sign_inclusion_proof = async ({
   const signedInclusionProofUnprotectedHeader = new Map()
   signedInclusionProofUnprotectedHeader.set(
     unprotectedHeader.inclusion_proof,
-    cbor.web.encode([
+    cbor.web.encode([cbor.web.encode([
       inclusion_proof.tree_size,
       inclusion_proof.leaf_index,
       inclusion_proof.inclusion_path.map(typedArrayToBuffer),
-    ]),
+    ])]
+    ),
   )
   const signedInclusionProof = unprotectedHeader.set(signedMerkleRoot, signedInclusionProofUnprotectedHeader)
   // TODO: remove this and require a detached signer?
