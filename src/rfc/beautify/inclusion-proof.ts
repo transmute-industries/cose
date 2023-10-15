@@ -1,35 +1,26 @@
 
 import cbor from '../../cbor'
 
-import { maxLineLength, commentOffset } from './constants'
 
-const bufferToTruncatedBstr = (buf: Buffer) => {
-  const line = `h'${buf.toString('hex').toLowerCase()}'`
-  return line.replace(/h'(.{8}).+(.{8})'/g, `h'$1...$2'`).trim()
-}
+import { addComment } from './addComment'
 
-const addComment = (line: string, comment: string) => {
-  let paddedComment = ' '.repeat(maxLineLength - commentOffset - line.length) + `/ ` + `${comment}`
-  paddedComment = paddedComment + ' '.repeat(maxLineLength - paddedComment.length - 4) + '/'
-  return `${line}${paddedComment}`
-}
+import { bufferToTruncatedBstr } from './bufferToTruncatedBstr'
 
 const beautifyInclusionProof = async (data: Buffer) => {
   const [tree_size, leaf_index, audit_path] = await cbor.web.decode(data);
-  const size = addComment(`  ${tree_size},`, `Transparency log length`)
+  const size = addComment(`  ${tree_size},`, `Tree size`)
   const leafIndex = addComment(`  ${leaf_index},`, `Leaf index`)
   const auditPaths = audit_path.map(bufferToTruncatedBstr).map((tp: string) => {
-    return `     ${tp}           / Intermediate hash                     /`
+    return addComment(`     ${tp}`, `Intermediate hash`)
   }).join('\n')
 
   return `
-[
+${addComment(`[`, `Inclusion proof`)}
 ${size}
 ${leafIndex}
-  [                                   / Inclusion path                        /
+${addComment(`  [`, `Inclusion path (${audit_path.length})`)}
 ${auditPaths}
   ]
-
 ]
   `.trim()
 }
@@ -40,38 +31,47 @@ export const beautifyInclusionProofs = async (value: Buffer) => {
   const beautifulProofs = [] as string[]
   for (const p of proofs) {
     beautifulProofs.push(await beautifyInclusionProof(p))
-    const line = `          ${bufferToTruncatedBstr(p)}      / inclusion proof                       /`
+    const line = addComment(`          ${bufferToTruncatedBstr(p)}`, 'Inclusion proof')
     truncatedProofs.push(line)
   }
-  const line = `  100: [                        / inclusion proofs (${truncatedProofs.length})                  `.substring(0, 76) + '/'
+  const line = addComment(`        100: [`, `Inclusion proofs (${truncatedProofs.length})`)
   const headerTag = `${line}
 ${truncatedProofs}
         ]`
-
-
   return { headerTag, proofs: beautifulProofs }
 }
 
 /*
-
-currently:
-
-{
-  100: [h'83040282...1f487bb1']
-},
-
-needs to be:
-
-{
-  100: [                         / inclusion proofs /
-    [                            / inclusion proof /
-      4,                         / tree size /
-      2,                         / leaf index /
-      [
-        h'a39655d4...1f487bb1'   / audit path hash /
-      ]
-    ]
+~~~~ cbor-diag
+[                                     / Inclusion proof                       /
+  4,                                  / Tree size                             /
+  2,                                  / Leaf index                            /
+  [                                   / Inclusion path                        /
+      h'a39655d4...d29a968a'          / Intermediate hash                     /
+      h'57187dff...1f487bb1'          / Intermediate hash                     /
   ]
-},
+]
+~~~~
 
+~~~~ cbor-diag
+{                                     / Protected header                      /
+  1: -7,                              / Cryptographic algorithm to use        /
+  4: h'68747470...6d706c65'           / Key identifier                        /
+}
+~~~~
+
+~~~~ cbor-diag
+18(                                   / COSE Single Signer Data Object        /
+    [
+      h'a2012604...6d706c65',         / Protected header encoded as bstr      /
+      {
+        100: [                        / inclusion proofs (1)                  /
+          h'83040282...1f487bb1'      / inclusion proof                       /
+        ]
+      },
+      h'',                            / Content of the message as bstr or nil /
+      h'efde9a59...b4cb142b'          / Signature value as bstr               /
+    ]
+)
+~~~~
 */

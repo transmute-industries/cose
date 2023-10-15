@@ -6,6 +6,8 @@ import { maxBstrTruncateLength, maxLineLength, commentOffset } from './constants
 
 import { beautifyInclusionProofs } from './inclusion-proof'
 
+import { addComment } from './addComment'
+
 // https://www.iana.org/assignments/cose/cose.xhtml
 const protectedHeaderTagToDescription = (tag: number) => {
   const descriptions = new Map();
@@ -25,7 +27,7 @@ const beautifyProtectedHeader = async (data: Buffer | Uint8Array) => {
   result = result.replace('}', `\n}`)
   result = result.split('\n').map((line: string) => {
     if (line.trim() === '{') {
-      line = `{                                     / Protected header                      /`
+      line = addComment(`{`, `Protected header`)
       return line
     }
     if (line.includes(`h'`) && line.length > maxBstrTruncateLength) {
@@ -35,10 +37,7 @@ const beautifyProtectedHeader = async (data: Buffer | Uint8Array) => {
       return line
     }
     const maybeIntLabel = parseInt(line.split(':')[0], 10)
-    const commentPlaceholder = `/ ${protectedHeaderTagToDescription(maybeIntLabel)}`
-    const commentSpacer = maxLineLength - line.length - commentOffset
-    const lineWithComment = line + ' '.repeat(commentSpacer) + commentPlaceholder
-    return lineWithComment + ' '.repeat(maxLineLength - lineWithComment.length) + `/`
+    return addComment(line, `${protectedHeaderTagToDescription(maybeIntLabel)}`)
   }).join('\n')
   return result
 }
@@ -46,18 +45,16 @@ const beautifyProtectedHeader = async (data: Buffer | Uint8Array) => {
 const coseSign1IndexToDescription = (index: number) => {
   const descriptions = new Map();
   descriptions.set(0, 'COSE Single Signer Data Object')
-  descriptions.set(2, 'Protected header encoded as bstr')
-  descriptions.set(3, 'Unprotected header as a map')
-  descriptions.set(4, 'Content of the message as bstr or nil')
-  descriptions.set(5, 'Signature value as bstr')
+  descriptions.set(2, 'Protected header')
+  descriptions.set(3, 'Unprotected header')
+  descriptions.set(4, 'Payload')
+  descriptions.set(5, 'Signature')
   return descriptions.get(index) || `${index} unknown cbor content`
 }
 
-
-
 const beautifyUnprotectedHeader = async (unprotectedHeader: Map<number, unknown>) => {
   const blocks = [] as string[]
-  let result = "      {},                     / Unprotected header as a map           /"
+  let result = addComment(`      {},`, `Unprotected header`)
   if (unprotectedHeader.size) {
     const lines = []
     for (const [key, value] of unprotectedHeader.entries()) {
@@ -71,8 +68,9 @@ const beautifyUnprotectedHeader = async (unprotectedHeader: Map<number, unknown>
         console.log('unknown tag ', key)
       }
     }
-    result = `      {
-      ${lines.join('      \n')}
+    const title = addComment(`      {`, `Unprotected header`)
+    result = `${title}
+${lines.join('      \n')}
       },`
   }
 
@@ -118,6 +116,6 @@ export const beautifyCoseSign1 = async (data: Buffer | Uint8Array) => {
   const [encodedProtectedHeader] = decoded.value
   const protectedHeader = await beautifyProtectedHeader(encodedProtectedHeader)
   const { envelope, blocks } = await beautifyCoseSign1Object(data)
-  return [...blocks, makeRfcCodeBlock(protectedHeader), makeRfcCodeBlock(envelope)].join('\n\n')
+  return [makeRfcCodeBlock(envelope), makeRfcCodeBlock(protectedHeader), ...blocks].join('\n\n')
 }
 
