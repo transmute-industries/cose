@@ -55,7 +55,31 @@ const coseSign1IndexToDescription = (index: number) => {
   return descriptions.get(index) || `${index} unknown cbor content`
 }
 
+const truncateBstr = async (data: Buffer) => {
+  let line = await cbor.web.diagnose(data)
+  if (line.includes(`h'`) && line.length > maxBstrTruncateLength) {
+    line = line.replace(/h'(.{8}).+(.{8})'/g, `h'$1...$2'`)
+  }
+  return line.trim()
+}
+
+const beautifyUnprotectedHeader = async (unprotectedHeader: Map<number, unknown>) => {
+  if (unprotectedHeader.size) {
+    const lines = []
+    for (const [key, value] of unprotectedHeader.entries()) {
+      // need to recognize unprotected headers and make them pretty...
+      // tag 100 for example...
+      lines.push(`  ${key}: ${await truncateBstr(value as any)}`)
+    }
+    return `      {
+      ${lines.join('      \n')}
+      },`
+  }
+  return "      {},                     / Unprotected header as a map           /"
+}
+
 const beautifyCoseSign1Object = async (data: Buffer | Uint8Array) => {
+  const decoded = await cbor.web.decode(data);
   const diagnostic = await cbor.web.diagnose(data)
   const tagSpacer = `    `;
   const arraySpacer = `${tagSpacer}  `
@@ -63,26 +87,32 @@ const beautifyCoseSign1Object = async (data: Buffer | Uint8Array) => {
   result = result.replace('([', `(\n${tagSpacer}[\n${arraySpacer}`)
   result = result.replace(/, /g, `,\n${arraySpacer}`)
   result = result.replace('])', `\n${tagSpacer}]\n)`)
-  result = result.split('\n').map((line: string, index: number) => {
+  result = await Promise.all(result.split('\n').map(async (line: string, index: number) => {
     if (line.includes(`h'`) && line.length > maxBstrTruncateLength) {
       line = line.replace(/h'(.{8}).+(.{8})'/g, `h'$1...$2'`)
     }
     if (line === '' || line.includes('[') || line.includes(']') || line.trim() === ')') {
       return line
     }
+    if (index === 3) {
+      line = await beautifyUnprotectedHeader(decoded.value[1])
+      return line
+    }
     const commentPlaceholder = `/ ${coseSign1IndexToDescription(index)}`
-    const commentSpacer = maxLineLength - line.length - commentOffset
+    let commentSpacer = maxLineLength - line.length - commentOffset
+    commentSpacer = commentSpacer > 0 ? commentSpacer : 1
     const lineWithComment = line + ' '.repeat(commentSpacer) + commentPlaceholder
     return lineWithComment + ' '.repeat(maxLineLength - lineWithComment.length) + `/`
-  }).join('\n')
+  }))
+  result = result.join('\n')
   return result
 }
 
 export const beautifyCoseSign1 = async (data: Buffer | Uint8Array) => {
   const decoded = await cbor.web.decode(data);
   const [encodedProtectedHeader] = decoded.value
-  const header = await beautifyProtectedHeader(encodedProtectedHeader)
+  const protectedHeader = await beautifyProtectedHeader(encodedProtectedHeader)
   const envelope = await beautifyCoseSign1Object(data)
-  return [header, envelope].map(makeRfcCodeBlock).join('\n\n')
+  return [protectedHeader, envelope].map(makeRfcCodeBlock).join('\n\n')
 }
 

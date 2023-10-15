@@ -28,7 +28,7 @@ beforeAll(async () => {
   })
 })
 
-it('sanity', async () => {
+it('cose-sign-1', async () => {
   const protectedHeader = { alg: 'ES256', kid: log_id }
   const message = 'hello'
   const payload = new TextEncoder().encode(message)
@@ -56,5 +56,22 @@ it('sanity', async () => {
 )
 ~~~~
   `.trim())
+})
 
+it('signed inclusion proof', async () => {
+  const message0 = cose.cbor.web.encode(0)
+  const message1 = cose.cbor.web.encode('1')
+  const message2 = cose.cbor.web.encode([2, 2])
+  const message3 = cose.cbor.web.encode({ 3: 3 })
+  const entries = [message0, message1, message2, message3]
+  const leaves = entries.map(cose.merkle.leaf)
+  const signed_inclusion_proof = await cose.merkle.inclusion_proof({
+    alg: signer.alg,
+    kid: log_id,
+    leaf_index: 2,
+    leaves,
+    signer,
+  })
+  const diag = await cose.rfc.diag(signed_inclusion_proof)
+  console.log(diag)
 })
