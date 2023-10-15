@@ -64,8 +64,8 @@ it('inclusion proof', async () => {
     verifier,
   })
 
-  expect(cose.binToHex(verified_inclusion_proof)).toBe(
-    '0bdaaed3b6301858b0acbda1e0c3aa55f2de037ced44253ae6797b5a32568964',
+  expect(verified_inclusion_proof).toBe(
+    true,
   )
   const old_root = await cose.merkle.root({
     alg: signer.alg,

@@ -12,8 +12,11 @@ export const sign_consistency_proof = async ({
   signer,
 }: RequestConsistencyProof) => {
   const decoded = cbor.web.decode(signed_inclusion_proof)
-  const [tree_size, leaf_index, inclusion_path] = cbor.web.decode(
+  const proofs = cbor.web.decode(
     decoded.value[1].get(100),
+  )
+  const [tree_size, leaf_index, inclusion_path] = cbor.web.decode(
+    proofs[0] // expect never more than 1 consistency proof?
   )
   const consistency_proof = CoMETRE.RFC9162_SHA256.consistency_proof(
     {
