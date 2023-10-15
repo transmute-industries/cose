@@ -5,6 +5,8 @@ import { makeRfcCodeBlock } from './makeRfcCodeBlock'
 import { maxBstrTruncateLength, maxLineLength, commentOffset } from './constants'
 import { truncateBstr } from './truncateBstr'
 
+import { beautifyInclusionProof } from './inclusion-proof'
+
 // https://www.iana.org/assignments/cose/cose.xhtml
 const protectedHeaderTagToDescription = (tag: number) => {
   const descriptions = new Map();
@@ -54,9 +56,11 @@ const beautifyUnprotectedHeader = async (unprotectedHeader: Map<number, unknown>
   if (unprotectedHeader.size) {
     const lines = []
     for (const [key, value] of unprotectedHeader.entries()) {
-      // need to recognize unprotected headers and make them pretty...
-      // tag 100 for example...
-      lines.push(`  ${key}: ${await truncateBstr(value as any)}`)
+      if (key === 100) {
+        lines.push(await beautifyInclusionProof(value as Buffer))
+      } else {
+        console.log('unknown tag ', key)
+      }
     }
     return `      {
       ${lines.join('      \n')}
