@@ -16,6 +16,8 @@ ${diagnostic.trim()}
 const protectedHeaderTagToDescription = (tag: number) => {
   const descriptions = new Map();
   descriptions.set(1, 'Cryptographic algorithm to use')
+  descriptions.set(2, 'Critical headers to be understood')
+  descriptions.set(3, 'Content type of the payload')
   descriptions.set(4, 'Key identifier')
   return descriptions.get(tag) || `${tag} unknown cbor content`
 }

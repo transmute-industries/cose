@@ -31,20 +31,30 @@ beforeAll(async () => {
 it('sanity', async () => {
   const protectedHeader = { alg: 'ES256', kid: log_id }
   const message = 'hello'
-  const payload = new TextEncoder().encode(message)
+  const payload = Buffer.from(new TextEncoder().encode(message))
   const signed = await signer.sign({ protectedHeader, payload })
   const verified = await verifier.verify(signed)
   expect(new TextDecoder().decode(verified)).toEqual(message)
   const diag = await cose.rfc.diag(signed)
-  console.log(diag)
-  //   expect(diag).toBe(`
-  // 18(
-  //   [
-  //     h'a2012604581c68747470733a2f2f7472616e73706172656e63792e6578616d706c65', 
-  //     {},
-  //     64(h'68656c6c6f'),
-  //     h'6026a1a9641353aa553a74166d01b156cc21c954740059020525bc4d71480a9226dbb9e1e22904da90d2de6f782fa8607c75d1e9137dbfded94a165dbd5f7ad2'
-  //   ]
-  // )
-  // `)
+  // console.log(diag)
+  expect(diag).toBe(`
+~~~~ cbor-diag
+{
+  1: -7,                      / Cryptographic algorithm to use        /
+  4: h'68747470...6d706c65'   / Key identifier                        /
+}
+~~~~
+
+~~~~ cbor-diag
+18(                           / COSE Single Signer Data Object        /
+    [
+      h'a2012604...6d706c65', / Protected header encoded as bstr      /
+      {},                     / Unprotected header as a map           /
+      h'68656c6c6f',          / Content of the message as bstr or nil /
+      h'cf003825...f949855e'  / Signature value as bstr               /
+    ]
+)
+~~~~
+  `.trim())
+
 })
