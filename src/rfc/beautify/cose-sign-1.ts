@@ -1,16 +1,9 @@
 import cbor from '../../cbor'
 
-const maxLineLength = 70
-const commentOffset = 40
-const maxBstrTruncateLength = 32
 
-const makeRfcCodeBlock = (diagnostic: string) => {
-  return `
-~~~~ cbor-diag
-${diagnostic.trim()}
-~~~~
-  `.trim()
-}
+import { makeRfcCodeBlock } from './makeRfcCodeBlock'
+import { maxBstrTruncateLength, maxLineLength, commentOffset } from './constants'
+import { truncateBstr } from './truncateBstr'
 
 // https://www.iana.org/assignments/cose/cose.xhtml
 const protectedHeaderTagToDescription = (tag: number) => {
@@ -55,13 +48,7 @@ const coseSign1IndexToDescription = (index: number) => {
   return descriptions.get(index) || `${index} unknown cbor content`
 }
 
-const truncateBstr = async (data: Buffer) => {
-  let line = await cbor.web.diagnose(data)
-  if (line.includes(`h'`) && line.length > maxBstrTruncateLength) {
-    line = line.replace(/h'(.{8}).+(.{8})'/g, `h'$1...$2'`)
-  }
-  return line.trim()
-}
+
 
 const beautifyUnprotectedHeader = async (unprotectedHeader: Map<number, unknown>) => {
   if (unprotectedHeader.size) {
