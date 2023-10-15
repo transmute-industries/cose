@@ -2,6 +2,7 @@ import { CoMETRE } from '@transmute/rfc9162'
 import unprotectedHeader from '../unprotectedHeader'
 import cbor from '../cbor'
 import { RequestConsistencyProof } from '../types'
+import { typedArrayToBuffer } from '../utils'
 
 export const sign_consistency_proof = async ({
   kid,
@@ -37,7 +38,7 @@ export const sign_consistency_proof = async ({
     cbor.web.encode([
       consistency_proof.tree_size_1,
       consistency_proof.tree_size_2,
-      consistency_proof.consistency_path,
+      consistency_proof.consistency_path.map(typedArrayToBuffer),
     ]),
   )
   const signedConsistencyProof = unprotectedHeader.set(signedMerkleRoot, signedConsistencyProofUnprotectedHeader)

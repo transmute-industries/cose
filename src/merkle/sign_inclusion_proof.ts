@@ -3,6 +3,7 @@ import unprotectedHeader from '../unprotectedHeader'
 import cbor from '../cbor'
 import { RequestInclusionProof } from '../types'
 import detachPayload from '../detachPayload'
+import { typedArrayToBuffer } from '../utils'
 export const sign_inclusion_proof = async ({
   kid,
   alg,
@@ -28,7 +29,7 @@ export const sign_inclusion_proof = async ({
     cbor.web.encode([
       inclusion_proof.tree_size,
       inclusion_proof.leaf_index,
-      inclusion_proof.inclusion_path,
+      inclusion_proof.inclusion_path.map(typedArrayToBuffer),
     ]),
   )
   const signedInclusionProof = unprotectedHeader.set(signedMerkleRoot, signedInclusionProofUnprotectedHeader)

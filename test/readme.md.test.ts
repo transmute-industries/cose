@@ -91,8 +91,8 @@ it('inclusion proof', async () => {
 
   # Unprotected Header
   {
-      # "inclusion-proof" : "h'efbfbd0402efbfbdefbfbd405820efbfbdefbfbd55efbfbdc28d15efbfbd18efbfbdefbfbd297fefbfbdd79c68efbfbd1c1700efbfbd505071efbfbdefbfbd6ed29aefbfbdefbfbdefbfbd40582057187defbfbd0b2d02efbfbd7fefbfbdc4837ad7baefbfbd670738efbfbdefbfbd7d6befbfbdefbfbdefbfbdefbfbd5e1f487befbfbd'"    
-      100 : h'efbfbd0402efbfbdefbfbd405820efbfbdefbfbd55efbfbdc28d15efbfbd18efbfbdefbfbd297fefbfbdd79c68efbfbd1c1700efbfbd505071efbfbdefbfbd6ed29aefbfbdefbfbdefbfbd40582057187defbfbd0b2d02efbfbd7fefbfbdc4837ad7baefbfbd670738efbfbdefbfbd7d6befbfbdefbfbdefbfbdefbfbd5e1f487befbfbd' 
+      # "inclusion-proof" : "h'efbfbd0402efbfbd5820efbfbdefbfbd55efbfbdc28d15efbfbd18efbfbdefbfbd297fefbfbdd79c68efbfbd1c1700efbfbd505071efbfbdefbfbd6ed29aefbfbdefbfbd582057187defbfbd0b2d02efbfbd7fefbfbdc4837ad7baefbfbd670738efbfbdefbfbd7d6befbfbdefbfbdefbfbdefbfbd5e1f487befbfbd'"    
+      100 : h'efbfbd0402efbfbd5820efbfbdefbfbd55efbfbdc28d15efbfbd18efbfbdefbfbd297fefbfbdd79c68efbfbd1c1700efbfbd505071efbfbdefbfbd6ed29aefbfbdefbfbd582057187defbfbd0b2d02efbfbd7fefbfbdc4837ad7baefbfbd670738efbfbdefbfbd7d6befbfbdefbfbdefbfbdefbfbd5e1f487befbfbd' 
   },
 
   # Detached Payload
@@ -145,8 +145,8 @@ it('consistency proof', async () => {
 
   # Unprotected Header
   {
-      # "consistency-proof" : "h'efbfbd0406efbfbdefbfbd4058200bdaaed3b6301858efbfbdefbfbdefbfbdefbfbdefbfbdc3aa55efbfbdefbfbd037cefbfbd44253aefbfbd797b5a3256efbfbd64efbfbd40582075efbfbd77efbfbd05efbfbd28d7a2efbfbd6defbfbdefbfbd244cefbfbd3befbfbdefbfbd4fefbfbdefbfbdefbfbd73033befbfbdefbfbd2e73efbfbdefbfbd'"    
-      200 : h'efbfbd0406efbfbdefbfbd4058200bdaaed3b6301858efbfbdefbfbdefbfbdefbfbdefbfbdc3aa55efbfbdefbfbd037cefbfbd44253aefbfbd797b5a3256efbfbd64efbfbd40582075efbfbd77efbfbd05efbfbd28d7a2efbfbd6defbfbdefbfbd244cefbfbd3befbfbdefbfbd4fefbfbdefbfbdefbfbd73033befbfbdefbfbd2e73efbfbdefbfbd' 
+      # "consistency-proof" : "h'efbfbd0406efbfbd58200bdaaed3b6301858efbfbdefbfbdefbfbdefbfbdefbfbdc3aa55efbfbdefbfbd037cefbfbd44253aefbfbd797b5a3256efbfbd64582075efbfbd77efbfbd05efbfbd28d7a2efbfbd6defbfbdefbfbd244cefbfbd3befbfbdefbfbd4fefbfbdefbfbdefbfbd73033befbfbdefbfbd2e73efbfbdefbfbd'"    
+      200 : h'efbfbd0406efbfbd58200bdaaed3b6301858efbfbdefbfbdefbfbdefbfbdefbfbdc3aa55efbfbdefbfbd037cefbfbd44253aefbfbd797b5a3256efbfbd64582075efbfbd77efbfbd05efbfbd28d7a2efbfbd6defbfbdefbfbd244cefbfbd3befbfbdefbfbd4fefbfbdefbfbdefbfbd73033befbfbdefbfbd2e73efbfbdefbfbd' 
   },
 
   # Protected Payload
