@@ -6,6 +6,7 @@ import { verify_inclusion_proof } from './verify_inclusion_proof'
 import { sign_consistency_proof } from './sign_consistency_proof'
 import { verify_consistency_proof } from './verify_consistency_proof'
 
+import { verify_multiple } from './verify_multiple'
 const merkle = {
   tree_alg: CoMETRE.RFC9162_SHA256.tree_alg,
   leaf: CoMETRE.RFC9162_SHA256.leaf,
@@ -14,6 +15,7 @@ const merkle = {
   verify_inclusion_proof: verify_inclusion_proof,
   consistency_proof: sign_consistency_proof,
   verify_consistency_proof: verify_consistency_proof,
+  verify_multiple
 }
 
 export default merkle

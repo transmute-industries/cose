@@ -27,6 +27,7 @@ import cose from '@transmute/cose'
 const cose = require('@transmute/cose')
 ```
 
+
 ### Inclusion Proof
 
 ```cbor-diag

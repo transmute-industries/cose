@@ -7,10 +7,13 @@ export const verify_inclusion_proof = async ({
   leaf,
   signed_inclusion_proof,
   verifier,
-}: RequestInclusionProofVerification) => {
+}: RequestInclusionProofVerification): Promise<boolean> => {
   const decoded = cbor.web.decode(signed_inclusion_proof)
-  const [tree_size, leaf_index, inclusion_path] = cbor.web.decode(
+  const proofs = cbor.web.decode(
     decoded.value[1].get(100),
+  )
+  const [tree_size, leaf_index, inclusion_path] = cbor.web.decode(
+    proofs[0]
   )
   const validated_root = await CoMETRE.RFC9162_SHA256.verify_inclusion_proof(
     leaf,
@@ -25,6 +28,7 @@ export const verify_inclusion_proof = async ({
     signature: signed_inclusion_proof,
     payload: validated_root
   })
-  const verified_root = await verifier.verify(attached)
-  return verified_root
+  await verifier.verify(attached)
+  return true
+
 }
