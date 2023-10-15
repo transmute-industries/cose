@@ -14,7 +14,10 @@ import { RFC9162 } from '@transmute/rfc9162'
 import getKid from './getKid'
 import getContentType from './getContentType'
 
+import rfc from './rfc'
+
 const cose = {
+  rfc,
   detached,
   getKid,
   getContentType,
