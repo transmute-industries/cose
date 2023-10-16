@@ -1,12 +1,15 @@
 import { addComment } from "./addComment"
 
+import unprotectedHeader from "../../unprotectedHeader"
 import { beautifyInclusionProofs } from './beautifyInclusionProofs'
+import { beautifyConsistencyProofs } from './beautifyConsistencyProofs'
 import { beautifyReceipts } from './beautifyReceipts'
 
 const labelMap = new Map()
 
-labelMap.set(100, beautifyInclusionProofs) // encoding is weird...
-labelMap.set(300, beautifyReceipts)
+labelMap.set(unprotectedHeader.inclusion_proof, beautifyInclusionProofs)
+labelMap.set(unprotectedHeader.consistency_proof, beautifyConsistencyProofs)
+labelMap.set(unprotectedHeader.receipt, beautifyReceipts)
 
 export const beautifyUnprotectedHeader = async (unprotectedHeader: Map<number, unknown>) => {
   let allBlocks = [] as string[]
