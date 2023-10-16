@@ -3,15 +3,15 @@ import { CoMETRE } from '@transmute/rfc9162'
 import cbor from '../cbor'
 import { RequestInclusionProofVerification } from '../types'
 import attachPayload from '../attachPayload'
+import unprotectedHeader from '../unprotectedHeader'
+
 export const verify_inclusion_proof = async ({
   leaf,
   signed_inclusion_proof,
   verifier,
 }: RequestInclusionProofVerification): Promise<boolean> => {
   const decoded = cbor.web.decode(signed_inclusion_proof)
-  const proofs = cbor.web.decode(
-    decoded.value[1].get(100),
-  )
+  const proofs = decoded.value[1].get(unprotectedHeader.inclusion_proof)
   const [tree_size, leaf_index, inclusion_path] = cbor.web.decode(
     proofs[0]
   )

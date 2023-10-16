@@ -9,15 +9,13 @@ export const verify_multiple = async ({
   verifier,
 }: RequestMultiVerifyInclusionProof) => {
   const decoded = cbor.web.decode(signed_inclusion_proof)
-  const proofs = cbor.web.decode(
-    decoded.value[1].get(100),
-  )
+  const proofs = decoded.value[1].get(unprotectedHeader.inclusion_proof)
   const verifications = [] as boolean[]
   for (let i = 0; i < leaves.length; i++) {
     const leaf = leaves[i]
     const proof = proofs[i]
     const updateHeader = unprotectedHeader.get(signed_inclusion_proof)
-    updateHeader.set(100, cbor.web.encode([proof]))
+    updateHeader.set(unprotectedHeader.inclusion_proof, [proof])
     const updated = unprotectedHeader.set(signed_inclusion_proof, updateHeader)
     const verified = await verify_inclusion_proof({
       leaf,

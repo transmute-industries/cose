@@ -3,14 +3,18 @@ import { CoMETRE } from '@transmute/rfc9162'
 import cbor from '../cbor'
 import { RequestConsistencyProofVerification } from '../types'
 
+
+import unprotectedHeader from '../unprotectedHeader'
+
 export const verify_consistency_proof = async ({
   old_root,
   signed_consistency_proof,
   verifier,
 }: RequestConsistencyProofVerification) => {
   const decoded = cbor.web.decode(signed_consistency_proof)
+  const proofs = decoded.value[1].get(unprotectedHeader.consistency_proof)
   const [tree_size_1, tree_size_2, consistency_path] = cbor.web.decode(
-    decoded.value[1].get(200),
+    proofs[0]
   )
   const new_root = await verifier.verify(signed_consistency_proof)
   const verified = await CoMETRE.RFC9162_SHA256.verify_consistency_proof(

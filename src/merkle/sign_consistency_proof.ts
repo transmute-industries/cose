@@ -12,9 +12,7 @@ export const sign_consistency_proof = async ({
   signer,
 }: RequestConsistencyProof) => {
   const decoded = cbor.web.decode(signed_inclusion_proof)
-  const proofs = cbor.web.decode(
-    decoded.value[1].get(100),
-  )
+  const proofs = decoded.value[1].get(unprotectedHeader.inclusion_proof)
   const [tree_size, leaf_index, inclusion_path] = cbor.web.decode(
     proofs[0] // expect never more than 1 consistency proof?
   )
@@ -38,11 +36,13 @@ export const sign_consistency_proof = async ({
   const signedConsistencyProofUnprotectedHeader = new Map()
   signedConsistencyProofUnprotectedHeader.set(
     unprotectedHeader.consistency_proof,
-    cbor.web.encode([
-      consistency_proof.tree_size_1,
-      consistency_proof.tree_size_2,
-      consistency_proof.consistency_path.map(typedArrayToBuffer),
-    ]),
+    [
+      cbor.web.encode([
+        consistency_proof.tree_size_1,
+        consistency_proof.tree_size_2,
+        consistency_proof.consistency_path.map(typedArrayToBuffer),
+      ]),
+    ]
   )
   const signedConsistencyProof = unprotectedHeader.set(signedMerkleRoot, signedConsistencyProofUnprotectedHeader)
   return signedConsistencyProof

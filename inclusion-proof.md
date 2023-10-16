@@ -8,7 +8,7 @@
           h'83040382...1f487bb1',   / Inclusion proof 2                     /
         ]
       },
-      h'',                          / Payload                               /
+      h'',                          / Detached payload                      /
       h'efde9a59...b4cb142b'        / Signature                             /
     ]
 )

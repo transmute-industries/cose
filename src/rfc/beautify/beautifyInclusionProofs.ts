@@ -25,8 +25,7 @@ ${auditPaths}
   `.trim()
 }
 
-export const beautifyInclusionProofs = async (value: Buffer) => {
-  const proofs = cbor.web.decode(value)
+export const beautifyInclusionProofs = async (proofs: Buffer[]) => {
   const truncatedProofs = [] as string[]
   const beautifulProofs = [] as string[]
   for (const p of proofs) {
@@ -38,5 +37,5 @@ export const beautifyInclusionProofs = async (value: Buffer) => {
   const headerTag = `${line}
 ${truncatedProofs.join("\n")}
         ]`
-  return { headerTag, proofs: beautifulProofs }
+  return [headerTag, ...beautifulProofs]
 }

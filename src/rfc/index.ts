@@ -1,8 +1,10 @@
 import cbor from '../cbor'
 
-import { beautifyCoseSign1 } from './beautify/cose-sign-1'
+import { beautifyCoseSign1 } from './beautify/beautifyCoseSign1'
 
-const beautify = async (data: Buffer | Uint8Array) => {
+import { makeRfcCodeBlock } from './beautify/makeRfcCodeBlock';
+
+const beautify = async (data: Uint8Array) => {
   const decoded = await cbor.web.decode(data);
   if (decoded.tag === 18) {
     return beautifyCoseSign1(data)
@@ -11,8 +13,11 @@ const beautify = async (data: Buffer | Uint8Array) => {
 }
 
 const rfc = {
-  diag: async (data: Buffer | Uint8Array) => {
+  diag: async (data: Uint8Array) => {
     return beautify(data)
+  },
+  blocks: (diagnostic: string[]) => {
+    return diagnostic.map(makeRfcCodeBlock).join('\n\n')
   }
 }
 

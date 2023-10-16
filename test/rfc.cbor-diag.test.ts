@@ -31,11 +31,11 @@ beforeAll(async () => {
 
 const getInclusionProofs = (signed_inclusion_proof: Uint8Array) => {
   const unprotectedHeader = cose.unprotectedHeader.get(signed_inclusion_proof)
-  const inclusionProof = cose.cbor.web.decode(unprotectedHeader.get(100) as Buffer)
-  return inclusionProof
+  const proofs = unprotectedHeader.get(100) as Buffer[]
+  return proofs
 }
 
-it('signed inclusion proof', async () => {
+it('e2e signed inclusion proof', async () => {
   const message0 = cose.cbor.web.encode(0)
   const message1 = cose.cbor.web.encode('1')
   const message2 = cose.cbor.web.encode([2, 2])
@@ -73,13 +73,12 @@ it('signed inclusion proof', async () => {
     }
   )
   expect(verified2).toBe(true)
-
   // Add a second inclusion proof to a previous received signed inclusion proof
   // TODO move to a utility function
   const firstProofs = getInclusionProofs(signed_inclusion_proof)
   const secondProofs = getInclusionProofs(signed_inclusion_proof2)
   const unprotectedHeader = cose.unprotectedHeader.get(signed_inclusion_proof)
-  unprotectedHeader.set(100, cose.cbor.web.encode([...firstProofs, ...secondProofs]))
+  unprotectedHeader.set(100, [...firstProofs, ...secondProofs])
   const updated = cose.unprotectedHeader.set(signed_inclusion_proof, unprotectedHeader)
   const verified3 = await cose.merkle.verify_multiple(
     {
@@ -89,7 +88,9 @@ it('signed inclusion proof', async () => {
     }
   )
   expect(verified3).toBe(true)
-  const diag = await cose.rfc.diag(updated)
-  fs.writeFileSync('inclusion-proof.cbor.md', diag)
-
+  fs.writeFileSync('inclusion-proof.cose', Buffer.from(updated))
+  const statement1 = fs.readFileSync('inclusion-proof.cose')
+  const items1 = await cose.rfc.diag(statement1)
+  const markdown = await cose.rfc.blocks(items1)
+  fs.writeFileSync('inclusion-proof.md', markdown)
 })
