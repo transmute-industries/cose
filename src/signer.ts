@@ -9,6 +9,8 @@ import {
 
 import { typedArrayToBuffer } from './utils'
 
+import { Headers, signer as coseSign1Signer } from './lib'
+
 const signer = async ({ privateKeyJwk }: { privateKeyJwk: PrivateKeyJwk }) => {
   return {
     alg: privateKeyJwk.alg,
@@ -21,6 +23,12 @@ const signer = async ({ privateKeyJwk }: { privateKeyJwk: PrivateKeyJwk }) => {
       unprotectedHeader?: UnprotectedHeader
       payload: Payload
     }): Promise<Uint8Array> => {
+      const s2 = await coseSign1Signer({ secretKeyJwk: privateKeyJwk }).sign({
+        protectedHeader: Headers.TranslateHeaders(protectedHeader),
+        unprotectedHeader: unprotectedHeader || new Map(),
+        payload: Buffer.from(payload)
+      })
+      console.log(s2.length)
       const signature = await cose.sign.create(
         { p: protectedHeader, u: unprotectedHeader },
         typedArrayToBuffer(payload),
@@ -30,6 +38,7 @@ const signer = async ({ privateKeyJwk }: { privateKeyJwk: PrivateKeyJwk }) => {
           },
         },
       )
+      console.log(signature.length)
       return new Uint8Array(signature)
     },
   }
