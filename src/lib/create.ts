@@ -1,13 +1,11 @@
 import crypto from 'crypto'
 import cbor from 'cbor'
 import { SecretKeyJwk, DecodedToBeSigned } from './types'
-import { Sign1Tag, EMPTY_BUFFER } from './common'
+import { Sign1Tag, EMPTY_BUFFER, Tagged } from './common'
 
-import { HeaderParameters, ProtectedHeaderMap, UnprotectedHeaderMap } from './HeaderParameters';
+import { labelToTag, ProtectedHeaderMap, UnprotectedHeaderMap, getCommonParameter } from './HeaderParameters';
 
 import getAlgFromVerificationKey from './getAlgFromVerificationKey'
-
-const Tagged = cbor.Tagged;
 
 async function doSign(decodedToBeSigned: DecodedToBeSigned, privateKey: SecretKeyJwk) {
   const encodedToBeSigned = cbor.encode(decodedToBeSigned);
@@ -34,7 +32,7 @@ async function doSign(decodedToBeSigned: DecodedToBeSigned, privateKey: SecretKe
 
 export const create = async function (protectedHeaderMap: ProtectedHeaderMap, unprotectedHeaderMap: UnprotectedHeaderMap, payload: Buffer, secretKey: SecretKeyJwk, externalAAD = EMPTY_BUFFER) {
   const signingKeyAlgorithm = getAlgFromVerificationKey(secretKey);
-  const envelopeAlgorithm = protectedHeaderMap.get(HeaderParameters.alg) || unprotectedHeaderMap.get(HeaderParameters.alg);
+  const envelopeAlgorithm = getCommonParameter(protectedHeaderMap, unprotectedHeaderMap, labelToTag.get('alg'))
   if (envelopeAlgorithm !== signingKeyAlgorithm) {
     throw new Error('Signing key does not support algorithm: ' + envelopeAlgorithm);
   }

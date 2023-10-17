@@ -1,9 +1,6 @@
 import crypto from 'crypto'
 import cbor from 'cbor'
 
-
-import getCommonParameter from './getCommonParameter';
-
 import getAlgFromVerificationKey from './getAlgFromVerificationKey'
 import getDigestFromVerificationKey from './getDigestFromVerificationKey'
 import { AlgFromTags } from './AlgFromTags'
@@ -11,8 +8,7 @@ import { PublicKeyJwk, DecodedToBeSigned, CoseSign1Structure } from './types'
 
 import { EMPTY_BUFFER } from './common';
 
-import { HeaderParameters, ProtectedHeaderMap } from './HeaderParameters';
-
+import { labelToTag, ProtectedHeaderMap, getCommonParameter } from './HeaderParameters';
 
 async function doVerify(publicKey: PublicKeyJwk, decodedToBeSigned: DecodedToBeSigned, signature: Buffer) {
   const digest = getDigestFromVerificationKey(publicKey)
@@ -51,7 +47,7 @@ async function verifyInternal(verificationKey: PublicKeyJwk, signatureStructure:
   }
   const [protectedHeaderBytes, unprotectedHeaderMap, plaintext, signature] = signatureStructure;
   const protectedHeaderMap: ProtectedHeaderMap = (!protectedHeaderBytes.length) ? new Map() : cbor.decodeFirstSync(protectedHeaderBytes);
-  const envelopeAlgorithm = getCommonParameter(protectedHeaderMap, unprotectedHeaderMap, HeaderParameters.alg)
+  const envelopeAlgorithm = getCommonParameter(protectedHeaderMap, unprotectedHeaderMap, labelToTag.get('alg'))
   if (envelopeAlgorithm !== verificationKeyAlgorithm) {
     throw new Error('Verification key does not support algorithm: ' + envelopeAlgorithm);
   }
