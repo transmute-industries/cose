@@ -21,9 +21,19 @@ const headers = {
 };
 
 it('e2e signer verifier', async () => {
-  const signature = await cose.lib.sign2.create(headers, plaintext, signer);
+  const privateKey = {
+    'alg': 'ES256',
+    kty: 'EC',
+    crv: 'P-256',
+    x: jose.base64url.encode(verifier.key.x),
+    y: jose.base64url.encode(verifier.key.y),
+    d: jose.base64url.encode(signer.key.d),
+  }
+
+  const signature = await cose.lib.sign2.create(headers, plaintext, privateKey);
   const verified = await cose.lib.sign.verify(signature, verifier);
   expect(verified.toString('utf8')).toBe('Important message!')
+
   const publicKey = {
     'alg': 'ES256',
     kty: 'EC',

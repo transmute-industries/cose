@@ -1,8 +1,9 @@
 import crypto from 'crypto'
 import cbor from 'cbor'
-import { ec as EC } from 'elliptic' // replace with web crypto / native crypto...
-
+import { SecretKeyJwk } from './types'
 import * as common from '../common'
+
+import getAlgFromVerificationKey from './getAlgFromVerificationKey'
 
 const EMPTY_BUFFER = common.EMPTY_BUFFER;
 const Tagged = cbor.Tagged;
@@ -21,41 +22,56 @@ const COSEAlgToNodeAlg: any = {
   ES512: { sign: 'p521', digest: 'sha512' },
 };
 
-function doSign(SigStructure: any, signer: any, alg: any) {
+async function doSign(decodedToBeSigned: any, privateKey: any) {
+  const alg = getAlgFromVerificationKey(privateKey)
   if (!AlgFromTags[alg]) {
     throw new Error('Unknown algorithm, ' + alg);
   }
   if (!COSEAlgToNodeAlg[AlgFromTags[alg].sign]) {
     throw new Error('Unsupported algorithm, ' + AlgFromTags[alg].sign);
   }
-  let ToBeSigned = cbor.encode(SigStructure);
-  const hash = crypto.createHash(COSEAlgToNodeAlg[AlgFromTags[alg].sign].digest);
-  hash.update(ToBeSigned);
-  ToBeSigned = hash.digest();
-  const ec = new EC(COSEAlgToNodeAlg[AlgFromTags[alg].sign].sign);
-  const key = ec.keyFromPrivate(signer.key.d);
-  const signature = key.sign(ToBeSigned);
-  const bitLength = Math.ceil(ec.curve._bitLength / 8);
-  return Buffer.concat([signature.r.toArrayLike(Buffer, undefined, bitLength), signature.s.toArrayLike(Buffer, undefined, bitLength)]);
+  const encodedToBeSigned = cbor.encode(decodedToBeSigned);
+  const signingKey = await crypto.subtle.importKey(
+    "jwk",
+    privateKey,
+    {
+      name: "ECDSA",
+      namedCurve: privateKey.crv,
+    },
+    true,
+    ["sign"],
+  )
+  const signature = await crypto.subtle.sign(
+    {
+      name: "ECDSA",
+      hash: { name: "SHA-256" },
+    },
+    signingKey,
+    encodedToBeSigned,
+  );
+
+  return signature
 }
 
-export const create = function (headers: any, payload: any, signers: any) {
+export const create = async function (headers: any, payload: Buffer, secretKey: SecretKeyJwk, externalAAD = EMPTY_BUFFER) {
+  const signingKeyAlgorithm = getAlgFromVerificationKey(secretKey);
   let u = headers.u || {};
   let p = headers.p || {};
   p = common.TranslateHeaders(p);
   u = common.TranslateHeaders(u);
   let bodyP = p || {};
   bodyP = (bodyP.size === 0) ? EMPTY_BUFFER : cbor.encode(bodyP);
-  const signer = signers;
-  const externalAAD = signer.externalAAD || EMPTY_BUFFER;
-  const alg = p.get(common.HeaderParameters.alg) || u.get(common.HeaderParameters.alg);
+  const envelopeAlgorithm = p.get(common.HeaderParameters.alg) || u.get(common.HeaderParameters.alg);
+  if (envelopeAlgorithm !== signingKeyAlgorithm) {
+    throw new Error('Signing key does not support algorithm: ' + envelopeAlgorithm);
+  }
   const SigStructure = [
     'Signature1',
     bodyP,
     externalAAD,
     payload
   ];
-  const sig = doSign(SigStructure, signer, alg);
+  const sig = await doSign(SigStructure, secretKey);
   if (p.size === 0) {
     p = EMPTY_BUFFER;
   } else {

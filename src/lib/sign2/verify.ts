@@ -3,7 +3,7 @@ import cbor from 'cbor'
 
 import * as common from '../common'
 import getCommonParameter from './getCommonParameter';
-import { VerifierKeyJwk } from './VerifierKeyJwk'
+import { PublicKeyJwk } from './types'
 import getAlgFromVerificationKey from './getAlgFromVerificationKey'
 import getDigestFromVerificationKey from './getDigestFromVerificationKey'
 
@@ -28,7 +28,7 @@ export type DecodedCoseSign1 = {
   value: CoseSign1Structure
 }
 
-async function doVerify(publicKey: VerifierKeyJwk, decodedToBeSigned: DecodedToBeSigned, signature: Buffer) {
+async function doVerify(publicKey: PublicKeyJwk, decodedToBeSigned: DecodedToBeSigned, signature: Buffer) {
   const digest = getDigestFromVerificationKey(publicKey)
   const encodedToBeSigned = cbor.encode(decodedToBeSigned);
   const verificationKey = await crypto.subtle.importKey(
@@ -55,7 +55,7 @@ async function doVerify(publicKey: VerifierKeyJwk, decodedToBeSigned: DecodedToB
   }
 }
 
-async function verifyInternal(verificationKey: VerifierKeyJwk, signatureStructure: CoseSign1Structure, externalAAD = EMPTY_BUFFER) {
+async function verifyInternal(verificationKey: PublicKeyJwk, signatureStructure: CoseSign1Structure, externalAAD = EMPTY_BUFFER) {
   const verificationKeyAlgorithm = getAlgFromVerificationKey(verificationKey)
   if (!Array.isArray(signatureStructure)) {
     throw new Error('Expecting Array');
@@ -65,12 +65,12 @@ async function verifyInternal(verificationKey: VerifierKeyJwk, signatureStructur
   }
   const [protectedHeaderBytes, unprotectedHeaderMap, plaintext, signature] = signatureStructure;
   const protectedHeaderMap = (!protectedHeaderBytes.length) ? new Map() : cbor.decodeFirstSync(protectedHeaderBytes);
-  const alg = getCommonParameter(protectedHeaderMap, unprotectedHeaderMap, common.HeaderParameters.alg)
-  if (alg !== verificationKeyAlgorithm) {
-    throw new Error('Verification key does not support algorithm: ' + alg);
+  const envelopeAlgorithm = getCommonParameter(protectedHeaderMap, unprotectedHeaderMap, common.HeaderParameters.alg)
+  if (envelopeAlgorithm !== verificationKeyAlgorithm) {
+    throw new Error('Verification key does not support algorithm: ' + envelopeAlgorithm);
   }
-  if (!AlgFromTags[alg]) {
-    throw new Error('Unknown algorithm, ' + alg);
+  if (!AlgFromTags[envelopeAlgorithm]) {
+    throw new Error('Unknown algorithm, ' + envelopeAlgorithm);
   }
   if (!signature) {
     throw new Error('No signature to verify');
@@ -85,7 +85,7 @@ async function verifyInternal(verificationKey: VerifierKeyJwk, signatureStructur
   return plaintext;
 }
 
-export const verify = async function (payload: Buffer, verificationKey: VerifierKeyJwk) {
+export const verify = async function (payload: Buffer, verificationKey: PublicKeyJwk) {
   const obj = await cbor.decodeFirst(payload);
   return verifyInternal(verificationKey, obj.value);
 };
