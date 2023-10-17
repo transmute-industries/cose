@@ -5,31 +5,19 @@ import * as common from '../common'
 
 import getAlgFromVerificationKey from './getAlgFromVerificationKey'
 
+import { AlgFromTags } from './AlgFromTags'
+
+export const Sign1Tag = 18;
+
 const EMPTY_BUFFER = common.EMPTY_BUFFER;
 const Tagged = cbor.Tagged;
-
-const Sign1Tag = exports.Sign1Tag = 18;
-
-const AlgFromTags: any = {};
-AlgFromTags[-7] = { sign: 'ES256', digest: 'SHA-256' };
-AlgFromTags[-35] = { sign: 'ES384', digest: 'SHA-384' };
-AlgFromTags[-36] = { sign: 'ES512', digest: 'SHA-512' };
-
-
-const COSEAlgToNodeAlg: any = {
-  ES256: { sign: 'p256', digest: 'sha256' },
-  ES384: { sign: 'p384', digest: 'sha384' },
-  ES512: { sign: 'p521', digest: 'sha512' },
-};
 
 async function doSign(decodedToBeSigned: any, privateKey: any) {
   const alg = getAlgFromVerificationKey(privateKey)
   if (!AlgFromTags[alg]) {
     throw new Error('Unknown algorithm, ' + alg);
   }
-  if (!COSEAlgToNodeAlg[AlgFromTags[alg].sign]) {
-    throw new Error('Unsupported algorithm, ' + AlgFromTags[alg].sign);
-  }
+
   const encodedToBeSigned = cbor.encode(decodedToBeSigned);
   const signingKey = await crypto.subtle.importKey(
     "jwk",
