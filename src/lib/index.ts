@@ -1,3 +1,5 @@
-import { verify } from "./verify";
+
 import signer from "./signer";
-export { signer, verify }
+import verifier from "./verifier";
+
+export { signer, verifier }

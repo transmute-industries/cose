@@ -34,3 +34,6 @@ export type RequestCoseSign1 = {
   payload: Buffer,
   externalAAD?: Buffer
 }
+
+export type RequestCoseSign1Verifier = { publicKeyJwk: PublicKeyJwk }
+export type CoseSign1Bytes = Buffer
