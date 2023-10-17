@@ -17,7 +17,7 @@ import getContentType from './getContentType'
 import utils from './utils'
 import rfc from './rfc'
 
-import lib from './lib'
+import * as lib from './lib'
 
 const cose = {
   lib,

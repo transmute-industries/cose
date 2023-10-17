@@ -27,9 +27,7 @@ it('e2e signer verifier', async () => {
   const protectedHeader = new Map();
   protectedHeader.set(1, -7)
   const unprotectedHeader = new Map();
-  const signature = await cose.lib.sign2.create(protectedHeader, unprotectedHeader, plaintext, privateKey);
-  const verified = await cose.lib.sign.verify(signature, verifier);
-  expect(verified.toString('utf8')).toBe('Important message!')
+  const signature = await cose.lib.create(protectedHeader, unprotectedHeader, plaintext, privateKey);
   const publicKey = {
     'alg': 'ES256',
     kty: 'EC',
@@ -37,6 +35,6 @@ it('e2e signer verifier', async () => {
     x: jose.base64url.encode(verifier.key.x),
     y: jose.base64url.encode(verifier.key.y)
   }
-  const verified2 = await cose.lib.sign2.verify(signature, publicKey);
+  const verified2 = await cose.lib.verify(signature, publicKey);
   expect(verified2.toString('utf8')).toBe('Important message!')
 })
