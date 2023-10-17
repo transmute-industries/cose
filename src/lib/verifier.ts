@@ -13,7 +13,6 @@ import { labelToTag, ProtectedHeaderMap, getCommonParameter } from './HeaderPara
 import { EMPTY_BUFFER } from './common'
 
 import subtleCryptoProvider from './subtleCryptoProvider'
-import { typedArrayToBuffer } from '../utils'
 
 const verifier = ({ publicKeyJwk }: RequestCoseSign1Verifier) => {
   const digest = getDigestFromVerificationKey(publicKeyJwk)
