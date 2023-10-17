@@ -1,5 +1,5 @@
 
 import signer from "./signer";
 import verifier from "./verifier";
-
-export { signer, verifier }
+import * as Headers from './HeaderParameters'
+export { signer, verifier, Headers }

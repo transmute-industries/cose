@@ -1,4 +1,3 @@
-import crypto from 'crypto'
 
 import * as cbor from 'cbor-web'
 
@@ -6,10 +5,13 @@ import { EMPTY_BUFFER, Tagged, Sign1Tag } from './common'
 import { RequestCoseSign1Signer, RequestCoseSign1 } from "./types"
 import getDigestFromVerificationKey from './getDigestFromVerificationKey'
 
+import subtleCryptoProvider from './subtleCryptoProvider'
+
 const signer = ({ secretKeyJwk }: RequestCoseSign1Signer) => {
   const digest = getDigestFromVerificationKey(secretKeyJwk)
   return {
     sign: async ({ protectedHeader, unprotectedHeader, externalAAD, payload }: RequestCoseSign1) => {
+      const subtle = await subtleCryptoProvider()
       const protectedHeaderBytes = (protectedHeader.size === 0) ? EMPTY_BUFFER : cbor.encode(protectedHeader);
       const encodedToBeSigned = cbor.encode([
         'Signature1',
@@ -17,7 +19,7 @@ const signer = ({ secretKeyJwk }: RequestCoseSign1Signer) => {
         externalAAD || EMPTY_BUFFER,
         payload
       ]);
-      const signingKey = await crypto.subtle.importKey(
+      const signingKey = await subtle.importKey(
         "jwk",
         secretKeyJwk,
         {
@@ -27,7 +29,7 @@ const signer = ({ secretKeyJwk }: RequestCoseSign1Signer) => {
         true,
         ["sign"],
       )
-      const signature = await crypto.subtle.sign(
+      const signature = await subtle.sign(
         {
           name: "ECDSA",
           hash: { name: digest },

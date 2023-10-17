@@ -1,7 +1,6 @@
 
 
 import * as cbor from 'cbor-web'
-import crypto from 'crypto'
 
 import { RequestCoseSign1Verifier, CoseSign1Bytes } from './types'
 
@@ -13,10 +12,13 @@ import { DecodedToBeSigned } from './types'
 import { labelToTag, ProtectedHeaderMap, getCommonParameter } from './HeaderParameters';
 import { EMPTY_BUFFER } from './common'
 
+import subtleCryptoProvider from './subtleCryptoProvider'
+
 const verifier = ({ publicKeyJwk }: RequestCoseSign1Verifier) => {
   const digest = getDigestFromVerificationKey(publicKeyJwk)
   return {
     verify: async (coseSign1Bytes: CoseSign1Bytes, externalAAD = EMPTY_BUFFER): Promise<Buffer> => {
+      const subtle = await subtleCryptoProvider()
       const obj = await cbor.decodeFirst(coseSign1Bytes);
       const signatureStructure = obj.value;
       const verificationKeyAlgorithm = getAlgFromVerificationKey(publicKeyJwk)
@@ -44,7 +46,7 @@ const verifier = ({ publicKeyJwk }: RequestCoseSign1Verifier) => {
         externalAAD,
         payload
       ] as DecodedToBeSigned
-      const verificationKey = await crypto.subtle.importKey(
+      const verificationKey = await subtle.importKey(
         "jwk",
         publicKeyJwk,
         {
@@ -55,7 +57,7 @@ const verifier = ({ publicKeyJwk }: RequestCoseSign1Verifier) => {
         ["verify"],
       )
       const encodedToBeSigned = cbor.encode(decodedToBeSigned);
-      const verified = await crypto.subtle.verify(
+      const verified = await subtle.verify(
         {
           name: "ECDSA",
           hash: { name: digest },
