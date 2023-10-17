@@ -13,7 +13,7 @@ labelMap.set(unprotectedHeader.receipt, beautifyReceipts)
 
 export const beautifyUnprotectedHeader = async (unprotectedHeader: Map<number, unknown>) => {
   let allBlocks = [] as string[]
-  let result = addComment(`    {},`, `Unprotected header`)
+  let result = addComment(`      {},`, `Unprotected header`)
   if (unprotectedHeader.size) {
     let lines = [] as string[]
     for (const [key, value] of unprotectedHeader.entries()) {
