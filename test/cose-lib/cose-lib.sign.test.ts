@@ -1,5 +1,5 @@
 import cose from '../../src'
-
+import * as jose from 'jose'
 
 const signer = {
   key: {
@@ -24,6 +24,16 @@ it('e2e signer verifier', async () => {
   const signature = await cose.lib.sign.create(headers, plaintext, signer);
   const verified = await cose.lib.sign.verify(signature, verifier);
   expect(verified.toString('utf8')).toBe('Important message!')
-  const verified2 = await cose.lib.sign2.verify(signature, verifier);
+
+
+  const publicKey = {
+    'alg': 'ES256',
+    kty: 'EC',
+    crv: 'P-256',
+    x: jose.base64url.encode(verifier.key.x),
+    y: jose.base64url.encode(verifier.key.y)
+  }
+
+  const verified2 = await cose.lib.sign2.verify(signature, publicKey);
   expect(verified2.toString('utf8')).toBe('Important message!')
 })
