@@ -23,7 +23,7 @@ const signer = async ({ privateKeyJwk }: { privateKeyJwk: PrivateKeyJwk }) => {
     }): Promise<Uint8Array> => {
       const signature = await cose.sign.create(
         { p: protectedHeader, u: unprotectedHeader },
-        payload,
+        typedArrayToBuffer(payload),
         {
           key: {
             d: base64url.decode(privateKeyJwk.d),
