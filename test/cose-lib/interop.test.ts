@@ -12,12 +12,9 @@ const secretKeyJwk = {
 }
 const { d, ...publicKeyJwk } = secretKeyJwk
 
-
 const protectedHeader = new Map();
 protectedHeader.set(1, -7)
-
 const unprotectedHeader = new Map();
-
 
 it('sanity', async () => {
   const message = 'hello'
@@ -45,8 +42,6 @@ it('sanity', async () => {
   });
   const v2 = await transmute.lib.verifier({ publicKeyJwk }).verify(s2);
   expect(new TextDecoder().decode(v2)).toBe(message)
-  // at this point both can sign and verify, and both return the same verified bytes.
-
   const v3 = await cose.sign.verify(s2, {
     key: {
       x: jose.base64url.decode(publicKeyJwk.x),
@@ -54,7 +49,6 @@ it('sanity', async () => {
     },
   })
   expect(new TextDecoder().decode(v3)).toBe(message)
-
-
-
+  const v4 = await transmute.lib.verifier({ publicKeyJwk }).verify(s1);
+  expect(new TextDecoder().decode(v4)).toBe(message)
 })
