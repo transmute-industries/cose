@@ -1,5 +1,5 @@
 import crypto from 'crypto'
-import cbor from 'cbor'
+import * as cbor from 'cbor-web'
 
 import getAlgFromVerificationKey from './getAlgFromVerificationKey'
 import getDigestFromVerificationKey from './getDigestFromVerificationKey'
@@ -43,7 +43,7 @@ async function verifyInternal(verificationKey: PublicKeyJwk, signatureStructure:
     throw new Error('Expecting Array');
   }
   if (signatureStructure.length !== 4) {
-    throw new Error('Expecting Array of lenght 4');
+    throw new Error('Expecting Array of length 4');
   }
   const [protectedHeaderBytes, unprotectedHeaderMap, plaintext, signature] = signatureStructure;
   const protectedHeaderMap: ProtectedHeaderMap = (!protectedHeaderBytes.length) ? new Map() : cbor.decodeFirstSync(protectedHeaderBytes);
