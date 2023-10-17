@@ -2,7 +2,7 @@ import cose from '../../src'
 import * as jose from 'jose'
 
 const secretKeyJwk = {
-  'alg': 'ES256',
+  alg: 'ES256',
   kty: 'EC',
   crv: 'P-256',
   x: jose.base64url.encode(Buffer.from('143329cce7868e416927599cf65a34f3ce2ffda55a7eca69ed8919a394d42f0f', 'hex')),

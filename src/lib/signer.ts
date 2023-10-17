@@ -7,18 +7,21 @@ import getDigestFromVerificationKey from './getDigestFromVerificationKey'
 
 import subtleCryptoProvider from './subtleCryptoProvider'
 
+
 const signer = ({ secretKeyJwk }: RequestCoseSign1Signer) => {
   const digest = getDigestFromVerificationKey(secretKeyJwk)
   return {
     sign: async ({ protectedHeader, unprotectedHeader, externalAAD, payload }: RequestCoseSign1) => {
       const subtle = await subtleCryptoProvider()
+      const payloadBuffer = payload
       const protectedHeaderBytes = (protectedHeader.size === 0) ? EMPTY_BUFFER : cbor.encode(protectedHeader);
-      const encodedToBeSigned = cbor.encode([
+      const decodedToBeSigned = [
         'Signature1',
         protectedHeaderBytes,
         externalAAD || EMPTY_BUFFER,
-        payload
-      ]);
+        payloadBuffer
+      ]
+      const encodedToBeSigned = cbor.encode(decodedToBeSigned);
       const signingKey = await subtle.importKey(
         "jwk",
         secretKeyJwk,
@@ -37,7 +40,7 @@ const signer = ({ secretKeyJwk }: RequestCoseSign1Signer) => {
         signingKey,
         encodedToBeSigned,
       );
-      const coseSign1Structure = [protectedHeaderBytes, unprotectedHeader, payload, signature];
+      const coseSign1Structure = [protectedHeaderBytes, unprotectedHeader, payloadBuffer, signature];
       return cbor.encodeAsync(new Tagged(Sign1Tag, coseSign1Structure), { canonical: true });
     }
   }
