@@ -1,3 +1,5 @@
+import { UnprotectedHeaderMap } from './HeaderParameters'
+
 export type PublicKeyJwk = {
   alg: string
   kty: string
@@ -10,7 +12,7 @@ export type SecretKeyJwk = PublicKeyJwk & {
   d: string
 }
 
-export type UnprotectedHeaderMap = Map<string | number, any>
+
 export type CoseSign1Structure = [Buffer, UnprotectedHeaderMap, Buffer, Buffer]
 export type DecodedToBeSigned = [string, Buffer, Buffer, Buffer]
 export type DecodedCoseSign1 = {

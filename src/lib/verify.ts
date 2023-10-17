@@ -9,7 +9,9 @@ import getDigestFromVerificationKey from './getDigestFromVerificationKey'
 import { AlgFromTags } from './AlgFromTags'
 import { PublicKeyJwk, DecodedToBeSigned, CoseSign1Structure } from './types'
 
-import { EMPTY_BUFFER, HeaderParameters } from './common';
+import { EMPTY_BUFFER } from './common';
+
+import { HeaderParameters, ProtectedHeaderMap } from './HeaderParameters';
 
 
 async function doVerify(publicKey: PublicKeyJwk, decodedToBeSigned: DecodedToBeSigned, signature: Buffer) {
@@ -48,7 +50,7 @@ async function verifyInternal(verificationKey: PublicKeyJwk, signatureStructure:
     throw new Error('Expecting Array of lenght 4');
   }
   const [protectedHeaderBytes, unprotectedHeaderMap, plaintext, signature] = signatureStructure;
-  const protectedHeaderMap = (!protectedHeaderBytes.length) ? new Map() : cbor.decodeFirstSync(protectedHeaderBytes);
+  const protectedHeaderMap: ProtectedHeaderMap = (!protectedHeaderBytes.length) ? new Map() : cbor.decodeFirstSync(protectedHeaderBytes);
   const envelopeAlgorithm = getCommonParameter(protectedHeaderMap, unprotectedHeaderMap, HeaderParameters.alg)
   if (envelopeAlgorithm !== verificationKeyAlgorithm) {
     throw new Error('Verification key does not support algorithm: ' + envelopeAlgorithm);
