@@ -53,31 +53,21 @@ async function doSign(decodedToBeSigned: any, privateKey: any) {
   return signature
 }
 
-export const create = async function (headers: any, payload: Buffer, secretKey: SecretKeyJwk, externalAAD = EMPTY_BUFFER) {
+export const create = async function (protectedHeaderMap: Map<any, any>, unprotectedHeaderMaop: Map<any, any>, payload: Buffer, secretKey: SecretKeyJwk, externalAAD = EMPTY_BUFFER) {
   const signingKeyAlgorithm = getAlgFromVerificationKey(secretKey);
-  let u = headers.u || {};
-  let p = headers.p || {};
-  p = common.TranslateHeaders(p);
-  u = common.TranslateHeaders(u);
-  let bodyP = p || {};
-  bodyP = (bodyP.size === 0) ? EMPTY_BUFFER : cbor.encode(bodyP);
-  const envelopeAlgorithm = p.get(common.HeaderParameters.alg) || u.get(common.HeaderParameters.alg);
+  const envelopeAlgorithm = protectedHeaderMap.get(common.HeaderParameters.alg) || unprotectedHeaderMaop.get(common.HeaderParameters.alg);
+  const protectedHeaderBytes = (protectedHeaderMap.size === 0) ? EMPTY_BUFFER : cbor.encode(protectedHeaderMap);
   if (envelopeAlgorithm !== signingKeyAlgorithm) {
     throw new Error('Signing key does not support algorithm: ' + envelopeAlgorithm);
   }
   const SigStructure = [
     'Signature1',
-    bodyP,
+    protectedHeaderBytes,
     externalAAD,
     payload
   ];
   const sig = await doSign(SigStructure, secretKey);
-  if (p.size === 0) {
-    p = EMPTY_BUFFER;
-  } else {
-    p = cbor.encode(p);
-  }
-  const signed = [p, u, payload, sig];
+  const signed = [protectedHeaderBytes, unprotectedHeaderMaop, payload, sig];
   return cbor.encodeAsync(new Tagged(Sign1Tag, signed), { canonical: true });
 };
 
