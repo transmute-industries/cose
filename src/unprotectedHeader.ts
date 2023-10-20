@@ -6,12 +6,13 @@ const unprotectedHeaderTags = {
   kid: 4,
   content_type: 3,
   counter_signature: 7,
+
   // will be registered in https://github.com/ietf-scitt/draft-steele-cose-merkle-tree-proofs
-  inclusion_proof: 100,
-  consistency_proof: 200,
+  verifiable_data_structure: -11111, // int
+  verifiable_data_structure_proofs: -22222, // a map of ints to array of bstrs
 
   // will be registered in https://datatracker.ietf.org/doc/draft-birkholz-scitt-receipts/
-  receipt: 300 // signed inclusion proof with extra data ... (uses tag 100)
+  scitt_receipt: -33333,
 }
 
 const unprotectedHeader = {

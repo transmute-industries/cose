@@ -27,6 +27,12 @@ import cose from '@transmute/cose'
 const cose = require('@transmute/cose')
 ```
 
+TODO:
+
+- tag / map updates for proofs in unprotected headers.
+- web tests (browser support tests...)
+
+
 
 ### Inclusion Proof
 

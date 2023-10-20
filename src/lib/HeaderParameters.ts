@@ -15,7 +15,6 @@ labelToTag.set('counter_signature', 7)
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const tagToLabel = new Map(Array.from(labelToTag, (a: any) => a.reverse()))
 
-
 export function getCommonParameter(protectedHeaderMap: ProtectedHeaderMap, unprotectedHeaderMap: UnprotectedHeaderMap, tag: number | undefined): number {
   if (tag === undefined) {
     throw new Error('Cannot get parameter from undefined tag')
@@ -46,7 +45,9 @@ const HeaderParameters = {
   IV: 5,
   Partial_IV: 6,
   counter_signature: 7,
-  x5chain: 33
+  x5chain: 33,
+  // will be registered in https://github.com/ietf-scitt/draft-steele-cose-merkle-tree-proofs
+  verifiable_data_structure: -11111
 } as any;
 
 
@@ -100,6 +101,11 @@ const AlgToTags = {
 } as any;
 
 
+const VerifiableDataStructureToTag = {
+  RFC9162_SHA256: 1,
+} as any;
+
+
 const Translators = {
   kid: (value: any) => {
     return Buffer.from(value, 'utf8');
@@ -109,7 +115,13 @@ const Translators = {
       throw new Error('Unknown \'alg\' parameter, ' + value);
     }
     return AlgToTags[value];
-  }
+  },
+  'verifiable_data_structure': (value: any) => {
+    if (!(VerifiableDataStructureToTag[value])) {
+      throw new Error('Unknown \'verifiable_data_structure\' parameter, ' + value);
+    }
+    return VerifiableDataStructureToTag[value];
+  },
 } as any;
 
 export const TranslateHeaders = function (header: any) {

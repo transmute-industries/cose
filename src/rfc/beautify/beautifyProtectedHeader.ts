@@ -11,6 +11,8 @@ const protectedHeaderTagToDescription = (tag: number) => {
   descriptions.set(2, 'Critical headers to be understood')
   descriptions.set(3, 'Content type of the payload')
   descriptions.set(4, 'Key identifier')
+  descriptions.set(-11111, 'Verifiable data structure')
+
   return descriptions.get(tag) || `${tag} unknown cbor content`
 }
 

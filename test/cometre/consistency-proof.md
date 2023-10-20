@@ -1,14 +1,16 @@
 ~~~~ cbor-diag
 18(                                 / COSE Single Signer Data Object        /
     [
-      h'a2012604...6d706c65',       / Protected header                      /
+      h'a3012604...392b6601',       / Protected header                      /
       {                             / Unprotected header                    /
-        200: [                      / Consistency proofs (1)                /
-          h'83040682...2e73a8ab',   / Consistency proof 1                   /
-        ]
+        -22222: {                   / Proofs                                /
+          2: [                      / Consistency proofs (1)                /
+            h'83040682...2e73a8ab', / Consistency proof 1                   /
+          ]
+        },
       },
       h'430b6fd7...f74c7fc4',       / Payload                               /
-      h'72d74673...96792437'        / Signature                             /
+      h'8bcb1b79...78829bca'        / Signature                             /
     ]
 )
 ~~~~
@@ -16,7 +18,8 @@
 ~~~~ cbor-diag
 {                                   / Protected header                      /
   1: -7,                            / Cryptographic algorithm to use        /
-  4: h'68747470...6d706c65'         / Key identifier                        /
+  4: h'68747470...6d706c65',        / Key identifier                        /
+  -11111: 1                         / Verifiable data structure             /
 }
 ~~~~
 

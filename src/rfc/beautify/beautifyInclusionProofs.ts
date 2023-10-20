@@ -6,6 +6,8 @@ import { addComment } from './addComment'
 
 import { bufferToTruncatedBstr } from './bufferToTruncatedBstr'
 
+import verifiable_data_structure_proofs from '../../verifiable_data_structure_proofs'
+
 const beautifyInclusionProof = async (data: Buffer, index: number) => {
   const [tree_size, leaf_index, audit_path] = await cbor.web.decode(data);
   const size = addComment(`  ${tree_size},`, `Tree size`)
@@ -30,12 +32,12 @@ export const beautifyInclusionProofs = async (proofs: Buffer[]) => {
   const beautifulProofs = [] as string[]
   for (const p of proofs) {
     beautifulProofs.push(await beautifyInclusionProof(p, beautifulProofs.length))
-    const line = addComment(`          ${bufferToTruncatedBstr(p)},`, `Inclusion proof ${beautifulProofs.length}`)
+    const line = addComment(`            ${bufferToTruncatedBstr(p)},`, `Inclusion proof ${beautifulProofs.length}`)
     truncatedProofs.push(line)
   }
-  const line = addComment(`        100: [`, `Inclusion proofs (${truncatedProofs.length})`)
+  const line = addComment(`          ${verifiable_data_structure_proofs.inclusion_proof}: [`, `Inclusion proofs (${truncatedProofs.length})`)
   const headerTag = `${line}
 ${truncatedProofs.join("\n")}
-        ]`
+          ]`
   return [headerTag, ...beautifulProofs]
 }
