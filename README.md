@@ -29,7 +29,6 @@ const cose = require('@transmute/cose')
 
 TODO:
 
-- tag / map updates for proofs in unprotected headers.
 - web tests (browser support tests...)
 
 
