@@ -11,41 +11,41 @@ const diagnosticOfSecretKey = await cose.key.edn(secretCoseKey)
 ```
 
 ~~~~ text
-urn:ietf:params:oauth:ckt:sha-256:znFTVwJYhrooFNbHO4_fEc6_tu13h7j0YQjjtHyRRn0
+urn:ietf:params:oauth:ckt:sha-256:K61ZLN2R7_1IVZ9Fbkm0AJLKdHYi-Hj-c4rU3LPFJv8
 ~~~~
 
 ~~~~ cbor-diag
 {                                   / COSE Key                      /
   1: 2,                             / Type                          /
-  2: h'425a6161...4a43314d',        / Identifier                    /
+  2: h'31754f2d...66696159',        / Identifier                    /
   3: -7,                            / Algorithm                     /
   -1: 1,                            / Curve                         /
-  -2: h'f1dde7cd...550ac610',       / x public key component        /
-  -3: h'a98e9c84...a6f424c1',       / y public key component        /
-  -4: h'bf686a56...d112fbaf',       / d private key component       /
+  -2: h'ef03e2c9...091a4da1',       / x public key component        /
+  -3: h'5d5a53b1...b7942be1',       / y public key component        /
+  -4: h'6829a8df...d2b1d2c2',       / d private key component       /
 }
 ~~~~
 
 ## Export Public Key
 
 ``` ts
-const publicKey = await cose.key.utils.publicFromPrivate(secretCoseKey)
-const thumbprintOfPublicKey = await cose.key.thumbprint.uri(publicKey)
-const diagnosticOfPublicKey = await cose.key.edn(publicKey)
+const publicCoseKey = await cose.key.utils.publicFromPrivate(secretCoseKey)
+const thumbprintOfPublicKey = await cose.key.thumbprint.uri(publicCoseKey)
+const diagnosticOfPublicKey = await cose.key.edn(publicCoseKey)
 ```
 
 ~~~~ text
-urn:ietf:params:oauth:ckt:sha-256:znFTVwJYhrooFNbHO4_fEc6_tu13h7j0YQjjtHyRRn0
+urn:ietf:params:oauth:ckt:sha-256:K61ZLN2R7_1IVZ9Fbkm0AJLKdHYi-Hj-c4rU3LPFJv8
 ~~~~
 
 ~~~~ cbor-diag
 {                                   / COSE Key                      /
   1: 2,                             / Type                          /
-  2: h'425a6161...4a43314d',        / Identifier                    /
+  2: h'31754f2d...66696159',        / Identifier                    /
   3: -7,                            / Algorithm                     /
   -1: 1,                            / Curve                         /
-  -2: h'f1dde7cd...550ac610',       / x public key component        /
-  -3: h'a98e9c84...a6f424c1',       / y public key component        /
+  -2: h'ef03e2c9...091a4da1',       / x public key component        /
+  -3: h'5d5a53b1...b7942be1',       / y public key component        /
 }
 ~~~~
 
@@ -79,7 +79,7 @@ const diagnostic = await cose.scitt.receipt.edn(receipt)
         },
       },
       h'',                          / Detached payload              /
-      h'97343991...a4265c61'        / Signature                     /
+      h'98192c9f...34b4191c'        / Signature                     /
     ]
 )
 ~~~~
@@ -87,7 +87,7 @@ const diagnostic = await cose.scitt.receipt.edn(receipt)
 ~~~~ cbor-diag
 {                                   / Protected                     /
   1: -7,                            / Algorithm                     /
-  4: h'425a6161...4a43314d',        / Key identifier                /
+  4: h'31754f2d...66696159',        / Key identifier                /
   -11111: 1                         / Verifiable data structure     /
 }
 ~~~~
@@ -101,4 +101,20 @@ const diagnostic = await cose.scitt.receipt.edn(receipt)
      h'0bdaaed3...32568964'         / Intermediate hash 2           /
   ]
 ]
+~~~~
+
+## Verify Receipt
+
+``` ts
+const verificaton = await cose.scitt.receipt.verify({
+  entry: entries[4],
+  receipt,
+  publicCoseKey
+})
+console.log({ verificaton })
+```
+
+
+~~~~ text
+{ verificaton: true }
 ~~~~

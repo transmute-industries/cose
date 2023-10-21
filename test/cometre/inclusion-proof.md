@@ -10,14 +10,14 @@
         },
       },
       h'',                          / Detached payload              /
-      h'e698fb4e...3818c729'        / Signature                     /
+      h'affc058e...c340d8bc'        / Signature                     /
     ]
 )
 ~~~~
 
 ~~~~ cbor-diag
 {                                   / Protected                     /
-  1: -7,                            / Cryptographic algorithm to use/
+  1: -7,                            / Algorithm                     /
   4: h'68747470...6d706c65',        / Key identifier                /
   -11111: 1                         / Verifiable data structure     /
 }

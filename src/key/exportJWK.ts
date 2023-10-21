@@ -2,6 +2,8 @@ import { CoseKeyMap } from "./types";
 import * as jose from 'jose'
 import keyUtils from './keyUtils'
 
+
+const textDecoder = new TextDecoder()
 const sortJwk = (jwk: any) => {
   const { kty, kid, alg, crv, x, y, d, ...rest } = jwk
   return JSON.parse(JSON.stringify({ kty, kid, alg, crv, x, y, d, ...rest }))
@@ -17,7 +19,7 @@ const coseKeyToJwk = (coseKey: CoseKeyMap): Record<string, unknown> => {
         break
       }
       case 2: {
-        jwk.kid = value
+        jwk.kid = textDecoder.decode(value as Buffer)
         break
       }
       case 3: {

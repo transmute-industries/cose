@@ -15,18 +15,18 @@ const cktUri = await cose.key.thumbprint.calculateCoseKeyThumbprintUri(coseKey)
 ```
 
 ~~~~ text
-urn:ietf:params:oauth:ckt:sha-256:1g28vYUpKVm2hIdew-qgNpKCHSz7R4DlfXes_pcrg2w
+urn:ietf:params:oauth:ckt:sha-256:lC-GkAD3bB7V6gyzn-WknVx0z9TvcgaAnRYoFKBz7zg
 ~~~~
 
 ~~~~ cbor-diag
 {                                   / COSE Key                      /
   1: 2,                             / Type                          /
-  2: h'345a6b50...4a506473',        / Identifier                    /
+  2: h'6b775163...61523267',        / Identifier                    /
   3: -7,                            / Algorithm                     /
   -1: 1,                            / Curve                         /
-  -2: h'e14a54a4...7bb7991f',       / x public key component        /
-  -3: h'660781aa...b699cf80',       / y public key component        /
-  -4: h'921e6ef5...000195f6',       / d private key component       /
+  -2: h'd69ce680...8383f9c7',       / x public key component        /
+  -3: h'40547ca1...c9c347bd',       / y public key component        /
+  -4: h'6caa6281...c06a086e',       / d private key component       /
 }
 ~~~~
 
@@ -41,18 +41,18 @@ const jktUri = await cose.key.thumbprint.calculateJwkThumbprintUri(jwk)
     ```
 
 ~~~~ text
-urn:ietf:params:oauth:jwk-thumbprint:sha-256:4ZkPqJeFc9BX82Pb4PRMNEzT8KWAEZs_rU2zukoJPds
+urn:ietf:params:oauth:jwk-thumbprint:sha-256:kwQc5cZuilOCixNhSdyPTwkEEHC8Dkx3Q0bKG_xaR2g
 ~~~~
 
 ~~~~ json
 {
   "kty": "EC",
-  "kid": "4ZkPqJeFc9BX82Pb4PRMNEzT8KWAEZs_rU2zukoJPds",
+  "kid": "kwQc5cZuilOCixNhSdyPTwkEEHC8Dkx3Q0bKG_xaR2g",
   "alg": "ES256",
   "crv": "P-256",
-  "x": "4UpUpOpFx9U-TLa8nuL8RDFrp1vcRqvPiLYrgnu3mR8",
-  "y": "ZgeBqsMITPNEo-qUufW-LIiI1kFpCoEvJU48WraZz4A",
-  "d": "kh5u9c_XRrShvU08aI4EcjwE4WIDwUMOQADgTwABlfY"
+  "x": "1pzmgGW4rNVZCbPcmYB8py_foFGI_tEENi3OR4OD-cc",
+  "y": "QFR8oRcJIjWUy7CATs-TsSYojg-cTrCpunurrcnDR70",
+  "d": "bKpigThFV3kenefjzxVZTxI75vgZiKCG-FqLacBqCG4"
 }
 ~~~~
 
@@ -69,18 +69,18 @@ const cktUri = await cose.key.thumbprint.calculateCoseKeyThumbprintUri(coseKey)
 ```
 
 ~~~~ text
-urn:ietf:params:oauth:ckt:sha-256:qnsh6IV4ppOwrrvZiXJbnRqCdEt5md2VAyTfBIxbDm4
+urn:ietf:params:oauth:ckt:sha-256:JKyHJ9DlJF9GcgNvjEe53IXZCsqqKeGMK13LWPjI50M
 ~~~~
 
 ~~~~ cbor-diag
 {                                   / COSE Key                      /
   1: 2,                             / Type                          /
-  2: h'732d7633...4a653434',        / Identifier                    /
+  2: h'674d4a56...74796134',        / Identifier                    /
   3: -35,                           / Algorithm                     /
   -1: 2,                            / Curve                         /
-  -2: h'835e747a...5507d423',       / x public key component        /
-  -3: h'8af49c25...02c86afa',       / y public key component        /
-  -4: h'8a72e3de...df60a3f8',       / d private key component       /
+  -2: h'd05a6096...87943299',       / x public key component        /
+  -3: h'7c6e5a3c...85ef3625',       / y public key component        /
+  -4: h'a8fc80ed...c8fd2a8b',       / d private key component       /
 }
 ~~~~
 
@@ -95,18 +95,18 @@ const jktUri = await cose.key.thumbprint.calculateJwkThumbprintUri(jwk)
     ```
 
 ~~~~ text
-urn:ietf:params:oauth:jwk-thumbprint:sha-256:s-v3XcM75xdFYIe-Ud8nYzZSIsb9yxIvh9eaTeIJe44
+urn:ietf:params:oauth:jwk-thumbprint:sha-256:gMJVOwztvWZ_0F09QApMClN_ynwaDp-sF0khbAktya4
 ~~~~
 
 ~~~~ json
 {
   "kty": "EC",
-  "kid": "s-v3XcM75xdFYIe-Ud8nYzZSIsb9yxIvh9eaTeIJe44",
+  "kid": "gMJVOwztvWZ_0F09QApMClN_ynwaDp-sF0khbAktya4",
   "alg": "ES384",
   "crv": "P-384",
-  "x": "g150euFuW64nKC-YHYZK5TgXNwq42Lh5EmEg70tklODccoc9h06dvlbBOKdVB9Qj",
-  "y": "ivScJUCWbyT8fUgxulB90Cdw0LdMnRmSAJUKM21KRUj0BP_csMrIBAYrAMQCyGr6",
-  "d": "inLj3nnJO0R1HjgzlyQnUKIije2sDObip-uopxeFlsuyc4MsYClw4490NQXfYKP4"
+  "x": "0Fpglh7gTVwrGMCfghiN13mRmK0Uaq2UoZMUosKWsAiEE6ZPnbfk9XG13ZSHlDKZ",
+  "y": "fG5aPCa2Ud_YDghvQN0kUy5Lfxccv9jN5UkIjtewW7tpTNYVBHZBiTaOXQyF7zYl",
+  "d": "qPyA7TXpnJX9JrKihyyza8BNmf6KJr_UvVHbr9YVuXLzqcMzyxE20pQXyTLI_SqL"
 }
 ~~~~
 
@@ -123,18 +123,18 @@ const cktUri = await cose.key.thumbprint.calculateCoseKeyThumbprintUri(coseKey)
 ```
 
 ~~~~ text
-urn:ietf:params:oauth:ckt:sha-256:2J8DpHy1snTd2lP1t4JLWRF4RmRqaZNz48urMG0CrSU
+urn:ietf:params:oauth:ckt:sha-256:-fMDrirSTd4f89-yghaFu9KC0ovpCQFpUCThB2OyKCg
 ~~~~
 
 ~~~~ cbor-diag
 {                                   / COSE Key                      /
   1: 2,                             / Type                          /
-  2: h'6f4f3745...4e505434',        / Identifier                    /
+  2: h'356c5a36...4c7a3259',        / Identifier                    /
   3: -36,                           / Algorithm                     /
   -1: 3,                            / Curve                         /
-  -2: h'014c6f77...372da365',       / x public key component        /
-  -3: h'002b9089...5523c61e',       / y public key component        /
-  -4: h'014166b6...779e8929',       / d private key component       /
+  -2: h'015c60b5...b05edafb',       / x public key component        /
+  -3: h'01f00374...4358780a',       / y public key component        /
+  -4: h'01a757bd...9655769f',       / d private key component       /
 }
 ~~~~
 
@@ -149,17 +149,17 @@ const jktUri = await cose.key.thumbprint.calculateJwkThumbprintUri(jwk)
     ```
 
 ~~~~ text
-urn:ietf:params:oauth:jwk-thumbprint:sha-256:oO7ELz-Zvzc6adVrj8t1j4UIo7UYXl2WaEOYpN1NPT4
+urn:ietf:params:oauth:jwk-thumbprint:sha-256:5lZ6atVornFTZWVNBEKUoAagwXwm8w0jNe2twyCLz2Y
 ~~~~
 
 ~~~~ json
 {
   "kty": "EC",
-  "kid": "oO7ELz-Zvzc6adVrj8t1j4UIo7UYXl2WaEOYpN1NPT4",
+  "kid": "5lZ6atVornFTZWVNBEKUoAagwXwm8w0jNe2twyCLz2Y",
   "alg": "ES512",
   "crv": "P-521",
-  "x": "AUxvd2_Qw9aq-nI1WUW6fGqS7Q53AA3Qynju5InxZpHaYNRLt0DkqDGRi2rkEfpmQ_skPTE6dtdxGHvhh643LaNl",
-  "y": "ACuQiRKcTbZHHYBMEfv4ZPiLL6inGwyeTah8MaJ60QNqB8tPErR7I1TDuAk7_hVQvq74kR8wDw1II1NXqQZVI8Ye",
-  "d": "AUFmtseg1cTLMsu9QOFmra_VsJbO_KyTUqS4SmRVIrZNVXCb-rK6j8ZW9z3bJfhR1gt7tPzhjWCRuFQw_NZ3nokp"
+  "x": "AVxgtRjO702Uc6etfKD3bqVkcEaUOGmOll9l0x0lMnf7vfZX12fR7h9SwjbBE2LxEGikG6JCJBE-RRFNVfqwXtr7",
+  "y": "AfADdAJkm0PHtWizyKxfQJqJ8T5gUT9IVa1rpw6jtHS_VTOaVVEtezqRgVFX1x9bzEoK37fTvROGmavI8EpDWHgK",
+  "d": "AadXvQSxFDrr8nIc8JZDkyxpIVN9tMuTAP8n6QsjXi6dXDD8bzILqESAREZhaAFwrN_y6Fz6tQDmf_FskKCWVXaf"
 }
 ~~~~
