@@ -14,7 +14,7 @@ labelMap.set(unprotectedHeader.scitt_receipt, beautifyReceipts)
 
 export const beautifyUnprotectedHeader = async (unprotectedHeader: Map<number, unknown>) => {
   let allBlocks = [] as string[]
-  let result = addComment(`      {},`, `Unprotected header`)
+  let result = addComment(`      {},`, `Unprotected`)
   if (unprotectedHeader.size) {
     let lines = [] as string[]
     for (const [key, value] of unprotectedHeader.entries()) {
@@ -27,7 +27,7 @@ export const beautifyUnprotectedHeader = async (unprotectedHeader: Map<number, u
       lines = [...lines, primaryLine]
       allBlocks = [...allBlocks, ...otherBlocks]
     }
-    const title = addComment(`      {`, `Unprotected header`)
+    const title = addComment(`      {`, `Unprotected`)
     result = `${title}
 ${lines.join('      \n')}
       },`

@@ -26,7 +26,7 @@ export const beautifyProtectedHeader = async (data: Buffer | Uint8Array) => {
   result = result.replace('}', `\n}`)
   result = result.split('\n').map((line: string) => {
     if (line.trim() === '{') {
-      line = addComment(`{`, `Protected header`)
+      line = addComment(`{`, `Protected`)
       return line
     }
     if (line.includes(`h'`) && line.length > maxBstrTruncateLength) {
