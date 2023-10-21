@@ -27,10 +27,6 @@ import cose from '@transmute/cose'
 const cose = require('@transmute/cose')
 ```
 
-TODO:
-
-- web tests (browser support tests...)
-
 ### Inclusion Proof
 
 ```ts
