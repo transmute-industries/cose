@@ -1,5 +1,4 @@
-import { base64url } from 'jose'
-import cose from 'cose-js'
+
 import {
   PrivateKeyJwk,
   ProtectedHeader,
@@ -8,6 +7,8 @@ import {
 } from './types'
 
 import { typedArrayToBuffer } from './utils'
+
+import { Headers, signer as coseSign1Signer } from './lib'
 
 const signer = async ({ privateKeyJwk }: { privateKeyJwk: PrivateKeyJwk }) => {
   return {
@@ -21,16 +22,12 @@ const signer = async ({ privateKeyJwk }: { privateKeyJwk: PrivateKeyJwk }) => {
       unprotectedHeader?: UnprotectedHeader
       payload: Payload
     }): Promise<Uint8Array> => {
-      const signature = await cose.sign.create(
-        { p: protectedHeader, u: unprotectedHeader },
-        typedArrayToBuffer(payload),
-        {
-          key: {
-            d: base64url.decode(privateKeyJwk.d),
-          },
-        },
-      )
-      return new Uint8Array(signature)
+      const coseSign1 = await coseSign1Signer({ secretKeyJwk: privateKeyJwk }).sign({
+        protectedHeader: Headers.TranslateHeaders(protectedHeader),
+        unprotectedHeader: unprotectedHeader || new Map(),
+        payload: typedArrayToBuffer(payload) as Buffer
+      })
+      return new Uint8Array(coseSign1)
     },
   }
 }

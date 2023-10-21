@@ -6,6 +6,8 @@ import { addComment } from './addComment'
 
 import { bufferToTruncatedBstr } from './bufferToTruncatedBstr'
 
+import verifiable_data_structure_proofs from '../../verifiable_data_structure_proofs'
+
 const beautifyConsistencyProof = async (data: Buffer, index: number) => {
   const [tree_size_1, tree_size_2, consistency_path] = await cbor.web.decode(data);
   const size1 = addComment(`  ${tree_size_1},`, `Tree size 1`)
@@ -30,12 +32,12 @@ export const beautifyConsistencyProofs = async (proofs: Buffer[]) => {
   const beautifulProofs = [] as string[]
   for (const p of proofs) {
     beautifulProofs.push(await beautifyConsistencyProof(p, beautifulProofs.length))
-    const line = addComment(`          ${bufferToTruncatedBstr(p)},`, `Consistency proof ${beautifulProofs.length}`)
+    const line = addComment(`            ${bufferToTruncatedBstr(p)},`, `Consistency proof ${beautifulProofs.length}`)
     truncatedProofs.push(line)
   }
-  const line = addComment(`        200: [`, `Consistency proofs (${truncatedProofs.length})`)
+  const line = addComment(`          ${verifiable_data_structure_proofs.consistency_proof}: [`, `Consistency proofs (${truncatedProofs.length})`)
   const headerTag = `${line}
 ${truncatedProofs.join("\n")}
-        ]`
+          ]`
   return [headerTag, ...beautifulProofs]
 }

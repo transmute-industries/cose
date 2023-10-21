@@ -7,10 +7,12 @@ import { maxBstrTruncateLength } from './constants'
 // https://www.iana.org/assignments/cose/cose.xhtml
 const protectedHeaderTagToDescription = (tag: number) => {
   const descriptions = new Map();
-  descriptions.set(1, 'Cryptographic algorithm to use')
-  descriptions.set(2, 'Critical headers to be understood')
-  descriptions.set(3, 'Content type of the payload')
+  descriptions.set(1, 'Algorithm')
+  descriptions.set(2, 'Critical parameters')
+  descriptions.set(3, 'Content type')
   descriptions.set(4, 'Key identifier')
+  descriptions.set(-11111, 'Verifiable data structure')
+
   return descriptions.get(tag) || `${tag} unknown cbor content`
 }
 
@@ -24,7 +26,7 @@ export const beautifyProtectedHeader = async (data: Buffer | Uint8Array) => {
   result = result.replace('}', `\n}`)
   result = result.split('\n').map((line: string) => {
     if (line.trim() === '{') {
-      line = addComment(`{`, `Protected header`)
+      line = addComment(`{`, `Protected`)
       return line
     }
     if (line.includes(`h'`) && line.length > maxBstrTruncateLength) {

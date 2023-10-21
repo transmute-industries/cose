@@ -17,7 +17,16 @@ import getContentType from './getContentType'
 import utils from './utils'
 import rfc from './rfc'
 
+import * as key from './key'
+
+import * as lib from './lib'
+
+import * as scitt from './scitt'
+
 const cose = {
+  key,
+  scitt,
+  lib,
   utils,
   rfc,
   detached,

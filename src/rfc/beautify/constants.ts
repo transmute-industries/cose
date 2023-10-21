@@ -1,3 +1,3 @@
-export const maxLineLength = 76
-export const commentOffset = 40
+export const maxLineLength = 68
+export const commentOffset = 32
 export const maxBstrTruncateLength = 32

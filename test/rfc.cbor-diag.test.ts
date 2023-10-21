@@ -7,6 +7,8 @@ const log_id = `https://transparency.example`
 let signer: CoseSigner
 let verifier: CoseVerifier
 
+import verifiable_data_structure_proofs from '../src/verifiable_data_structure_proofs'
+
 beforeAll(async () => {
   signer = await cose.signer({
     privateKeyJwk: {
@@ -30,8 +32,8 @@ beforeAll(async () => {
 })
 
 const getInclusionProofs = (signed_inclusion_proof: Uint8Array) => {
-  const unprotectedHeader = cose.unprotectedHeader.get(signed_inclusion_proof)
-  const proofs = unprotectedHeader.get(100) as Buffer[]
+  const unprotectedHeader = cose.unprotectedHeader.get(signed_inclusion_proof) as any
+  const proofs = unprotectedHeader.get(cose.unprotectedHeader.verifiable_data_structure_proofs).get(verifiable_data_structure_proofs.inclusion_proof) as Buffer[]
   return proofs
 }
 
@@ -78,7 +80,9 @@ it('e2e signed inclusion proof', async () => {
   const firstProofs = getInclusionProofs(signed_inclusion_proof)
   const secondProofs = getInclusionProofs(signed_inclusion_proof2)
   const unprotectedHeader = cose.unprotectedHeader.get(signed_inclusion_proof)
-  unprotectedHeader.set(100, [...firstProofs, ...secondProofs])
+  const updatedProofs = new Map();
+  updatedProofs.set(verifiable_data_structure_proofs.inclusion_proof, [...firstProofs, ...secondProofs])
+  unprotectedHeader.set(cose.unprotectedHeader.verifiable_data_structure_proofs, updatedProofs)
   const updated = cose.unprotectedHeader.set(signed_inclusion_proof, unprotectedHeader)
   const verified3 = await cose.merkle.verify_multiple(
     {
@@ -88,9 +92,9 @@ it('e2e signed inclusion proof', async () => {
     }
   )
   expect(verified3).toBe(true)
-  fs.writeFileSync('inclusion-proof.cose', Buffer.from(updated))
-  const statement1 = fs.readFileSync('inclusion-proof.cose')
-  const items1 = await cose.rfc.diag(statement1)
-  const markdown = await cose.rfc.blocks(items1)
-  fs.writeFileSync('inclusion-proof.md', markdown)
+  // fs.writeFileSync('inclusion-proof.cose', Buffer.from(updated))
+  // const statement1 = fs.readFileSync('inclusion-proof.cose')
+  // const items1 = await cose.rfc.diag(statement1)
+  // const markdown = await cose.rfc.blocks(items1)
+  // fs.writeFileSync('inclusion-proof.md', markdown)
 })

@@ -1,19 +1,20 @@
 import { addComment } from "./addComment"
 
 import unprotectedHeader from "../../unprotectedHeader"
-import { beautifyInclusionProofs } from './beautifyInclusionProofs'
-import { beautifyConsistencyProofs } from './beautifyConsistencyProofs'
+import { beautifyVerifiableProofs } from './beautifyVerifiableProofs'
 import { beautifyReceipts } from './beautifyReceipts'
 
 const labelMap = new Map()
 
-labelMap.set(unprotectedHeader.inclusion_proof, beautifyInclusionProofs)
-labelMap.set(unprotectedHeader.consistency_proof, beautifyConsistencyProofs)
-labelMap.set(unprotectedHeader.receipt, beautifyReceipts)
+labelMap.set(unprotectedHeader.verifiable_data_structure_proofs, beautifyVerifiableProofs)
+labelMap.set(unprotectedHeader.scitt_receipt, beautifyReceipts)
+
+// labelMap.set(unprotectedHeader.inclusion_proof, beautifyInclusionProofs)
+// labelMap.set(unprotectedHeader.consistency_proof, beautifyConsistencyProofs)
 
 export const beautifyUnprotectedHeader = async (unprotectedHeader: Map<number, unknown>) => {
   let allBlocks = [] as string[]
-  let result = addComment(`    {},`, `Unprotected header`)
+  let result = addComment(`      {},`, `Unprotected`)
   if (unprotectedHeader.size) {
     let lines = [] as string[]
     for (const [key, value] of unprotectedHeader.entries()) {
@@ -26,7 +27,7 @@ export const beautifyUnprotectedHeader = async (unprotectedHeader: Map<number, u
       lines = [...lines, primaryLine]
       allBlocks = [...allBlocks, ...otherBlocks]
     }
-    const title = addComment(`      {`, `Unprotected header`)
+    const title = addComment(`      {`, `Unprotected`)
     result = `${title}
 ${lines.join('      \n')}
       },`

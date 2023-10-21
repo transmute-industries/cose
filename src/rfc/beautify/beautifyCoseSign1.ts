@@ -14,9 +14,9 @@ export const beautifyCoseSign1 = async (data: Uint8Array): Promise<string[]> => 
   const payloadLine = `      ${bufferToTruncatedBstr(decoded.value[2])},`
   const signatureLine = `      ${bufferToTruncatedBstr(decoded.value[3])}`
   const envelope = `
-18(                                 / COSE Single Signer Data Object        /
+${addComment(`18(`, 'COSE Sign 1')}
     [
-${addComment(protectedHeaderLine, 'Protected header')}
+${addComment(protectedHeaderLine, 'Protected')}
 ${unprotectedHeaderLines}
 ${addComment(payloadLine, decoded.value[2].length > 0 ? `Payload` : `Detached payload`)}
 ${addComment(signatureLine, 'Signature')}

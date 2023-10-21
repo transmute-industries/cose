@@ -1,32 +1,35 @@
 ~~~~ cbor-diag
-18(                                 / COSE Single Signer Data Object        /
+18(                                 / COSE Sign 1                   /
     [
-      h'a2012604...6d706c65',       / Protected header                      /
-      {                             / Unprotected header                    /
-        100: [                      / Inclusion proofs (1)                  /
-          h'83040282...1f487bb1',   / Inclusion proof 1                     /
-        ]
+      h'a3012604...392b6601',       / Protected                     /
+      {                             / Unprotected                   /
+        -22222: {                   / Proofs                        /
+          1: [                      / Inclusion proofs (1)          /
+            h'83040282...1f487bb1', / Inclusion proof 1             /
+          ]
+        },
       },
-      h'',                          / Detached payload                      /
-      h'efde9a59...b4cb142b'        / Signature                             /
+      h'',                          / Detached payload              /
+      h'affc058e...c340d8bc'        / Signature                     /
     ]
 )
 ~~~~
 
 ~~~~ cbor-diag
-{                                   / Protected header                      /
-  1: -7,                            / Cryptographic algorithm to use        /
-  4: h'68747470...6d706c65'         / Key identifier                        /
+{                                   / Protected                     /
+  1: -7,                            / Algorithm                     /
+  4: h'68747470...6d706c65',        / Key identifier                /
+  -11111: 1                         / Verifiable data structure     /
 }
 ~~~~
 
 ~~~~ cbor-diag
-[                                   / Inclusion proof 1                     /
-  4,                                / Tree size                             /
-  2,                                / Leaf index                            /
-  [                                 / Inclusion hashes (2)                  /
-     h'a39655d4...d29a968a'         / Intermediate hash 1                   /
-     h'57187dff...1f487bb1'         / Intermediate hash 2                   /
+[                                   / Inclusion proof 1             /
+  4,                                / Tree size                     /
+  2,                                / Leaf index                    /
+  [                                 / Inclusion hashes (2)          /
+     h'a39655d4...d29a968a'         / Intermediate hash 1           /
+     h'57187dff...1f487bb1'         / Intermediate hash 2           /
   ]
 ]
 ~~~~
