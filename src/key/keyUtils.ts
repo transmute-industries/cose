@@ -1,4 +1,6 @@
 
+import { publicFromPrivate } from "./publicFromPrivate";
+
 // https://www.iana.org/assignments/cose/cose.xhtml#algorithms
 
 const reverse = (map: Map<any, any>) => new Map(Array.from(map, (a: any) => a.reverse()))
@@ -51,6 +53,7 @@ const types = {
 
 
 export const keyUtils = {
+  publicFromPrivate,
   algorithms,
   parameters,
   curves,

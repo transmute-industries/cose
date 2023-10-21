@@ -29,7 +29,8 @@ export const thumbprint = {
   calculateJwkThumbprint,
   calculateJwkThumbprintUri,
   calculateCoseKeyThumbprint,
-  calculateCoseKeyThumbprintUri
+  calculateCoseKeyThumbprintUri,
+  uri: calculateCoseKeyThumbprintUri
 }
 
 export default thumbprint
