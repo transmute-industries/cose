@@ -11,7 +11,7 @@
         },
       },
       h'',                          / Detached payload                      /
-      h'2c29a4cd...4f86d158'        / Signature                             /
+      h'0a1e2031...5cb26f93'        / Signature                             /
     ]
 )
 ~~~~

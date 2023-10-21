@@ -17,9 +17,12 @@ import getContentType from './getContentType'
 import utils from './utils'
 import rfc from './rfc'
 
+import * as key from './key'
+
 import * as lib from './lib'
 
 const cose = {
+  key,
   lib,
   utils,
   rfc,
