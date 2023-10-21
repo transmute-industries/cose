@@ -21,8 +21,11 @@ import * as key from './key'
 
 import * as lib from './lib'
 
+import * as scitt from './scitt'
+
 const cose = {
   key,
+  scitt,
   lib,
   utils,
   rfc,

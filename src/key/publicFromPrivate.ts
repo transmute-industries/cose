@@ -1,12 +1,13 @@
-import { PrivateCoseKeyMap, PublicCoseKeyMap } from "./types";
+import { SecretCoseKeyMap, PublicCoseKeyMap } from "./types";
 
-export const publicFromPrivate = (secretCoseKeyMap: PrivateCoseKeyMap): PublicCoseKeyMap => {
-  if (secretCoseKeyMap.get(1) !== 2) {
+export const publicFromPrivate = (secretCoseKeyMap: SecretCoseKeyMap): PublicCoseKeyMap => {
+  const publicCoseKeyMap = new Map(secretCoseKeyMap)
+  if (publicCoseKeyMap.get(1) !== 2) {
     throw new Error('Only EC2 keys are supported')
   }
-  if (!secretCoseKeyMap.get(-4)) {
+  if (!publicCoseKeyMap.get(-4)) {
     throw new Error('secretCoseKeyMap is not a secret / private key (has no d / -4)')
   }
-  secretCoseKeyMap.delete(-4);
-  return secretCoseKeyMap
+  publicCoseKeyMap.delete(-4);
+  return publicCoseKeyMap
 }

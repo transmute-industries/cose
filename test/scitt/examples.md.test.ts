@@ -8,7 +8,6 @@ lines.push(`
 import cose from '@transmute/cose'
 \`\`\`
           `.trim())
-
 let secretCoseKey: any
 it('generate private key', async () => {
   lines.push(`## Generate Private Key`)
@@ -29,12 +28,9 @@ ${thumbprintOfSecretKey}
 ~~~~
     `.trim())
   lines.push(makeRfcCodeBlock(diagnosticOfSecretKey))
-
-
 })
 
 it('export public key', async () => {
-
   lines.push(`## Export Public Key`)
   const publicKey = await cose.key.utils.publicFromPrivate(secretCoseKey)
   const thumbprintOfPublicKey = await cose.key.thumbprint.uri(publicKey)
@@ -52,9 +48,42 @@ ${thumbprintOfPublicKey}
 ~~~~
                 `.trim())
   lines.push(makeRfcCodeBlock(diagnosticOfPublicKey))
-
 })
 
+it('issue receipt', async () => {
+  lines.push(`## Issue Receipt`)
+  const message0 = cose.cbor.encode(0)
+  const message1 = cose.cbor.encode('1')
+  const message2 = cose.cbor.encode([2, 2])
+  const message3 = cose.cbor.encode({ 3: 3 })
+  const message4 = cose.cbor.encode(['🔥', 4])
+  const message5 = cose.cbor.encode({ five: '💀' })
+  const entries = [message0, message1, message2, message3, message4, message5]
+  const receipt = await cose.scitt.receipt.issue({
+    index: 4,
+    entries: entries,
+    secretCoseKey
+  })
+  const diagnostic = await cose.scitt.receipt.edn(receipt)
+  lines.push(`
+\`\`\` ts
+const message0 = cose.cbor.encode(0)
+const message1 = cose.cbor.encode('1')
+const message2 = cose.cbor.encode([2, 2])
+const message3 = cose.cbor.encode({ 3: 3 })
+const message4 = cose.cbor.encode(['🔥', 4])
+const message5 = cose.cbor.encode({ five: '💀' })
+const entries = [message0, message1, message2, message3, message4, message5]
+const receipt = await cose.scitt.receipt.issue({
+  index: 4,
+  entries: entries,
+  secretCoseKey
+})
+const diagnostic = await cose.scitt.receipt.edn(receipt)
+\`\`\`
+            `.trim())
+  lines.push(diagnostic.trim())
+})
 
 afterAll(() => {
   const final = lines.join('\n\n')
