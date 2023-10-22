@@ -138,7 +138,7 @@ func GenerateSecretKey(alg int) (CoseKey, error) {
 		mode := dilithium.ModeByName("Dilithium2")
 		publicKey, privateKey, _ := mode.GenerateKey(rand.Reader)
 		coseKey = CoseKey{
-			1:  alg,
+			1:  7,
 			3:  alg,
 			-2: publicKey.Bytes(),
 			-4: privateKey.Bytes(),

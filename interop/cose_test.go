@@ -92,15 +92,11 @@ func TestCoseDilithium(t *testing.T) {
 	encodedPublicKey, _ := EncodeCborBytes(publicKey)
 	diagnosticOfPublicKey, _ := cbor.Diagnose(encodedPublicKey)
 	diagnosticOfSecretKey, _ := cbor.Diagnose(encodedSecretKey)
-
 	sign := CreateSign(secretKey)
-
-	p := ProtectedHeader{1: -7}
+	p := ProtectedHeader{1: publicKey[3]}
 	u := UnprotectedHeader{}
 	c := []byte("fake")
-
 	s, _ := sign(p, u, c)
-
 	f1, err := os.Create("dilithium.sign1.cose")
 	check(err)
 	defer f1.Close()
@@ -114,7 +110,7 @@ func TestCoseDilithium(t *testing.T) {
 		t.Errorf("verification %t", v)
 	}
 
-	if !strings.Contains(diagnosticOfPublicKey, "1: -55555") {
+	if !strings.Contains(diagnosticOfPublicKey, "1: 7") {
 		fmt.Println(diagnosticOfPublicKey)
 		t.Errorf("expected diagnostic to contain key type %q", diagnosticOfPublicKey)
 	} else {
@@ -123,7 +119,7 @@ func TestCoseDilithium(t *testing.T) {
 		defer f1.Close()
 		f1.Write(encodedSecretKey)
 	}
-	if !strings.Contains(diagnosticOfSecretKey, "1: -55555") {
+	if !strings.Contains(diagnosticOfSecretKey, "1: 7") {
 		fmt.Println(diagnosticOfSecretKey)
 		t.Errorf("expected diagnostic to contain key type %q", diagnosticOfSecretKey)
 	} else {
