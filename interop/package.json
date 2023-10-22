@@ -1,0 +1,14 @@
+{
+  "name": "interop",
+  "version": "1.0.0",
+  "description": "",
+  "main": "sanity.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Orie Steele",
+  "license": "ISC",
+  "dependencies": {
+    "@transmute/cose": "^0.0.17"
+  }
+}
