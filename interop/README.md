@@ -70,19 +70,24 @@
 ## Current
 
 ## Public Key
+```json 
 {
   "alg": "CRYDI2",
   "kty": "MLWE",
   "pub": "V53SIdVF...uvw2nuCQ"
 }
+```
 
 ## Private Key
+```json
 {
   "alg": "CRYDI2",
   "kty": "MLWE",
   "priv": "V53SIdVF...cDKLbsBY",
   "pub": "V53SIdVF...uvw2nuCQ"
 }
+```
+
 
 ## Protected Header 
 ```json 
