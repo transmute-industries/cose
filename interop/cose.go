@@ -203,67 +203,90 @@ func digestForCoseKey(content []byte, coseKey CoseKey) ([]byte, error) {
 	}
 }
 
+func getToBeSignedDigest(coseKey CoseKey, p ProtectedHeader, u UnprotectedHeader, c []byte) ([]byte, []byte, error) {
+	em, _ := cbor.CanonicalEncOptions().EncMode()
+	// make protected header
+	var protectedHeaderBytes []byte
+	if len(p) >= 0 {
+		protectedHeaderBytes, _ = em.Marshal(p)
+	}
+	// make eadd
+	var externalAAD []byte
+	var tbsArray = []interface{}{"Signature1", protectedHeaderBytes, externalAAD, c}
+	var tbsBytes, _ = cbor.Marshal(tbsArray)
+	tbsDigest, err := digestForCoseKey(tbsBytes, coseKey)
+	return tbsDigest, protectedHeaderBytes, err
+}
+
+func encodeCoseSign1(protectedHeaderBytes []byte, u UnprotectedHeader, c []byte, encodedSignature []byte) ([]byte, error) {
+	var coseSign1 = signedCWT{
+		Protected:   protectedHeaderBytes,
+		Unprotected: u,
+		Payload:     c,
+		Signature:   encodedSignature,
+	}
+	tags := cbor.NewTagSet()
+	tags.Add(
+		cbor.TagOptions{EncTag: cbor.EncTagRequired, DecTag: cbor.DecTagRequired},
+		reflect.TypeOf(signedCWT{}),
+		18)
+	em2, _ := cbor.EncOptions{}.EncModeWithTags(tags)
+	taggedCoseSign1, err := em2.Marshal(coseSign1)
+	return taggedCoseSign1, err
+}
+
+func removeShamefulDependencyOnASN1Parser(privateKey *ecdsa.PrivateKey, marshaledASN1Signature []byte) ([]byte, error) {
+	var unmarshaledASN1Signature struct {
+		R, S *big.Int
+	}
+	if _, err := asn1.Unmarshal(marshaledASN1Signature, &unmarshaledASN1Signature); err != nil {
+		return nil, err
+	}
+	encodedSignature, err := encodeECDSASignature(privateKey.Curve, unmarshaledASN1Signature.R, unmarshaledASN1Signature.S)
+	return encodedSignature, err
+}
+
 func CreateSign(coseKey CoseKey) CoseSign1Signer {
 	coseSign1SecretKeySigner := func(p ProtectedHeader, u UnprotectedHeader, c []byte) ([]byte, error) {
-		privateKey := coseKeyToEcdsaPrivateKey((coseKey))
-		em, _ := cbor.CanonicalEncOptions().EncMode()
-		// make protected header
-		var protectedHeaderBytes []byte
-		if len(p) >= 0 {
-			protectedHeaderBytes, _ = em.Marshal(p)
-		}
-		// make eadd
-		var externalAAD []byte
-		var tbsArray = []interface{}{"Signature1", protectedHeaderBytes, externalAAD, c}
-		var tbsBytes, _ = cbor.Marshal(tbsArray)
-		tbsDigest, _ := digestForCoseKey(tbsBytes, coseKey)
-		marshaledASN1Signature, err := privateKey.Sign(rand.Reader, tbsDigest, nil)
-		// TODO: unmarshal ASN1 ... fix cose structure...
-		var unmarshaledASN1Signature struct {
-			R, S *big.Int
-		}
-		// when your standard library forces you to use an ASN.1 parser...
-		if _, err := asn1.Unmarshal(marshaledASN1Signature, &unmarshaledASN1Signature); err != nil {
-			return nil, err
-		}
-		encodedSignature, _ := encodeECDSASignature(privateKey.Curve, unmarshaledASN1Signature.R, unmarshaledASN1Signature.S)
-		// create cose sign 1
-		var coseSign1 = signedCWT{
-			Protected:   protectedHeaderBytes,
-			Unprotected: u,
-			Payload:     c,
-			Signature:   encodedSignature,
-		}
-		tags := cbor.NewTagSet()
-		tags.Add(
-			cbor.TagOptions{EncTag: cbor.EncTagRequired, DecTag: cbor.DecTagRequired},
-			reflect.TypeOf(signedCWT{}),
-			18)
-		em2, _ := cbor.EncOptions{}.EncModeWithTags(tags)
-		taggedCoseSign1, _ := em2.Marshal(coseSign1)
-		return taggedCoseSign1, err
-	}
+		tbsDigest, protectedHeaderBytes, _ := getToBeSignedDigest(coseKey, p, u, c)
 
+		// this part changes with alg
+		privateKey := coseKeyToEcdsaPrivateKey(coseKey)
+		marshaledASN1Signature, _ := privateKey.Sign(rand.Reader, tbsDigest, nil)
+		encodedSignature, _ := removeShamefulDependencyOnASN1Parser(privateKey, marshaledASN1Signature)
+		// this part changes with alg
+
+		return encodeCoseSign1(protectedHeaderBytes, u, c, encodedSignature)
+	}
 	return coseSign1SecretKeySigner
+}
+
+func recoverTbsDigest(coseKey CoseKey, coseSign1 []byte) ([]byte, []byte, error) {
+	tags := cbor.NewTagSet()
+	tags.Add(
+		cbor.TagOptions{EncTag: cbor.EncTagRequired, DecTag: cbor.DecTagRequired},
+		reflect.TypeOf(signedCWT{}),
+		18)
+	dm, _ := cbor.DecOptions{}.DecModeWithTags(tags)
+	var decodedCoseSign1 signedCWT
+	dm.Unmarshal(coseSign1, &decodedCoseSign1)
+	var externalAAD []byte
+	var tbsArray = []interface{}{"Signature1", decodedCoseSign1.Protected, externalAAD, decodedCoseSign1.Payload}
+	var tbsBytes, _ = cbor.Marshal(tbsArray)
+	tbsDigest, err := digestForCoseKey(tbsBytes, coseKey)
+	return tbsDigest, decodedCoseSign1.Signature, err
 }
 
 func CreateVerify(coseKey CoseKey) CoseSign1Verifier {
 	coseSign1PublicKeyVerifier := func(coseSign1 []byte) bool {
-		tags := cbor.NewTagSet()
-		tags.Add(
-			cbor.TagOptions{EncTag: cbor.EncTagRequired, DecTag: cbor.DecTagRequired},
-			reflect.TypeOf(signedCWT{}),
-			18)
-		dm, _ := cbor.DecOptions{}.DecModeWithTags(tags)
-		var decodedCoseSign1 signedCWT
-		dm.Unmarshal(coseSign1, &decodedCoseSign1)
 		publicKey := coseKeyToEcdsaPublicKey(coseKey)
-		var externalAAD []byte
-		var tbsArray = []interface{}{"Signature1", decodedCoseSign1.Protected, externalAAD, decodedCoseSign1.Payload}
-		var tbsBytes, _ = cbor.Marshal(tbsArray)
-		tbsDigest, _ := digestForCoseKey(tbsBytes, coseKey)
-		r, s, _ := decodeECDSASignature(publicKey.Curve, decodedCoseSign1.Signature)
-		verification := ecdsa.Verify(publicKey, tbsDigest, r, s)
+		digest, signature, _ := recoverTbsDigest(coseKey, coseSign1)
+
+		// this part changes with alg
+		r, s, _ := decodeECDSASignature(publicKey.Curve, signature)
+		verification := ecdsa.Verify(publicKey, digest, r, s)
+		// this part changes with alg
+
 		return verification
 	}
 	return coseSign1PublicKeyVerifier

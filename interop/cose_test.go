@@ -46,7 +46,6 @@ func TestSigner(t *testing.T) {
 	secretKey := decodeSecretKey(cborEncodedSecretKey)
 
 	cborEncodedPublicKey, _ := ioutil.ReadFile("publicKey.cose")
-	// fmt.Println("cborEncodedPublicKey", cborEncodedPublicKey)
 	publicKey := decodePublicKey(cborEncodedPublicKey)
 
 	sign := CreateSign(secretKey)
