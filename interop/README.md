@@ -64,8 +64,8 @@
 
 # JOSE
 
-"alg": "CRYDI2" ✨ new
-"kty": "MLWE"   ✨ new
+- "alg": "CRYDI2" ✨ new
+- "kty": "MLWE"   ✨ new
 
 ## Current
 
