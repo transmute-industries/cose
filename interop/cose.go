@@ -12,6 +12,7 @@ import (
 	"math/big"
 	"reflect"
 
+	"github.com/cloudflare/circl/sign/dilithium"
 	"github.com/fxamacker/cbor/v2"
 )
 
@@ -114,32 +115,67 @@ func calculateCoseKeyThumbprint(coseKey CoseKey) ([]byte, error) {
 	return bs, err
 }
 
-func GenerateSecretKey() (CoseKey, error) {
-	privateKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
-	if err != nil {
-		fmt.Println(err)
+func generatePrivateKeyForAlg(alg int) (*ecdsa.PrivateKey, error) {
+	switch alg {
+	case -7:
+		privateKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+		return privateKey, err
+	case -35:
+		privateKey, err := ecdsa.GenerateKey(elliptic.P384(), rand.Reader)
+		return privateKey, err
+	case -36:
+		privateKey, err := ecdsa.GenerateKey(elliptic.P521(), rand.Reader)
+		return privateKey, err
+	default:
+		return nil, errors.New("Algorithm not supported")
 	}
-	coseKey := CoseKey{
-		1:  2,
-		3:  -7,
-		-1: 1,
-		-2: privateKey.X.Bytes(),
-		-3: privateKey.Y.Bytes(),
-		-4: privateKey.D.Bytes(),
+
+}
+
+func GenerateSecretKey(alg int) (CoseKey, error) {
+	var coseKey CoseKey
+	if alg == -55555 {
+		mode := dilithium.ModeByName("Dilithium2")
+		publicKey, privateKey, _ := mode.GenerateKey(rand.Reader)
+		coseKey = CoseKey{
+			1:  alg,
+			3:  alg,
+			-2: publicKey.Bytes(),
+			-4: privateKey.Bytes(),
+		}
+	} else {
+		privateKey, err := generatePrivateKeyForAlg(alg)
+		if err != nil {
+			fmt.Println(err)
+		}
+		coseKey = CoseKey{
+			1:  2,
+			3:  alg,
+			-1: 1,
+			-2: privateKey.X.Bytes(),
+			-3: privateKey.Y.Bytes(),
+			-4: privateKey.D.Bytes(),
+		}
+
 	}
 	ckt, err := calculateCoseKeyThumbprint(coseKey)
 	coseKey[2] = ckt
 	return coseKey, err
+
 }
 
 func PublicKey(coseKey CoseKey) CoseKey {
 	publicKey := CoseKey{
-		1:  coseKey[1],
-		2:  coseKey[2],
-		3:  coseKey[3],
-		-1: coseKey[-1],
-		-2: coseKey[-2],
-		-3: coseKey[-3],
+		1: coseKey[1],
+		2: coseKey[2],
+		3: coseKey[3],
+	}
+	if coseKey[3] == -55555 {
+		publicKey[-2] = coseKey[-2]
+	} else {
+		publicKey[-1] = coseKey[-1]
+		publicKey[-2] = coseKey[-2]
+		publicKey[-3] = coseKey[-3]
 	}
 	return publicKey
 }
@@ -203,7 +239,7 @@ func digestForCoseKey(content []byte, coseKey CoseKey) ([]byte, error) {
 	}
 }
 
-func getToBeSignedDigest(coseKey CoseKey, p ProtectedHeader, u UnprotectedHeader, c []byte) ([]byte, []byte, error) {
+func getToBeSignedDigest(coseKey CoseKey, p ProtectedHeader, u UnprotectedHeader, c []byte) ([]byte, []byte, []byte, error) {
 	em, _ := cbor.CanonicalEncOptions().EncMode()
 	// make protected header
 	var protectedHeaderBytes []byte
@@ -215,7 +251,7 @@ func getToBeSignedDigest(coseKey CoseKey, p ProtectedHeader, u UnprotectedHeader
 	var tbsArray = []interface{}{"Signature1", protectedHeaderBytes, externalAAD, c}
 	var tbsBytes, _ = cbor.Marshal(tbsArray)
 	tbsDigest, err := digestForCoseKey(tbsBytes, coseKey)
-	return tbsDigest, protectedHeaderBytes, err
+	return tbsDigest, tbsBytes, protectedHeaderBytes, err
 }
 
 func encodeCoseSign1(protectedHeaderBytes []byte, u UnprotectedHeader, c []byte, encodedSignature []byte) ([]byte, error) {
@@ -248,12 +284,21 @@ func removeShamefulDependencyOnASN1Parser(privateKey *ecdsa.PrivateKey, marshale
 
 func CreateSign(coseKey CoseKey) CoseSign1Signer {
 	coseSign1SecretKeySigner := func(p ProtectedHeader, u UnprotectedHeader, c []byte) ([]byte, error) {
-		tbsDigest, protectedHeaderBytes, _ := getToBeSignedDigest(coseKey, p, u, c)
+		tbsDigest, tbs, protectedHeaderBytes, _ := getToBeSignedDigest(coseKey, p, u, c)
 
+		var encodedSignature []byte
 		// this part changes with alg
-		privateKey := coseKeyToEcdsaPrivateKey(coseKey)
-		marshaledASN1Signature, _ := privateKey.Sign(rand.Reader, tbsDigest, nil)
-		encodedSignature, _ := removeShamefulDependencyOnASN1Parser(privateKey, marshaledASN1Signature)
+		if coseKey[3] == -55555 {
+			mode := dilithium.ModeByName("Dilithium2")
+
+			secretKey := mode.PrivateKeyFromBytes(coseKey[-4].([]byte))
+			encodedSignature = mode.Sign(secretKey, tbs)
+		} else {
+
+			privateKey := coseKeyToEcdsaPrivateKey(coseKey)
+			marshaledASN1Signature, _ := privateKey.Sign(rand.Reader, tbsDigest, nil)
+			encodedSignature, _ = removeShamefulDependencyOnASN1Parser(privateKey, marshaledASN1Signature)
+		}
 		// this part changes with alg
 
 		return encodeCoseSign1(protectedHeaderBytes, u, c, encodedSignature)
@@ -261,7 +306,7 @@ func CreateSign(coseKey CoseKey) CoseSign1Signer {
 	return coseSign1SecretKeySigner
 }
 
-func recoverTbsDigest(coseKey CoseKey, coseSign1 []byte) ([]byte, []byte, error) {
+func recoverTbsDigest(coseKey CoseKey, coseSign1 []byte) ([]byte, []byte, []byte, error) {
 	tags := cbor.NewTagSet()
 	tags.Add(
 		cbor.TagOptions{EncTag: cbor.EncTagRequired, DecTag: cbor.DecTagRequired},
@@ -274,20 +319,26 @@ func recoverTbsDigest(coseKey CoseKey, coseSign1 []byte) ([]byte, []byte, error)
 	var tbsArray = []interface{}{"Signature1", decodedCoseSign1.Protected, externalAAD, decodedCoseSign1.Payload}
 	var tbsBytes, _ = cbor.Marshal(tbsArray)
 	tbsDigest, err := digestForCoseKey(tbsBytes, coseKey)
-	return tbsDigest, decodedCoseSign1.Signature, err
+	return tbsDigest, tbsBytes, decodedCoseSign1.Signature, err
 }
 
 func CreateVerify(coseKey CoseKey) CoseSign1Verifier {
 	coseSign1PublicKeyVerifier := func(coseSign1 []byte) bool {
-		publicKey := coseKeyToEcdsaPublicKey(coseKey)
-		digest, signature, _ := recoverTbsDigest(coseKey, coseSign1)
-
+		digest, tbs, signature, _ := recoverTbsDigest(coseKey, coseSign1)
 		// this part changes with alg
-		r, s, _ := decodeECDSASignature(publicKey.Curve, signature)
-		verification := ecdsa.Verify(publicKey, digest, r, s)
+		if coseKey[3] == -55555 {
+			mode := dilithium.ModeByName("Dilithium2")
+			publicKey := mode.PublicKeyFromBytes(coseKey[-2].([]byte))
+			verification := mode.Verify(publicKey, tbs, signature)
+			return verification
+		} else {
+			publicKey := coseKeyToEcdsaPublicKey(coseKey)
+			r, s, _ := decodeECDSASignature(publicKey.Curve, signature)
+			verification := ecdsa.Verify(publicKey, digest, r, s)
+			return verification
+		}
 		// this part changes with alg
 
-		return verification
 	}
 	return coseSign1PublicKeyVerifier
 }

@@ -1,12 +1,14 @@
 package cose
 
 import (
+	"crypto/rand"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"strings"
 	"testing"
 
+	"github.com/cloudflare/circl/sign/dilithium"
 	"github.com/fxamacker/cbor/v2"
 )
 
@@ -17,7 +19,7 @@ func check(e error) {
 }
 
 func TestGenerateSecretKey(t *testing.T) {
-	secretKey, _ := GenerateSecretKey()
+	secretKey, _ := GenerateSecretKey(-7)
 	publicKey := PublicKey(secretKey)
 	encodedSecretKey, _ := EncodeCborBytes(secretKey)
 	encodedPublicKey, _ := EncodeCborBytes(publicKey)
@@ -41,7 +43,7 @@ func TestGenerateSecretKey(t *testing.T) {
 	}
 }
 
-func TestSigner(t *testing.T) {
+func TestSignAndVerify(t *testing.T) {
 	cborEncodedSecretKey, _ := ioutil.ReadFile("secretKey.cose")
 	secretKey := decodeSecretKey(cborEncodedSecretKey)
 
@@ -67,5 +69,67 @@ func TestSigner(t *testing.T) {
 
 	if !v {
 		t.Errorf("verification %t", v)
+	}
+}
+
+func TestDilithium(t *testing.T) {
+	message := []byte("fake")
+	mode := dilithium.ModeByName("Dilithium2")
+	publicKey, privateKey, _ := mode.GenerateKey(rand.Reader)
+	signature := mode.Sign(privateKey, message)
+	verified := mode.Verify(publicKey, message, signature)
+	if !verified {
+		t.Errorf("verification %t", verified)
+	}
+}
+
+func TestCoseDilithium(t *testing.T) {
+	// what should dilithium 2 be ?
+	dilithium2CoseAlg := -55555
+	secretKey, _ := GenerateSecretKey(dilithium2CoseAlg)
+	publicKey := PublicKey(secretKey)
+	encodedSecretKey, _ := EncodeCborBytes(secretKey)
+	encodedPublicKey, _ := EncodeCborBytes(publicKey)
+	diagnosticOfPublicKey, _ := cbor.Diagnose(encodedPublicKey)
+	diagnosticOfSecretKey, _ := cbor.Diagnose(encodedSecretKey)
+
+	sign := CreateSign(secretKey)
+
+	p := ProtectedHeader{1: -7}
+	u := UnprotectedHeader{}
+	c := []byte("fake")
+
+	s, _ := sign(p, u, c)
+
+	f1, err := os.Create("dilithium.sign1.cose")
+	check(err)
+	defer f1.Close()
+	f1.Write(s)
+
+	verify := CreateVerify(publicKey)
+
+	v := verify(s)
+
+	if !v {
+		t.Errorf("verification %t", v)
+	}
+
+	if !strings.Contains(diagnosticOfPublicKey, "1: -55555") {
+		fmt.Println(diagnosticOfPublicKey)
+		t.Errorf("expected diagnostic to contain key type %q", diagnosticOfPublicKey)
+	} else {
+		f1, err := os.Create("dilithium.secretKey.cose")
+		check(err)
+		defer f1.Close()
+		f1.Write(encodedSecretKey)
+	}
+	if !strings.Contains(diagnosticOfSecretKey, "1: -55555") {
+		fmt.Println(diagnosticOfSecretKey)
+		t.Errorf("expected diagnostic to contain key type %q", diagnosticOfSecretKey)
+	} else {
+		f2, err := os.Create("dilithium.publicKey.cose")
+		check(err)
+		defer f2.Close()
+		f2.Write(encodedPublicKey)
 	}
 }
