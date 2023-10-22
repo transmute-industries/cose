@@ -19,14 +19,20 @@
 ## Current
 
 ### Public Key
+
+~~~~ cbor-diag
 {                                   / COSE Key                      /
   1: 7,                             / Type                          /
   2: h'fac56e1c...ae984e0a',        / Identifier                    /
   3: -55555,                        / Algorithm                     /
   -14: h'7803c0f9...3bba7abd',      / Post quantum public key       /
 }
+~~~~
+
 
 ### Secret Key
+
+~~~~ cbor-diag
 {                                   / COSE Key                      /
   1: 7,                             / Type                          /
   2: h'fac56e1c...ae984e0a',        / Identifier                    /
@@ -34,6 +40,7 @@
   -13: h'7803c0f9...3f6e2c70',      / Post quantum private key      /
   -14: h'7803c0f9...3bba7abd',      / Post quantum public key       /
 }
+~~~~
 
 ### Envelope
 

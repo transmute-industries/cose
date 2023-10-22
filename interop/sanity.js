@@ -32,10 +32,14 @@ const makeDilithiumReadme = async () => {
 ## Current
 
 ### Public Key
+~~~~ cbor-diag
 ${publicKeyDiagnostic}
+~~~~
 
 ### Secret Key
+~~~~ cbor-diag
 ${secretKeyDiagnostic}
+~~~~
 
 ### Envelope
 
