@@ -46,17 +46,25 @@ func TestSigner(t *testing.T) {
 	secretKey := decodeSecretKey(cborEncodedSecretKey)
 
 	cborEncodedPublicKey, _ := ioutil.ReadFile("publicKey.cose")
+	// fmt.Println("cborEncodedPublicKey", cborEncodedPublicKey)
 	publicKey := decodePublicKey(cborEncodedPublicKey)
 
 	sign := CreateSign(secretKey)
 	verify := CreateVerify(publicKey)
 
 	p := ProtectedHeader{1: -7}
-	u := UnprotectedHeader{-22222: p}
+	u := UnprotectedHeader{}
 	c := []byte("fake")
 
 	s, _ := sign(p, u, c)
-	v := verify(s, c)
+
+	f1, err := os.Create("sign1.cose")
+	check(err)
+	defer f1.Close()
+	f1.Write(s)
+
+	// s must be made a cose sign 1
+	v := verify(s)
 
 	if !v {
 		t.Errorf("verification %t", v)
