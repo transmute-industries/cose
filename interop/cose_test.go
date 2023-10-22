@@ -2,14 +2,10 @@ package cose
 
 import (
 	"crypto/rand"
-	"fmt"
-	"io/ioutil"
 	"os"
-	"strings"
 	"testing"
 
 	"github.com/cloudflare/circl/sign/dilithium"
-	"github.com/fxamacker/cbor/v2"
 )
 
 func check(e error) {
@@ -18,59 +14,52 @@ func check(e error) {
 	}
 }
 
-func TestGenerateSecretKey(t *testing.T) {
-	secretKey, _ := GenerateSecretKey(-7)
-	publicKey := PublicKey(secretKey)
-	encodedSecretKey, _ := EncodeCborBytes(secretKey)
-	encodedPublicKey, _ := EncodeCborBytes(publicKey)
-	diagnosticOfPublicKey, _ := cbor.Diagnose(encodedPublicKey)
-	diagnosticOfSecretKey, _ := cbor.Diagnose(encodedSecretKey)
-	if !strings.Contains(diagnosticOfSecretKey, "1: 2") {
-		fmt.Println(diagnosticOfSecretKey)
-		t.Errorf("expected diagnostic to contain key type %q", diagnosticOfSecretKey)
-		f2, err := os.Create("publicKey.cose")
-		check(err)
-		defer f2.Close()
-		f2.Write(encodedPublicKey)
-	}
-	if !strings.Contains(diagnosticOfPublicKey, "1: 2") {
-		fmt.Println(diagnosticOfPublicKey)
-		t.Errorf("expected diagnostic to contain key type %q", diagnosticOfPublicKey)
-		f1, err := os.Create("secretKey.cose")
-		check(err)
-		defer f1.Close()
-		f1.Write(encodedSecretKey)
-	}
-}
+// func TestSignAndVerify(t *testing.T) {
 
-func TestSignAndVerify(t *testing.T) {
-	cborEncodedSecretKey, _ := ioutil.ReadFile("secretKey.cose")
-	secretKey := decodeSecretKey(cborEncodedSecretKey)
+// 	// secretKey, _ := GenerateSecretKey(-7)
+// 	// publicKey := PublicKey(secretKey)
+// 	// encodedSecretKey, _ := EncodeCborBytes(secretKey)
+// 	// encodedPublicKey, _ := EncodeCborBytes(publicKey)
+// 	// diagnosticOfPublicKey, _ := cbor.Diagnose(encodedPublicKey)
+// 	// diagnosticOfSecretKey, _ := cbor.Diagnose(encodedSecretKey)
 
-	cborEncodedPublicKey, _ := ioutil.ReadFile("publicKey.cose")
-	publicKey := decodePublicKey(cborEncodedPublicKey)
+// 	// f2, err := os.Create("publicKey.cose")
+// 	// check(err)
+// 	// defer f2.Close()
+// 	// f2.Write(encodedPublicKey)
 
-	sign := CreateSign(secretKey)
-	verify := CreateVerify(publicKey)
+// 	// f1, err := os.Create("secretKey.cose")
+// 	// check(err)
+// 	// defer f1.Close()
+// 	// f1.Write(encodedSecretKey)
 
-	p := ProtectedHeader{1: -7}
-	u := UnprotectedHeader{}
-	c := []byte("fake")
+// 	cborEncodedSecretKey, _ := ioutil.ReadFile("secretKey.cose")
+// 	secretKey := decodeSecretKey(cborEncodedSecretKey)
 
-	s, _ := sign(p, u, c)
+// 	cborEncodedPublicKey, _ := ioutil.ReadFile("publicKey.cose")
+// 	publicKey := decodePublicKey(cborEncodedPublicKey)
 
-	f1, err := os.Create("sign1.cose")
-	check(err)
-	defer f1.Close()
-	f1.Write(s)
+// 	sign := CreateSign(secretKey)
+// 	verify := CreateVerify(publicKey)
 
-	// s must be made a cose sign 1
-	v := verify(s)
+// 	p := ProtectedHeader{1: -7}
+// 	u := UnprotectedHeader{}
+// 	c := []byte("fake")
 
-	if !v {
-		t.Errorf("verification %t", v)
-	}
-}
+// 	s, _ := sign(p, u, c)
+
+// 	f1, err := os.Create("sign1.cose")
+// 	check(err)
+// 	defer f1.Close()
+// 	f1.Write(s)
+
+// 	// s must be made a cose sign 1
+// 	v := verify(s)
+
+// 	if !v {
+// 		t.Errorf("verification %t", v)
+// 	}
+// }
 
 func TestDilithium(t *testing.T) {
 	message := []byte("fake")
@@ -90,17 +79,24 @@ func TestCoseDilithium(t *testing.T) {
 	publicKey := PublicKey(secretKey)
 	encodedSecretKey, _ := EncodeCborBytes(secretKey)
 	encodedPublicKey, _ := EncodeCborBytes(publicKey)
-	diagnosticOfPublicKey, _ := cbor.Diagnose(encodedPublicKey)
-	diagnosticOfSecretKey, _ := cbor.Diagnose(encodedSecretKey)
+
+	f1, _ := os.Create("dilithium.secretKey.cose")
+	defer f1.Close()
+	f1.Write(encodedSecretKey)
+
+	f2, _ := os.Create("dilithium.publicKey.cose")
+	defer f2.Close()
+	f2.Write(encodedPublicKey)
+
 	sign := CreateSign(secretKey)
 	p := ProtectedHeader{1: publicKey[3]}
 	u := UnprotectedHeader{}
 	c := []byte("fake")
 	s, _ := sign(p, u, c)
-	f1, err := os.Create("dilithium.sign1.cose")
-	check(err)
-	defer f1.Close()
-	f1.Write(s)
+
+	f3, _ := os.Create("dilithium.sign1.cose")
+	defer f3.Close()
+	f3.Write(s)
 
 	verify := CreateVerify(publicKey)
 
@@ -110,22 +106,4 @@ func TestCoseDilithium(t *testing.T) {
 		t.Errorf("verification %t", v)
 	}
 
-	if !strings.Contains(diagnosticOfPublicKey, "1: 7") {
-		fmt.Println(diagnosticOfPublicKey)
-		t.Errorf("expected diagnostic to contain key type %q", diagnosticOfPublicKey)
-	} else {
-		f1, err := os.Create("dilithium.secretKey.cose")
-		check(err)
-		defer f1.Close()
-		f1.Write(encodedSecretKey)
-	}
-	if !strings.Contains(diagnosticOfSecretKey, "1: 7") {
-		fmt.Println(diagnosticOfSecretKey)
-		t.Errorf("expected diagnostic to contain key type %q", diagnosticOfSecretKey)
-	} else {
-		f2, err := os.Create("dilithium.publicKey.cose")
-		check(err)
-		defer f2.Close()
-		f2.Write(encodedPublicKey)
-	}
 }

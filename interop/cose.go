@@ -138,10 +138,10 @@ func GenerateSecretKey(alg int) (CoseKey, error) {
 		mode := dilithium.ModeByName("Dilithium2")
 		publicKey, privateKey, _ := mode.GenerateKey(rand.Reader)
 		coseKey = CoseKey{
-			1:  7,
-			3:  alg,
-			-2: publicKey.Bytes(),
-			-4: privateKey.Bytes(),
+			1:   7,
+			3:   alg,
+			-13: privateKey.Bytes(),
+			-14: publicKey.Bytes(),
 		}
 	} else {
 		privateKey, err := generatePrivateKeyForAlg(alg)
@@ -170,9 +170,9 @@ func PublicKey(coseKey CoseKey) CoseKey {
 		2: coseKey[2],
 		3: coseKey[3],
 	}
-	if coseKey[3] == -55555 {
-		publicKey[-2] = coseKey[-2]
-	} else {
+	if coseKey[1] == 7 { // kty PQC
+		publicKey[-14] = coseKey[-14]
+	} else { // kty EC2
 		publicKey[-1] = coseKey[-1]
 		publicKey[-2] = coseKey[-2]
 		publicKey[-3] = coseKey[-3]
@@ -288,10 +288,10 @@ func CreateSign(coseKey CoseKey) CoseSign1Signer {
 
 		var encodedSignature []byte
 		// this part changes with alg
-		if coseKey[3] == -55555 {
+		if coseKey[1] == 7 {
 			mode := dilithium.ModeByName("Dilithium2")
 
-			secretKey := mode.PrivateKeyFromBytes(coseKey[-4].([]byte))
+			secretKey := mode.PrivateKeyFromBytes(coseKey[-13].([]byte))
 			encodedSignature = mode.Sign(secretKey, tbs)
 		} else {
 
@@ -326,9 +326,9 @@ func CreateVerify(coseKey CoseKey) CoseSign1Verifier {
 	coseSign1PublicKeyVerifier := func(coseSign1 []byte) bool {
 		digest, tbs, signature, _ := recoverTbsDigest(coseKey, coseSign1)
 		// this part changes with alg
-		if coseKey[3] == -55555 {
+		if coseKey[1] == 7 {
 			mode := dilithium.ModeByName("Dilithium2")
-			publicKey := mode.PublicKeyFromBytes(coseKey[-2].([]byte))
+			publicKey := mode.PublicKeyFromBytes(coseKey[-14].([]byte))
 			verification := mode.Verify(publicKey, tbs, signature)
 			return verification
 		} else {

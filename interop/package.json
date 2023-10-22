@@ -9,6 +9,6 @@
   "author": "Orie Steele",
   "license": "ISC",
   "dependencies": {
-    "@transmute/cose": "^0.0.17"
+    "@transmute/cose": "file:.."
   }
 }
