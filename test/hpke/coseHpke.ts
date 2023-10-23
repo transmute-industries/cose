@@ -26,7 +26,7 @@ const directMode = {
   // todo: use jwks instead...
   encrypt: async (plaintext: Uint8Array, recipientPublic: PublicCoseKeyMap) => {
     const alg = recipientPublic.get(3) || -55555
-    const kid = recipientPublic.get(4)
+    const kid = recipientPublic.get(2)
     if (alg !== -55555) {
       throw new Error('Unsupported algorithm')
     }
@@ -47,10 +47,11 @@ const directMode = {
 
     const protectedHeaderMap = new Map();
     protectedHeaderMap.set(1, alg) // alg : TBD / restrict alg by recipient key /
-    protectedHeaderMap.set(4, kid) // kid : ...
+
     const encodedProtectedHeader = cbor.encode(protectedHeaderMap)
 
     const unprotectedHeaderMap = new Map();
+    unprotectedHeaderMap.set(4, kid) // kid : ...
     unprotectedHeaderMap.set(-22222, sender.enc) // https://datatracker.ietf.org/doc/html/draft-ietf-cose-hpke-07#section-3.1
 
     const external_aad = Buffer.from(new Uint8Array())
@@ -100,7 +101,7 @@ const indirectMode = {
   // todo: use jwks instead...
   encrypt: async (plaintext: Uint8Array, recipientPublic: PublicCoseKeyMap) => {
     const alg = recipientPublic.get(3) || -55555
-    const kid = recipientPublic.get(4)
+    const kid = recipientPublic.get(2)
     if (alg !== -55555) {
       throw new Error('Unsupported algorithm')
     }
@@ -135,7 +136,7 @@ const indirectMode = {
     unprotectedHeaderMap.set(-22222, sender.enc) // https://datatracker.ietf.org/doc/html/draft-ietf-cose-hpke-07#section-3.1
 
     unprotectedHeaderMap.set(4, kid) // kid : ...
-    unprotectedHeaderMap.set(5, iv) // https://datatracker.ietf.org/doc/html/rfc8152#appendix-C.4.1
+    unprotectedHeaderMap.set(5, Buffer.from(iv)) // https://datatracker.ietf.org/doc/html/rfc8152#appendix-C.4.1
 
     const key = await crypto.subtle.importKey('raw', cek, {
       name: "AES-GCM",
@@ -176,9 +177,8 @@ const indirectMode = {
     )
     const decoded = await cbor.decode(coseEnc)
     const [encodedProtectedHeader, encrypted_content, recipients] = decoded
-
     const recipientArray = recipients.find(([ph, uphm, encCek]: any) => {
-      return uphm.get(4) === recipientPrivate.get(3) // header.kid === privateKey.kid
+      return Buffer.from(uphm.get(4)).toString() === Buffer.from(recipientPrivate.get(2) as any).toString() // header.kid === privateKey.kid
     })
     const [ph, uphm, encCek] = recipientArray
     // why repeat protected header?

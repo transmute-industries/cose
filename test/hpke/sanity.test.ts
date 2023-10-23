@@ -140,11 +140,12 @@ See https://datatracker.ietf.org/doc/html/draft-ietf-cose-hpke-07#section-3.1.1
 
 ~~~~ cbor-diag
 [
-  h'A20139D90204F7', 
+  h'A10139D902', 
   {
-    -22222: h'04F9E269...051458AC'
+    4: h'746573742D6B65792D3432', 
+    -22222: h'048B1833...7D274594'
   }, 
-  h'4849CE69...E6982351'
+  h'A05D4B87...3E99A6F5'
 ]
 ~~~~
 
@@ -153,7 +154,21 @@ See https://datatracker.ietf.org/doc/html/draft-ietf-cose-hpke-07#section-3.1.1
 See https://datatracker.ietf.org/doc/html/draft-ietf-cose-hpke-07#section-3.1.2
 
 ~~~~ cbor-diag
-... todo
+[
+  h'A10139D902', / protected header /
+  h'4F1EE8FE6B430057B83500FDC807EE679E0FE59F34B462CAC4AA8A', / encrypted content /
+  [
+    [
+      h'A10139D902', / protected header (repeated why?) /
+      {
+        -22222: h'04E8A00C...273E9D83', 
+        4: h'746573742D6B65792D3432',  / recipient kid /
+        5: h'B0810758588B262C0492BE2D' / iv /
+      }, 
+      h'E4FC6B69...FF449CA1' / encrypted content encryption key /
+    ]
+  ]
+]
 ~~~~
 
   
