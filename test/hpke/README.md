@@ -27,8 +27,8 @@ Inspired by https://datatracker.ietf.org/doc/html/rfc7516#section-7.2.1
   "crv": "P-256",
   "alg": "HPKE-Base-P256-SHA256-AES128GCM",
   "kid": "test-key-42",
-  "x": "oqhllhz4-baJW1L_UqDxjLVgMoRXJ5Alfj40fD-2BnM",
-  "y": "0hPPe-G502BE_e_JUociO3xPiZBCQIWjxJOszxE5dVQ",
+  "x": "I-56LdxhSGHqJP-Kq9geT9K6raTe9Jao3oD2JEHhvQY",
+  "y": "bffCG9dOnJoKG3lNVs11RprI_FYFfTguwAkqZ9rzfS4",
   "use": "enc",
   "key_ops": [
     "deriveBits"
@@ -44,9 +44,9 @@ Inspired by https://datatracker.ietf.org/doc/html/rfc7516#section-7.2.1
   "crv": "P-256",
   "alg": "HPKE-Base-P256-SHA256-AES128GCM",
   "kid": "test-key-42",
-  "x": "oqhllhz4-baJW1L_UqDxjLVgMoRXJ5Alfj40fD-2BnM",
-  "y": "0hPPe-G502BE_e_JUociO3xPiZBCQIWjxJOszxE5dVQ",
-  "d": "oneFyqTlPPrf_RjnakaErkR_wmjtVNlleI-8zXjKLIc",
+  "x": "I-56LdxhSGHqJP-Kq9geT9K6raTe9Jao3oD2JEHhvQY",
+  "y": "bffCG9dOnJoKG3lNVs11RprI_FYFfTguwAkqZ9rzfS4",
+  "d": "txWSMYMJH1EqKz5veMoxmRCZH4g-92tYOEJOqPsiJ7I",
   "key_ops": [
     "deriveBits"
   ]
@@ -59,8 +59,8 @@ https://datatracker.ietf.org/doc/html/draft-rha-jose-hpke-encrypt-01#section-4.1
 
 ~~~~ json
 {
-  "protected": "eyJhbGciOiJIUEtFLUJhc2UtUDI1Ni1TSEEyNTYtQUVTMTI4R0NNIiwiZW5jIjoiQkIzM1NheGZ5UU4yOGp5YVdnWlc5aU1ueTZQdzR0b3A5VVRsbXMybERJSmVoUG51bXJJVlFNVXBySk1WYldMdmo4R1F6T2MzWVVuREJtRlFaeXZhV0hnIiwia2lkIjoidGVzdC1rZXktNDIifQ",
-  "ciphertext": "d6ey_nLzclQFSYCrr0djKtkgdjp5YiTeTG7z"
+  "protected": "eyJhbGciOiJIUEtFLUJhc2UtUDI1Ni1TSEEyNTYtQUVTMTI4R0NNIiwiZW5jIjoiQkpEVi00WGJrWUxmcE05UnNZZDdoY2g4STJWZEszWWFZYVBvQ1FZZENfelZleFV0Z1NDel9XLUpXMFc4elJyaUFjRmg3VjhVRHNqcFVXM01OU1d1QXNVIiwia2lkIjoidGVzdC1rZXktNDIifQ",
+  "ciphertext": "mXphyX1NlrBLtbS_xo21jMsO7tSeR-P8Yg7j"
 }
 ~~~~
 
@@ -75,13 +75,13 @@ https://datatracker.ietf.org/doc/html/draft-rha-jose-hpke-encrypt-01#section-4.1
     "recipients": [
       {
         "kid": "test-key-42",
-        "enc": "BO5OwgjG9OGQcjmktVxpPR7ZQW4VbgZCriYClTVZPxPiiqu-l-iFZFMkGgA-Ivnuo_VPWaiV5ZJBb15SYqGaZN8",
-        "encrypted_key": "sWjcksMGxC47UZdMEc45o2IfboZkreU3zjgyYeiDHCQ"
+        "enc": "BHxnDF4bWzoQeQ__rRUJ-4v89ZVphGbK-2te_PdcGMMxW5a8ARRNpsWAF3bTNF4w2hMTozwXCYl1EaEkMlZJ2NM",
+        "encrypted_key": "sgEoDPExIgpS6BNGaV2LLwi63QwnkDWKyYBqSrtHpfA"
       }
     ]
   },
-  "iv": "NawPVdYltkxpZHoK",
-  "ciphertext": "8dKQrzma2zAqzH37AB6n3e6IBnUMF7VyvspL"
+  "iv": "Zf70hrB_LxMA0RQ8",
+  "ciphertext": "-VAKR3tNcm3uafNnh2alIcrc5bIjdhFvWKzJ"
 }
 ~~~~
 
@@ -119,12 +119,49 @@ Enc_structure = [
 
 ## Public Key
 
-... todo
+~~~~ cbor-diag
+{                                   / COSE Key                      /
+  1: 2,                             / Type                          /
+  2: h'74657374...792d3432',        / Identifier                    /
+  3: TBD,                           / Algorithm                     /
+  -1: 1,                            / Curve                         /
+  -2: h'23ee7a2d...41e1bd06',       / x public key component        /
+  -3: h'6df7c21b...daf37d2e',       / y public key component        /
+}
+~~~~
 
 ## Private Key
 
-... todo
+~~~~ cbor-diag
+{                                   / COSE Key                      /
+  1: 2,                             / Type                          /
+  2: h'74657374...792d3432',        / Identifier                    /
+  3: TBD,                           / Algorithm                     /
+  -1: 1,                            / Curve                         /
+  -2: h'23ee7a2d...41e1bd06',       / x public key component        /
+  -3: h'6df7c21b...daf37d2e',       / y public key component        /
+  -4: h'b7159231...fb2227b2',       / d private key component       /
+}
+~~~~
 
-## Envelope
+## Single Recipient / One Layer Structure 
 
+See https://datatracker.ietf.org/doc/html/draft-ietf-cose-hpke-07#section-3.1.1
+
+~~~~ cbor-diag
+[
+  h'A20139D90204F7', 
+  {
+    -22222: h'04F9E269...051458AC'
+  }, 
+  h'4849CE69...E6982351'
+]
+~~~~
+
+## Multiple Recipients / Two Layer Structure
+
+See https://datatracker.ietf.org/doc/html/draft-ietf-cose-hpke-07#section-3.1.2
+
+~~~~ cbor-diag
 ... todo
+~~~~

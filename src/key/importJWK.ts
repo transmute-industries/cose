@@ -45,6 +45,14 @@ const jwkToCoseKey = (jwk: Record<string, unknown>): CoseKeyMap => {
         coseKey.set(coseKeyParam, typedArrayToBuffer(jose.base64url.decode(value as string)))
         break
       }
+      case 'use': {
+        // console.log('skipping JWK use property when importing as COSE Key')
+        break
+      }
+      case 'key_ops': {
+        // console.log('skipping JWK use property when importing as COSE Key')
+        break
+      }
       default: {
         throw new Error('Unsupported JWK param: ' + key)
       }

@@ -27,7 +27,7 @@ export const beautify = (coseKey: CoseKeyMap): string => {
         break
       }
       case 3: {
-        lines.push(addComment(`${indentSpaces}${key}: ${value},`, 'Algorithm'))
+        lines.push(addComment(`${indentSpaces}${key}: ${value || 'TBD'},`, 'Algorithm'))
         break
       }
       case -1: {
