@@ -36,9 +36,9 @@ it('sanity', async () => {
 
   const c4 = await cose.hpke.indirect.encrypt(m, k2.cosePublicKey)
   fs.writeFileSync('test/hpke/ct.multi.cose', c4)
-  // const d4 = await cose.hpke.indirect.decrypt(c4, k2.cosePrivateKey)
-  // const rpt4 = new TextDecoder().decode(d4)
-  // expect(rpt4).toBe(pt)
+  const d4 = await cose.hpke.indirect.decrypt(c4, k2.cosePrivateKey)
+  const rpt4 = new TextDecoder().decode(d4)
+  expect(rpt4).toBe(pt)
 
   const final = `
 # JOSE

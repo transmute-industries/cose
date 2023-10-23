@@ -121,27 +121,44 @@ const indirectMode = {
 
     const protectedHeaderMap = new Map();
     protectedHeaderMap.set(1, alg) // alg : TBD / restrict alg by recipient key /
-    protectedHeaderMap.set(4, kid) // kid : ...
+
     const encodedProtectedHeader = cbor.encode(protectedHeaderMap)
+
+    const external_aad = Buffer.from(new Uint8Array())
+    // not used?
+
+    // 16 for AES-128-GCM
+    const cek = crypto.randomBytes(16)
+    const iv = crypto.getRandomValues(new Uint8Array(12));
 
     const unprotectedHeaderMap = new Map();
     unprotectedHeaderMap.set(-22222, sender.enc) // https://datatracker.ietf.org/doc/html/draft-ietf-cose-hpke-07#section-3.1
 
-    const external_aad = Buffer.from(new Uint8Array())
-    const Enc_structure = ["Encrypt0", encodedProtectedHeader, external_aad]
-    // .... so we don't use this? ... confused.
+    unprotectedHeaderMap.set(4, kid) // kid : ...
+    unprotectedHeaderMap.set(5, iv) // https://datatracker.ietf.org/doc/html/rfc8152#appendix-C.4.1
+
+    const key = await crypto.subtle.importKey('raw', cek, {
+      name: "AES-GCM",
+    }, true, ["encrypt", "decrypt"])
+    const encrypted_content = await crypto.subtle.encrypt(
+      { name: "AES-GCM", iv: iv },
+      key,
+      plaintext,
+    );
 
     const aad = encodedProtectedHeader
-    const ciphertext = await sender.seal(plaintext, aad)
+    const encCEK = await sender.seal(cek, aad)
+
+    // why are we sending this same protected header to every recipient here?
+    const recipient = [encodedProtectedHeader, unprotectedHeaderMap, encCEK]
     return cbor.encode([
       encodedProtectedHeader,
-      unprotectedHeaderMap,
-      ciphertext
+      encrypted_content,
+      [recipient]
     ])
 
   },
   decrypt: async (coseEnc: ArrayBuffer, recipientPrivate: SecretCoseKeyMap) => {
-    const decoded = await cbor.decode(coseEnc)
     const alg = recipientPrivate.get(3) || -55555
     if (alg !== -55555) {
       throw new Error('Unsupported algorithm')
@@ -157,16 +174,31 @@ const indirectMode = {
       true,
       ['deriveBits'],
     )
+    const decoded = await cbor.decode(coseEnc)
+    const [encodedProtectedHeader, encrypted_content, recipients] = decoded
 
-    const [encodedProtectedHeader, unprotectedHeaderMap, ciphertext] = decoded
+    const recipientArray = recipients.find(([ph, uphm, encCek]: any) => {
+      return uphm.get(4) === recipientPrivate.get(3) // header.kid === privateKey.kid
+    })
+    const [ph, uphm, encCek] = recipientArray
+    // why repeat protected header?
     const aad = encodedProtectedHeader
-    const enc = unprotectedHeaderMap.get(-22222)
+    const enc = uphm.get(-22222)
+    const iv = uphm.get(5)
     const recipient = await suites[alg].createRecipientContext({
       recipientKey: privateKey, // rkp (CryptoKeyPair) is also acceptable.
       enc
     })
-    const pt = await recipient.open(ciphertext, aad)
-    return new Uint8Array(pt)
+    const cek = await recipient.open(encCek, aad)
+    const key = await crypto.subtle.importKey('raw', cek, {   //this is the algorithm options
+      name: "AES-GCM",
+    }, true, ["encrypt", "decrypt"])
+    const decrypted_content = await crypto.subtle.decrypt(
+      { name: "AES-GCM", iv: iv },
+      key,
+      encrypted_content,
+    );
+    return decrypted_content
   }
 }
 
