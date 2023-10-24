@@ -178,16 +178,16 @@ const indirectMode = {
     const encodedEnc = jose.base64url.encode(new Uint8Array(sender.enc))
 
     const encodedProtectedHeader = craftProtectedHeader({ alg })
-    const aad = jose.base64url.decode(encodedProtectedHeader)
+    const internal_aad = jose.base64url.decode(encodedProtectedHeader)
 
-    const ct = await sender.seal(cek, aad)
+    const encCEK = await sender.seal(cek, internal_aad)
 
     const unprotected = {
       recipients: [
         {
           kid: recipientPublicKeyJwk.kid,
           enc: encodedEnc,
-          encrypted_key: jose.base64url.encode(new Uint8Array(ct))
+          encrypted_key: jose.base64url.encode(new Uint8Array(encCEK))
         }
       ]
     }
