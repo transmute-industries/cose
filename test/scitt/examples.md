@@ -11,18 +11,18 @@ const diagnosticOfSecretKey = await cose.key.edn(secretCoseKey)
 ```
 
 ~~~~ text
-urn:ietf:params:oauth:ckt:sha-256:K61ZLN2R7_1IVZ9Fbkm0AJLKdHYi-Hj-c4rU3LPFJv8
+urn:ietf:params:oauth:ckt:sha-256:cpInDXPP6fdwdSMC11uPZ31JYoWPL_EqqakJXX_ZLJE
 ~~~~
 
 ~~~~ cbor-diag
 {                                   / COSE Key                      /
   1: 2,                             / Type                          /
-  2: h'31754f2d...66696159',        / Identifier                    /
+  2: h'4930714e...7163316b',        / Identifier                    /
   3: -7,                            / Algorithm                     /
   -1: 1,                            / Curve                         /
-  -2: h'ef03e2c9...091a4da1',       / x public key component        /
-  -3: h'5d5a53b1...b7942be1',       / y public key component        /
-  -4: h'6829a8df...d2b1d2c2',       / d private key component       /
+  -2: h'c5ee0e96...77b00ddc',       / x public key component        /
+  -3: h'10a3f1c2...580741d9',       / y public key component        /
+  -4: h'ba4d123d...bd9a527a',       / d private key component       /
 }
 ~~~~
 
@@ -35,17 +35,123 @@ const diagnosticOfPublicKey = await cose.key.edn(publicCoseKey)
 ```
 
 ~~~~ text
-urn:ietf:params:oauth:ckt:sha-256:K61ZLN2R7_1IVZ9Fbkm0AJLKdHYi-Hj-c4rU3LPFJv8
+urn:ietf:params:oauth:ckt:sha-256:cpInDXPP6fdwdSMC11uPZ31JYoWPL_EqqakJXX_ZLJE
 ~~~~
 
 ~~~~ cbor-diag
 {                                   / COSE Key                      /
   1: 2,                             / Type                          /
-  2: h'31754f2d...66696159',        / Identifier                    /
+  2: h'4930714e...7163316b',        / Identifier                    /
   3: -7,                            / Algorithm                     /
   -1: 1,                            / Curve                         /
-  -2: h'ef03e2c9...091a4da1',       / x public key component        /
-  -3: h'5d5a53b1...b7942be1',       / y public key component        /
+  -2: h'c5ee0e96...77b00ddc',       / x public key component        /
+  -3: h'10a3f1c2...580741d9',       / y public key component        /
+}
+~~~~
+
+## Issue Statement
+
+``` ts
+const statement = Buffer.from(JSON.stringify({
+  "spdxVersion": "SPDX-2.2",
+  "dataLicense": "CC0-1.0",
+  "SPDXID": "SPDXRef-DOCUMENT",
+  "name": "sbom-tool v0.1.2",
+  "documentNamespace": "https://sbom.microsoft/sbom-tool/v0.1.2/sxs6e--NIEC8xIJRVxEbQQ",
+  "creationInfo": {
+    "created": "2022-07-05T22:11:05Z",
+    "creators": [
+      "Organization: Microsoft",
+      "Tool: Microsoft.SBOMTool-0.0.0-alpha.0.13+build.37"
+    ]
+  },
+  "documentDescribes": [
+    "SPDXRef-RootPackage"
+  ],
+  "files": [
+    {
+      "fileName": "./sbom-tool-win-x64.exe",
+      "SPDXID": "SPDXRef-File--sbom-tool-win-x64.exe-E55F25E239D8D3572D75D5CDC5CA24899FD4993F",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "56624d8ab67ac0e323bcac0ae1ec0656f1721c6bb60640ecf9b30e861062aad5"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    }
+  ],
+  "packages": [
+    {
+      "name": "NuGet.Packaging",
+      "SPDXID": "SPDXRef-Package-F374B589EF5A916D768BC9BDD592C16C2436F9F20F975BCF9458F1FFB2E91504",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoFromFiles": [
+        "NOASSERTION"
+      ],
+      "licenseDeclared": "NOASSERTION",
+      "copyrightText": "NOASSERTION",
+      "versionInfo": "5.6.0",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE_MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:nuget/NuGet.Packaging%405.6.0"
+        }
+      ],
+      "supplier": "NOASSERTION"
+    },
+  ],
+  "externalDocumentRefs": [],
+  "relationships": [
+    {
+      "relationshipType": "DESCRIBES",
+      "relatedSpdxElement": "SPDXRef-RootPackage",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-Package-342BA5C11805FDDCAF3A2BF48BFDCAB5C0240793089F89196209A39C580902E6",
+      "spdxElementId": "SPDXRef-RootPackage"
+    },
+  ]
+}))
+const signedStatement = await cose.scitt.statement.issue({
+  iss: 'software.vendor.example',
+  sub: 'vendor.product.example',
+  cty: 'application/spdx+json',
+  secretCoseKey,
+  payload: statement
+})
+const diagnostic = await cose.scitt.receipt.edn(receipt)
+```
+
+~~~~ cbor-diag
+18(                                 / COSE Sign 1                   /
+    [
+      h'a4012603...6d706c65',       / Protected                     /
+      {},                           / Unprotected                   /
+      h'',                          / Detached payload              /
+      h'39a6f0d3...fce67a6c'        / Signature                     /
+    ]
+)
+~~~~
+
+~~~~ cbor-diag
+{                                   / Protected                     /
+  1: -7,                            / Algorithm                     /
+  3: application/spdx+json,         / Content type                  /
+  4: h'4930714e...7163316b',        / Key identifier                /
+  13: {                             / CWT Claims                    /
+    1: software.vendor.example,     / Issuer                        /
+    2: vendor.product.example,      / Subject                       /
+  }
 }
 ~~~~
 
@@ -59,8 +165,10 @@ const message3 = cose.cbor.encode({ 3: 3 })
 const message4 = cose.cbor.encode(['🔥', 4])
 const message5 = cose.cbor.encode({ five: '💀' })
 const entries = [message0, message1, message2, message3, message4, message5]
-const receipt = await cose.scitt.receipt.issue({
-  index: 4,
+entries.push(Buffer.from(signedStatement))
+const logIndex = entries.length - 1 // last entry is the signed statement
+receipt = await cose.scitt.receipt.issue({
+  index: logIndex,
   entries: entries,
   secretCoseKey
 })
@@ -70,16 +178,16 @@ const diagnostic = await cose.scitt.receipt.edn(receipt)
 ~~~~ cbor-diag
 18(                                 / COSE Sign 1                   /
     [
-      h'a3012604...392b6601',       / Protected                     /
+      h'a4012604...6d706c65',       / Protected                     /
       {                             / Unprotected                   /
-        -22222: {                   / Proofs                        /
-          1: [                      / Inclusion proofs (1)          /
-            h'83060482...32568964', / Inclusion proof 1             /
+        -222: {                     / Proofs                        /
+          -1: [                     / Inclusion proofs (1)          /
+            h'83080783...32568964', / Inclusion proof 1             /
           ]
         },
       },
       h'',                          / Detached payload              /
-      h'98192c9f...34b4191c'        / Signature                     /
+      h'2e34df43...8d74d55e'        / Signature                     /
     ]
 )
 ~~~~
@@ -87,18 +195,23 @@ const diagnostic = await cose.scitt.receipt.edn(receipt)
 ~~~~ cbor-diag
 {                                   / Protected                     /
   1: -7,                            / Algorithm                     /
-  4: h'31754f2d...66696159',        / Key identifier                /
-  -11111: 1                         / Verifiable data structure     /
+  4: h'4930714e...7163316b',        / Key identifier                /
+  -111: 1,                          / Verifiable Data Structure     /
+  13: {                             / CWT Claims                    /
+    1: transparency.vendor.example, / Issuer                        /
+    2: vendor.product.example,      / Subject                       /
+  }
 }
 ~~~~
 
 ~~~~ cbor-diag
 [                                   / Inclusion proof 1             /
-  6,                                / Tree size                     /
-  4,                                / Leaf index                    /
-  [                                 / Inclusion hashes (2)          /
-     h'aa1a3c19...15a276cc'         / Intermediate hash 1           /
-     h'0bdaaed3...32568964'         / Intermediate hash 2           /
+  8,                                / Tree size                     /
+  7,                                / Leaf index                    /
+  [                                 / Inclusion hashes (3)          /
+     h'2a8d7dfc...15d10b22'         / Intermediate hash 1           /
+     h'75f177fd...2e73a8ab'         / Intermediate hash 2           /
+     h'0bdaaed3...32568964'         / Intermediate hash 3           /
   ]
 ]
 ~~~~
@@ -106,8 +219,9 @@ const diagnostic = await cose.scitt.receipt.edn(receipt)
 ## Verify Receipt
 
 ``` ts
+const logIndex = entries.length - 1 // last entry is the signed statement
 const verificaton = await cose.scitt.receipt.verify({
-  entry: entries[4],
+  entry: entries[logIndex],
   receipt,
   publicCoseKey
 })
@@ -117,4 +231,81 @@ console.log({ verificaton })
 
 ~~~~ text
 { verificaton: true }
+~~~~
+
+## Transparent Statement
+
+``` ts
+const transparentStatement = await cose.scitt.statement.addReceipt({
+  statement: signedStatement,
+  receipt
+})
+```
+
+~~~~ cbor-diag
+18(                                 / COSE Sign 1                   /
+    [
+      h'a4012603...6d706c65',       / Protected                     /
+      {                             / Unprotected                   /
+        -333: [                     / Receipts (1)                  /
+          h'd284586c...8d74d55e'    / Receipt 1                     /
+        ]
+      },
+      h'',                          / Detached payload              /
+      h'39a6f0d3...fce67a6c'        / Signature                     /
+    ]
+)
+~~~~
+
+~~~~ cbor-diag
+{                                   / Protected                     /
+  1: -7,                            / Algorithm                     /
+  3: application/spdx+json,         / Content type                  /
+  4: h'4930714e...7163316b',        / Key identifier                /
+  13: {                             / CWT Claims                    /
+    1: software.vendor.example,     / Issuer                        /
+    2: vendor.product.example,      / Subject                       /
+  }
+}
+~~~~
+
+~~~~ cbor-diag
+18(                                 / COSE Sign 1                   /
+    [
+      h'a4012604...6d706c65',       / Protected                     /
+      {                             / Unprotected                   /
+        -222: {                     / Proofs                        /
+          -1: [                     / Inclusion proofs (1)          /
+            h'83080783...32568964', / Inclusion proof 1             /
+          ]
+        },
+      },
+      h'',                          / Detached payload              /
+      h'2e34df43...8d74d55e'        / Signature                     /
+    ]
+)
+~~~~
+
+~~~~ cbor-diag
+{                                   / Protected                     /
+  1: -7,                            / Algorithm                     /
+  4: h'4930714e...7163316b',        / Key identifier                /
+  -111: 1,                          / Verifiable Data Structure     /
+  13: {                             / CWT Claims                    /
+    1: transparency.vendor.example, / Issuer                        /
+    2: vendor.product.example,      / Subject                       /
+  }
+}
+~~~~
+
+~~~~ cbor-diag
+[                                   / Inclusion proof 1             /
+  8,                                / Tree size                     /
+  7,                                / Leaf index                    /
+  [                                 / Inclusion hashes (3)          /
+     h'2a8d7dfc...15d10b22'         / Intermediate hash 1           /
+     h'75f177fd...2e73a8ab'         / Intermediate hash 2           /
+     h'0bdaaed3...32568964'         / Intermediate hash 3           /
+  ]
+]
 ~~~~

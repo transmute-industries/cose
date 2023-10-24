@@ -4,9 +4,12 @@ import { bufferToTruncatedBstr } from './bufferToTruncatedBstr';
 
 import { beautifyCoseSign1 } from "./beautifyCoseSign1";
 
+import { default as tags } from '../../unprotectedHeader'
+
+
 export const beautifyReceipts = async (receipts: Buffer[]) => {
   const blocks = [
-    `${addComment(`        300: [`, `Receipts (${receipts.length})`)}
+    `${addComment(`        ${tags.scitt_receipt}: [`, `Receipts (${receipts.length})`)}
 ${receipts.map((receipt, i: number) => {
       const truncated = bufferToTruncatedBstr(receipt)
       return addComment(`          ${truncated}`, `Receipt ${i + 1}`)

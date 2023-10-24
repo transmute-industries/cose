@@ -1,1 +1,1 @@
-export type UnprotectedHeader = Map<number, string | number | object>
+export type UnprotectedHeader = Map<number | string, string | number | object>
