@@ -115,7 +115,7 @@ const indirectMode = {
       recipientPublicKey: publicKey,
     })
     const layer0ProtectedHeaderMap = new Map()
-    layer0ProtectedHeaderMap.set(1, 1) // A128GCM
+    layer0ProtectedHeaderMap.set(1, 1) // A128GCM / optional for HPKE, required for mixed key agreement? /
     const layer0EncodedProtectedHeader = cbor.encode(layer0ProtectedHeaderMap)
     const layer1ProtectedHeaderMap = new Map();
     layer1ProtectedHeaderMap.set(1, alg) // alg : TBD / restrict alg by recipient key /
