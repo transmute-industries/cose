@@ -150,38 +150,25 @@ const indirectMode = {
       true,
       [],
     )
-
     // 16 for AES-128-GCM
     const cek = crypto.randomBytes(16)
-
-    // TODO const ciphertext = ... AES-128-GCM(cek, message)
-
     const iv = crypto.getRandomValues(new Uint8Array(12));
-
     const key = await crypto.subtle.importKey('raw', cek, {   //this is the algorithm options
       name: "AES-GCM",
     }, true, ["encrypt", "decrypt"])
-
     const encrypted_content = await crypto.subtle.encrypt(
       { name: "AES-GCM", iv: iv },
       key,
       plaintext,
     );
-
-
     const ciphertext = jose.base64url.encode(new Uint8Array(encrypted_content))
-
     const sender = await suites[alg].createSenderContext({
       recipientPublicKey: publicKey,
     })
-
     const encodedEnc = jose.base64url.encode(new Uint8Array(sender.enc))
-
     const encodedProtectedHeader = craftProtectedHeader({ alg })
     const internal_aad = jose.base64url.decode(encodedProtectedHeader)
-
     const encCEK = await sender.seal(cek, internal_aad)
-
     const unprotected = {
       recipients: [
         {
@@ -216,21 +203,17 @@ const indirectMode = {
       true,
       ['deriveBits'],
     )
-    const aad = jose.base64url.decode(jwe.protected)
-    // const decodedUntrustedProtectedHeader = new TextDecoder().decode(aad)
-    // const parsedUntrustedProtectedHeader = JSON.parse(decodedUntrustedProtectedHeader)
-
+    const internal_aad = jose.base64url.decode(jwe.protected)
     const recipientObj = jwe.unprotected.recipients.find((r: any) => {
       return r.kid === privateKeyJwk.kid
     })
-
     const decodedEnc = jose.base64url.decode(recipientObj.enc)
     const recipient = await suites[alg].createRecipientContext({
       recipientKey: privateKey, // rkp (CryptoKeyPair) is also acceptable.
       enc: decodedEnc
     })
     const ct = jose.base64url.decode(recipientObj.encrypted_key)
-    const cek = await recipient.open(ct, aad)
+    const cek = await recipient.open(ct, internal_aad)
     const iv = jose.base64url.decode(jwe.iv)
     const key = await crypto.subtle.importKey('raw', cek, {   //this is the algorithm options
       name: "AES-GCM",

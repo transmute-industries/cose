@@ -44,16 +44,12 @@ const directMode = {
     const sender = await suites[alg].createSenderContext({
       recipientPublicKey: publicKey,
     })
-
     const protectedHeaderMap = new Map();
     protectedHeaderMap.set(1, alg) // alg : TBD / restrict alg by recipient key /
-
     const encodedProtectedHeader = cbor.encode(protectedHeaderMap)
-
     const unprotectedHeaderMap = new Map();
     unprotectedHeaderMap.set(4, kid) // kid : ...
     unprotectedHeaderMap.set(-22222, sender.enc) // https://datatracker.ietf.org/doc/html/draft-ietf-cose-hpke-07#section-3.1
-
     const external_aad = Buffer.from(new Uint8Array())
     const Enc_structure = ["Encrypt0", encodedProtectedHeader, external_aad]
     const internal_aad = cbor.encode(Enc_structure)
@@ -82,12 +78,10 @@ const directMode = {
       true,
       ['deriveBits'],
     )
-
     const [encodedProtectedHeader, unprotectedHeaderMap, ciphertext] = decoded
     const external_aad = Buffer.from(new Uint8Array())
     const Enc_structure = ["Encrypt0", encodedProtectedHeader, external_aad]
     const internal_aad = cbor.encode(Enc_structure)
-
     const enc = unprotectedHeaderMap.get(-22222)
     const recipient = await suites[alg].createRecipientContext({
       recipientKey: privateKey, // rkp (CryptoKeyPair) is also acceptable.
@@ -120,31 +114,20 @@ const indirectMode = {
     const sender = await suites[alg].createSenderContext({
       recipientPublicKey: publicKey,
     })
-
     const layer0ProtectedHeaderMap = new Map()
     layer0ProtectedHeaderMap.set(1, 1) // A128GCM
-
     const layer0EncodedProtectedHeader = cbor.encode(layer0ProtectedHeaderMap)
-
-
     const layer1ProtectedHeaderMap = new Map();
     layer1ProtectedHeaderMap.set(1, alg) // alg : TBD / restrict alg by recipient key /
-
     const layer1EncodedProtectedHeader = cbor.encode(layer1ProtectedHeaderMap)
-
     const external_aad = Buffer.from(new Uint8Array())
-    // not used?
-
     // 16 for AES-128-GCM
     const cek = crypto.randomBytes(16)
     const iv = crypto.getRandomValues(new Uint8Array(12));
-
     const unprotectedHeaderMap = new Map();
     unprotectedHeaderMap.set(-22222, sender.enc) // https://datatracker.ietf.org/doc/html/draft-ietf-cose-hpke-07#section-3.1
-
     unprotectedHeaderMap.set(4, kid) // kid : ...
     unprotectedHeaderMap.set(5, Buffer.from(iv)) // https://datatracker.ietf.org/doc/html/rfc8152#appendix-C.4.1
-
     const key = await crypto.subtle.importKey('raw', cek, {
       name: "AES-GCM",
     }, true, ["encrypt", "decrypt"])
@@ -153,12 +136,9 @@ const indirectMode = {
       key,
       plaintext,
     );
-
     const Enc_structure = ["Encrypt0", layer1EncodedProtectedHeader, external_aad]
-
     const internal_aad = cbor.encode(Enc_structure)
     const encCEK = await sender.seal(cek, internal_aad)
-
     const recipient = [layer1EncodedProtectedHeader, unprotectedHeaderMap, encCEK]
     return cbor.encode([
       layer0EncodedProtectedHeader,
@@ -189,7 +169,6 @@ const indirectMode = {
       return Buffer.from(uphm.get(4)).toString() === Buffer.from(recipientPrivate.get(2) as any).toString() // header.kid === privateKey.kid
     })
     const [layer1EncodedProtectedHeader, uphm, encCek] = recipientArray
-
     const external_aad = Buffer.from(new Uint8Array())
     const enc = uphm.get(-22222)
     const iv = uphm.get(5)
@@ -197,20 +176,14 @@ const indirectMode = {
       recipientKey: privateKey, // rkp (CryptoKeyPair) is also acceptable.
       enc
     })
-
     const Enc_structure = ["Encrypt0", layer1EncodedProtectedHeader, external_aad]
-
     const internal_aad = cbor.encode(Enc_structure)
     const cek = await recipient.open(encCek, internal_aad)
-
     const decodedLayer0Header = cbor.decode(layer0EncodedProtectedHeader)
-
     const layer0Alg = decodedLayer0Header.get(1)
-
     if (layer0Alg !== 1 /* "AES-GCM" */) {
       throw new Error('Unsupported layer 0 alg')
     }
-
     const key = await crypto.subtle.importKey('raw', cek, {   //this is the algorithm options
       name: "AES-GCM",
     }, true, ["encrypt", "decrypt"])
