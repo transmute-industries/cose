@@ -27,8 +27,8 @@ Inspired by https://datatracker.ietf.org/doc/html/rfc7516#section-7.2.1
   "crv": "P-256",
   "alg": "HPKE-Base-P256-SHA256-AES128GCM",
   "kid": "test-key-42",
-  "x": "v9WjH3_9biEyYEtx6BoVsEm892fU6I3XbtiI_Z4xmHQ",
-  "y": "Z8P90xAUdtWS1rEcph4z_iA6azhX-yiCTrw0CR_SAmw",
+  "x": "T18yeVUxksn5HHyY64psjkkBF6tHAN3BF7Ui5iypMyc",
+  "y": "eATL3G5Cdkmok20UtkpVEp3EGLjtifPkT9hfVN2QF7Y",
   "use": "enc",
   "key_ops": [
     "deriveBits"
@@ -44,9 +44,9 @@ Inspired by https://datatracker.ietf.org/doc/html/rfc7516#section-7.2.1
   "crv": "P-256",
   "alg": "HPKE-Base-P256-SHA256-AES128GCM",
   "kid": "test-key-42",
-  "x": "v9WjH3_9biEyYEtx6BoVsEm892fU6I3XbtiI_Z4xmHQ",
-  "y": "Z8P90xAUdtWS1rEcph4z_iA6azhX-yiCTrw0CR_SAmw",
-  "d": "De_RiPnWlHWWINY5Ow5_FtrHbE1drRKXa_8aSl8DWxU",
+  "x": "T18yeVUxksn5HHyY64psjkkBF6tHAN3BF7Ui5iypMyc",
+  "y": "eATL3G5Cdkmok20UtkpVEp3EGLjtifPkT9hfVN2QF7Y",
+  "d": "dc7GTBdM-RKynw9OzDQqfFi4E_qdqnB6KBSiTWNkWbY",
   "key_ops": [
     "deriveBits"
   ]
@@ -59,8 +59,8 @@ https://datatracker.ietf.org/doc/html/draft-rha-jose-hpke-encrypt-01#section-4.1
 
 ~~~~ json
 {
-  "protected": "eyJhbGciOiJIUEtFLUJhc2UtUDI1Ni1TSEEyNTYtQUVTMTI4R0NNIiwiZW5jIjoiQkNNT2Z4M2pvNTQ5elNJX3Y2aVdHMl9qSUJpaGhqaW95VlVxOEJZWklNYnFndDRYaG9VM0hseHVhaUNnRE55SXo3cVdMU01zR2pBYmJNeV9ZWXlzUlF3Iiwia2lkIjoidGVzdC1rZXktNDIifQ",
-  "ciphertext": "bkA9KB_cnSBYalCV8XBrBaEIkFWYHyrJHCwA"
+  "protected": "eyJhbGciOiJIUEtFLUJhc2UtUDI1Ni1TSEEyNTYtQUVTMTI4R0NNIiwiZW5jIjoiQkZZTlhZN2JCdXQ5YjZlNW5xdmdBLVhTTzZ0SFdGOFNmNjBUdG9wNHVzVHlHRVJka1pwTmxod1ZLU2hTRDJRMW5rZldHd0pQZ2pPVko1ZzA2blNzNzJRIiwia2lkIjoidGVzdC1rZXktNDIifQ",
+  "ciphertext": "dslJmGje6jSUHbRNno7PSBB8yMmG-8vsOEhk"
 }
 ~~~~
 
@@ -75,13 +75,13 @@ https://datatracker.ietf.org/doc/html/draft-rha-jose-hpke-encrypt-01#section-4.1
     "recipients": [
       {
         "kid": "test-key-42",
-        "enc": "BNFJG2WvuAOS1yaD2D-KAhOEUhdvQ1g6-SKb50hQKMyu455BkHk5-753LMOv1pMid0AZN9xuMBUJZCw1_qpUWlQ",
-        "encrypted_key": "LQHOvwT1jAFi0rbQXGtWZXwbVDOxl9z8LF27xHZ9TAs"
+        "enc": "BMyxiFpA1QDMXFUkMQWl5h2OlmLh9dupMEcQlAwb9TOoVBFvwM2HOrhoIKnCTaeqZ-fOZW6CidExGUWJ0IuhAmw",
+        "encrypted_key": "Pu8BCLmPKTy7owdvB3fzzh6wbsjwdwiM4dwzY9uOeWM"
       }
     ]
   },
-  "iv": "31UpLo3e71zG5Ocn",
-  "ciphertext": "BnSmv-tQ0F74Tih0br-to7gy9OT7Nn86ZQs8"
+  "iv": "Lz9eQLIYH1jLqCzK",
+  "ciphertext": "qpfht8SfENwt3vummHFNtU7s4kg3L9GilghX"
 }
 ~~~~
 
@@ -125,8 +125,8 @@ Enc_structure = [
   2: h'74657374...792d3432',        / Identifier                    /
   3: TBD,                           / Algorithm                     /
   -1: 1,                            / Curve                         /
-  -2: h'bfd5a31f...9e319874',       / x public key component        /
-  -3: h'67c3fdd3...1fd2026c',       / y public key component        /
+  -2: h'4f5f3279...2ca93327',       / x public key component        /
+  -3: h'7804cbdc...dd9017b6',       / y public key component        /
 }
 ~~~~
 
@@ -138,9 +138,9 @@ Enc_structure = [
   2: h'74657374...792d3432',        / Identifier                    /
   3: TBD,                           / Algorithm                     /
   -1: 1,                            / Curve                         /
-  -2: h'bfd5a31f...9e319874',       / x public key component        /
-  -3: h'67c3fdd3...1fd2026c',       / y public key component        /
-  -4: h'0defd188...5f035b15',       / d private key component       /
+  -2: h'4f5f3279...2ca93327',       / x public key component        /
+  -3: h'7804cbdc...dd9017b6',       / y public key component        /
+  -4: h'75cec64c...636459b6',       / d private key component       /
 }
 ~~~~
 

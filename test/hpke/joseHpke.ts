@@ -154,8 +154,6 @@ const indirectMode = {
     // 16 for AES-128-GCM
     const cek = crypto.randomBytes(16)
 
-
-
     // TODO const ciphertext = ... AES-128-GCM(cek, message)
 
     const iv = crypto.getRandomValues(new Uint8Array(12));

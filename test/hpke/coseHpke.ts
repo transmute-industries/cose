@@ -56,10 +56,8 @@ const directMode = {
 
     const external_aad = Buffer.from(new Uint8Array())
     const Enc_structure = ["Encrypt0", encodedProtectedHeader, external_aad]
-    // .... so we don't use this? ... confused.
-
-    const aad = encodedProtectedHeader
-    const ciphertext = await sender.seal(plaintext, aad)
+    const internal_aad = cbor.encode(Enc_structure)
+    const ciphertext = await sender.seal(plaintext, internal_aad)
     return cbor.encode([
       encodedProtectedHeader,
       unprotectedHeaderMap,
@@ -86,13 +84,16 @@ const directMode = {
     )
 
     const [encodedProtectedHeader, unprotectedHeaderMap, ciphertext] = decoded
-    const aad = encodedProtectedHeader
+    const external_aad = Buffer.from(new Uint8Array())
+    const Enc_structure = ["Encrypt0", encodedProtectedHeader, external_aad]
+    const internal_aad = cbor.encode(Enc_structure)
+
     const enc = unprotectedHeaderMap.get(-22222)
     const recipient = await suites[alg].createRecipientContext({
       recipientKey: privateKey, // rkp (CryptoKeyPair) is also acceptable.
       enc
     })
-    const pt = await recipient.open(ciphertext, aad)
+    const pt = await recipient.open(ciphertext, internal_aad)
     return new Uint8Array(pt)
   }
 }
@@ -120,10 +121,16 @@ const indirectMode = {
       recipientPublicKey: publicKey,
     })
 
-    const protectedHeaderMap = new Map();
-    protectedHeaderMap.set(1, alg) // alg : TBD / restrict alg by recipient key /
+    const layer0ProtectedHeaderMap = new Map()
+    layer0ProtectedHeaderMap.set(1, 1) // A128GCM
 
-    const encodedProtectedHeader = cbor.encode(protectedHeaderMap)
+    const layer0EncodedProtectedHeader = cbor.encode(layer0ProtectedHeaderMap)
+
+
+    const layer1ProtectedHeaderMap = new Map();
+    layer1ProtectedHeaderMap.set(1, alg) // alg : TBD / restrict alg by recipient key /
+
+    const layer1EncodedProtectedHeader = cbor.encode(layer1ProtectedHeaderMap)
 
     const external_aad = Buffer.from(new Uint8Array())
     // not used?
@@ -147,13 +154,14 @@ const indirectMode = {
       plaintext,
     );
 
-    const aad = encodedProtectedHeader
-    const encCEK = await sender.seal(cek, aad)
+    const Enc_structure = ["Encrypt0", layer1EncodedProtectedHeader, external_aad]
 
-    // why are we sending this same protected header to every recipient here?
-    const recipient = [encodedProtectedHeader, unprotectedHeaderMap, encCEK]
+    const internal_aad = cbor.encode(Enc_structure)
+    const encCEK = await sender.seal(cek, internal_aad)
+
+    const recipient = [layer1EncodedProtectedHeader, unprotectedHeaderMap, encCEK]
     return cbor.encode([
-      encodedProtectedHeader,
+      layer0EncodedProtectedHeader,
       encrypted_content,
       [recipient]
     ])
@@ -176,20 +184,33 @@ const indirectMode = {
       ['deriveBits'],
     )
     const decoded = await cbor.decode(coseEnc)
-    const [encodedProtectedHeader, encrypted_content, recipients] = decoded
+    const [layer0EncodedProtectedHeader, encrypted_content, recipients] = decoded
     const recipientArray = recipients.find(([ph, uphm, encCek]: any) => {
       return Buffer.from(uphm.get(4)).toString() === Buffer.from(recipientPrivate.get(2) as any).toString() // header.kid === privateKey.kid
     })
-    const [ph, uphm, encCek] = recipientArray
-    // why repeat protected header?
-    const aad = encodedProtectedHeader
+    const [layer1EncodedProtectedHeader, uphm, encCek] = recipientArray
+
+    const external_aad = Buffer.from(new Uint8Array())
     const enc = uphm.get(-22222)
     const iv = uphm.get(5)
     const recipient = await suites[alg].createRecipientContext({
       recipientKey: privateKey, // rkp (CryptoKeyPair) is also acceptable.
       enc
     })
-    const cek = await recipient.open(encCek, aad)
+
+    const Enc_structure = ["Encrypt0", layer1EncodedProtectedHeader, external_aad]
+
+    const internal_aad = cbor.encode(Enc_structure)
+    const cek = await recipient.open(encCek, internal_aad)
+
+    const decodedLayer0Header = cbor.decode(layer0EncodedProtectedHeader)
+
+    const layer0Alg = decodedLayer0Header.get(1)
+
+    if (layer0Alg !== 1 /* "AES-GCM" */) {
+      throw new Error('Unsupported layer 0 alg')
+    }
+
     const key = await crypto.subtle.importKey('raw', cek, {   //this is the algorithm options
       name: "AES-GCM",
     }, true, ["encrypt", "decrypt"])
