@@ -3,14 +3,14 @@
     [
       h'a3012604...392b6601',       / Protected                     /
       {                             / Unprotected                   /
-        -22222: {                   / Proofs                        /
-          1: [                      / Inclusion proofs (1)          /
+        -222: {                     / Proofs                        /
+          -1: [                     / Inclusion proofs (1)          /
             h'83040282...1f487bb1', / Inclusion proof 1             /
           ]
         },
       },
       h'',                          / Detached payload              /
-      h'affc058e...c340d8bc'        / Signature                     /
+      h'94d8f4a3...250f27b2'        / Signature                     /
     ]
 )
 ~~~~
@@ -19,7 +19,7 @@
 {                                   / Protected                     /
   1: -7,                            / Algorithm                     /
   4: h'68747470...6d706c65',        / Key identifier                /
-  -11111: 1                         / Verifiable data structure     /
+  -11111: 1,                        / Parameter                     /
 }
 ~~~~
 

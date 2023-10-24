@@ -8,11 +8,11 @@ const unprotectedHeaderTags = {
   counter_signature: 7,
 
   // will be registered in https://github.com/ietf-scitt/draft-steele-cose-merkle-tree-proofs
-  verifiable_data_structure: -11111, // int
-  verifiable_data_structure_proofs: -22222, // a map of ints to array of bstrs
+  verifiable_data_structure: -111, // 'TBD_1', // int
+  verifiable_data_structure_proofs: -222, //'TBD_2', // a map of ints to array of bstrs
 
   // will be registered in https://datatracker.ietf.org/doc/draft-birkholz-scitt-receipts/
-  scitt_receipt: -33333,
+  scitt_receipt: -333, //'TBD_3',
 }
 
 const unprotectedHeader = {
