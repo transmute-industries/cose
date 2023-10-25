@@ -11,18 +11,18 @@ const diagnosticOfSecretKey = await cose.key.edn(secretCoseKey)
 ```
 
 ~~~~ text
-urn:ietf:params:oauth:ckt:sha-256:WDwZjP-PW1-FGCMSTJle_OI5T9k06h2nKr1yFIznK4g
+urn:ietf:params:oauth:ckt:sha-256:kRn6MeMYk8AqCyXhSMp1s4fAMfvHNjJ8nvTHwNsrz98
 ~~~~
 
 ~~~~ cbor-diag
 {                                   / COSE Key                      /
   1: 2,                             / Type                          /
-  2: h'31526430...5666726f',        / Identifier                    /
+  2: h'43546a6e...41693549',        / Identifier                    /
   3: -7,                            / Algorithm                     /
   -1: 1,                            / Curve                         /
-  -2: h'96aecf6d...3c469103',       / x public key component        /
-  -3: h'423e7199...703dfaec',       / y public key component        /
-  -4: h'351a3741...2a293e73',       / d private key component       /
+  -2: h'3e6829b2...11fde9dd',       / x public key component        /
+  -3: h'1a51e32e...28548c08',       / y public key component        /
+  -4: h'acccf3bf...29f78d13',       / d private key component       /
 }
 ~~~~
 
@@ -35,17 +35,17 @@ const diagnosticOfPublicKey = await cose.key.edn(publicCoseKey)
 ```
 
 ~~~~ text
-urn:ietf:params:oauth:ckt:sha-256:WDwZjP-PW1-FGCMSTJle_OI5T9k06h2nKr1yFIznK4g
+urn:ietf:params:oauth:ckt:sha-256:kRn6MeMYk8AqCyXhSMp1s4fAMfvHNjJ8nvTHwNsrz98
 ~~~~
 
 ~~~~ cbor-diag
 {                                   / COSE Key                      /
   1: 2,                             / Type                          /
-  2: h'31526430...5666726f',        / Identifier                    /
+  2: h'43546a6e...41693549',        / Identifier                    /
   3: -7,                            / Algorithm                     /
   -1: 1,                            / Curve                         /
-  -2: h'96aecf6d...3c469103',       / x public key component        /
-  -3: h'423e7199...703dfaec',       / y public key component        /
+  -2: h'3e6829b2...11fde9dd',       / x public key component        /
+  -3: h'1a51e32e...28548c08',       / y public key component        /
 }
 ~~~~
 
@@ -138,7 +138,7 @@ const diagnostic = await cose.scitt.receipt.edn(receipt)
       h'a4012603...6d706c65',       / Protected                     /
       {},                           / Unprotected                   /
       h'',                          / Detached payload              /
-      h'49975934...f05f4c36'        / Signature                     /
+      h'1de11934...6fc2773f'        / Signature                     /
     ]
 )
 ~~~~
@@ -147,7 +147,7 @@ const diagnostic = await cose.scitt.receipt.edn(receipt)
 {                                   / Protected                     /
   1: -7,                            / Algorithm                     /
   3: application/spdx+json,         / Content type                  /
-  4: h'31526430...5666726f',        / Key identifier                /
+  4: h'43546a6e...41693549',        / Key identifier                /
   13: {                             / CWT Claims                    /
     1: software.vendor.example,     / Issuer                        /
     2: vendor.product.example,      / Subject                       /
@@ -203,7 +203,7 @@ const diagnostic = await cose.scitt.receipt.edn(receipt)
         },
       },
       h'',                          / Detached payload              /
-      h'19d1fcdd...76e594a5'        / Signature                     /
+      h'04378dc5...2e228d38'        / Signature                     /
     ]
 )
 ~~~~
@@ -211,7 +211,7 @@ const diagnostic = await cose.scitt.receipt.edn(receipt)
 ~~~~ cbor-diag
 {                                   / Protected                     /
   1: -7,                            / Algorithm                     /
-  4: h'31526430...5666726f',        / Key identifier                /
+  4: h'43546a6e...41693549',        / Key identifier                /
   -111: 1,                          / Verifiable Data Structure     /
   13: {                             / CWT Claims                    /
     1: transparency.vendor.example, / Issuer                        /
@@ -225,7 +225,7 @@ const diagnostic = await cose.scitt.receipt.edn(receipt)
   8,                                / Tree size                     /
   7,                                / Leaf index                    /
   [                                 / Inclusion hashes (3)          /
-     h'1d82d3ad...dd930417'         / Intermediate hash 1           /
+     h'48098ee3...beaa0ef8'         / Intermediate hash 1           /
      h'75f177fd...2e73a8ab'         / Intermediate hash 2           /
      h'0bdaaed3...32568964'         / Intermediate hash 3           /
   ]
@@ -265,11 +265,11 @@ const { entry, receipts } = cose.scitt.statement.getEntryReceipts({ transparentS
       h'a4012603...6d706c65',       / Protected                     /
       {                             / Unprotected                   /
         -333: [                     / Receipts (1)                  /
-          h'd284586c...76e594a5'    / Receipt 1                     /
+          h'd284586c...2e228d38'    / Receipt 1                     /
         ]
       },
       h'',                          / Detached payload              /
-      h'49975934...f05f4c36'        / Signature                     /
+      h'1de11934...6fc2773f'        / Signature                     /
     ]
 )
 ~~~~
@@ -278,7 +278,7 @@ const { entry, receipts } = cose.scitt.statement.getEntryReceipts({ transparentS
 {                                   / Protected                     /
   1: -7,                            / Algorithm                     /
   3: application/spdx+json,         / Content type                  /
-  4: h'31526430...5666726f',        / Key identifier                /
+  4: h'43546a6e...41693549',        / Key identifier                /
   13: {                             / CWT Claims                    /
     1: software.vendor.example,     / Issuer                        /
     2: vendor.product.example,      / Subject                       /
@@ -298,7 +298,7 @@ const { entry, receipts } = cose.scitt.statement.getEntryReceipts({ transparentS
         },
       },
       h'',                          / Detached payload              /
-      h'19d1fcdd...76e594a5'        / Signature                     /
+      h'04378dc5...2e228d38'        / Signature                     /
     ]
 )
 ~~~~
@@ -306,7 +306,7 @@ const { entry, receipts } = cose.scitt.statement.getEntryReceipts({ transparentS
 ~~~~ cbor-diag
 {                                   / Protected                     /
   1: -7,                            / Algorithm                     /
-  4: h'31526430...5666726f',        / Key identifier                /
+  4: h'43546a6e...41693549',        / Key identifier                /
   -111: 1,                          / Verifiable Data Structure     /
   13: {                             / CWT Claims                    /
     1: transparency.vendor.example, / Issuer                        /
@@ -320,7 +320,7 @@ const { entry, receipts } = cose.scitt.statement.getEntryReceipts({ transparentS
   8,                                / Tree size                     /
   7,                                / Leaf index                    /
   [                                 / Inclusion hashes (3)          /
-     h'1d82d3ad...dd930417'         / Intermediate hash 1           /
+     h'48098ee3...beaa0ef8'         / Intermediate hash 1           /
      h'75f177fd...2e73a8ab'         / Intermediate hash 2           /
      h'0bdaaed3...32568964'         / Intermediate hash 3           /
   ]

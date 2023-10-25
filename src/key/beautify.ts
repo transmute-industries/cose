@@ -54,6 +54,15 @@ export const beautify = (coseKey: CoseKeyMap): string => {
         lines.push(addComment(`${indentSpaces}${key}: ${bufferToTruncatedBstr(value)},`, 'Post quantum public key'))
         break
       }
+      case -66666: {
+        // x5c
+        lines.push(addComment(`${indentSpaces}${key}: [`, 'X.509 Certificate Chain'))
+        for (const cert of value as any) {
+          lines.push(addComment(`${indentSpaces}  ${bufferToTruncatedBstr(cert)},`, 'X.509 Certificate'))
+        }
+        lines.push(`${indentSpaces}]`)
+        break
+      }
       default: {
         throw new Error('Unsupported cose key value: ' + key)
       }
