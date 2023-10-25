@@ -319,12 +319,17 @@ it('compose transparent statement', async () => {
     statement: signedStatement,
     receipt
   })
+
+  const { entry, receipts } = cose.scitt.statement.getEntryReceipts({ transparentStatement })
+  expect(entry).toBeDefined()
+  expect(receipts.length).toBe(1)
   lines.push(`
 \`\`\` ts
 const transparentStatement = await cose.scitt.statement.addReceipt({
   statement: signedStatement,
   receipt
 })
+const { entry, receipts } = cose.scitt.statement.getEntryReceipts({ transparentStatement })
 \`\`\`
             `.trim())
   const diagnostic = await cose.scitt.receipt.edn(transparentStatement)
