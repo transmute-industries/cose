@@ -10,7 +10,7 @@
         },
       },
       h'',                          / Detached payload              /
-      h'8d6e3b55...8e2ee013'        / Signature                     /
+      h'8caf354a...5aa06095'        / Signature                     /
     ]
 )
 ~~~~

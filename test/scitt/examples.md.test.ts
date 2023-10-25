@@ -227,6 +227,31 @@ const diagnostic = await cose.scitt.receipt.edn(receipt)
   lines.push(diagnostic.trim())
 })
 
+
+it('verify signed statement', async () => {
+  const verificaton = await cose.scitt.statement.verify({
+    statement,
+    signedStatement,
+    publicCoseKey
+  })
+  expect(verificaton).toBe(true)
+  lines.push(`## Verify Signed Statement`)
+  lines.push(`
+\`\`\` ts
+const verificaton = await cose.scitt.statement.verify({
+  statement,
+  signedStatement,
+  publicCoseKey
+})
+console.log({ verificaton })
+\`\`\`
+            `.trim())
+  lines.push(`
+~~~~ text
+{ verificaton: true }
+~~~~`)
+})
+
 let receipt: ArrayBuffer
 it('issue receipt', async () => {
   lines.push(`## Issue Receipt`)
