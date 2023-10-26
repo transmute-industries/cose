@@ -337,6 +337,33 @@ const { entry, receipts } = cose.scitt.statement.getEntryReceipts({ transparentS
   lines.push(diagnostic.trim())
 })
 
+it('x5c example', async () => {
+  const publicKeyCose = cose.cbor.decode(fs.readFileSync('test/keys/x.509.user.publicKey.cose'))
+  const privateKeyCose = cose.cbor.decode(fs.readFileSync('test/keys/x.509.user.privateKey.cose'))
+  const statement = Buffer.from(JSON.stringify({ "hello": 'world' }))
+  const signature = await cose.scitt.statement.issue({
+    iss: 'urn:example:123',
+    sub: 'urn:example:456',
+    cty: 'application/json',
+    x5c: publicKeyCose.get(-66666), // there is no cose key tag x5c
+    payload: statement,
+    secretCoseKey: privateKeyCose
+  })
+
+  lines.push(`## X5C / X5T`)
+
+  const diag0 = await cose.key.edn(publicKeyCose)
+  lines.push(`
+  ~~~~ cbor-diag
+  ${diag0}
+  ~~~~
+      `.trim())
+
+  const diag1 = await cose.scitt.receipt.edn(signature)
+  lines.push(diag1)
+
+})
+
 afterAll(() => {
   const final = lines.join('\n\n')
   fs.writeFileSync('test/scitt/examples.md', final)

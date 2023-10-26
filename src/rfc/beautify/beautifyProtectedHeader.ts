@@ -29,11 +29,16 @@ export const beautifyProtectedHeader = async (data: Buffer | Uint8Array) => {
         } else {
           lines.push(addComment(`    ${claimKey}: ${claimValue},`, 'Claim'))
         }
-
       }
-      lines.push(`  }`)
+      lines.push(`  },`)
     } else if (label === tags.verifiable_data_structure) {
       lines.push(addComment(`  ${label}: ${value},`, 'Verifiable Data Structure'))
+    } else if (label === 33) {
+      lines.push(addComment(`  ${label}: [`, 'X.509 Certificate Chain'))
+      for (const cert of value) {
+        lines.push(addComment(`    ${bufferToTruncatedBstr(cert)},`, 'X.509 Certificate'))
+      }
+      lines.push(`  ],`)
     } else {
       lines.push(addComment(`  ${label}: ${value},`, 'Parameter'))
     }
