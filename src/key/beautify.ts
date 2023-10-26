@@ -9,6 +9,9 @@ const keySorter = (a: string, b: string) => {
   if (aTag >= 0 && bTag >= 0) {
     return aTag >= bTag ? 1 : -1
   } else {
+    if (a.includes('[')) { // hack for x5c / x5t
+      return 0
+    }
     return aTag >= bTag ? -1 : 1
   }
 }
@@ -60,7 +63,12 @@ export const beautify = (coseKey: CoseKeyMap): string => {
         for (const cert of value as any) {
           lines.push(addComment(`${indentSpaces}  ${bufferToTruncatedBstr(cert)},`, 'X.509 Certificate'))
         }
-        lines.push(`${indentSpaces}]`)
+        lines.push(`${indentSpaces}],`)
+        break
+      }
+      case -66667: {
+        // x5t (sha256)
+        lines.push(addComment(`${indentSpaces}${key}: ${bufferToTruncatedBstr(value)},`, 'X.509 SHA-256 Thumbprint'))
         break
       }
       default: {

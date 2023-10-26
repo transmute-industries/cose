@@ -52,6 +52,10 @@ const jwkToCoseKey = (jwk: Record<string, unknown>): CoseKeyMap => {
         coseKey.set(coseKeyParam, items)
         break
       }
+      case 'x5t#S256': {
+        coseKey.set(coseKeyParam, typedArrayToBuffer(jose.base64url.decode(value as any)))
+        break
+      }
       default: {
         throw new Error('Unsupported JWK param: ' + key)
       }

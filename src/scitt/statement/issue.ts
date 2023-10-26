@@ -10,18 +10,22 @@ export type RequestScittSignedStatement = {
   iss: string
   sub: string
   cty: string
+  x5c?: ArrayBuffer[]
   payload: ArrayBuffer
   signer?: any,
   secretCoseKey?: SecretCoseKeyMap
 }
 
-export const issue = async ({ iss, sub, cty, payload, signer, secretCoseKey }: RequestScittSignedStatement): Promise<ArrayBuffer> => {
+export const issue = async ({ iss, sub, cty, x5c, payload, signer, secretCoseKey }: RequestScittSignedStatement): Promise<ArrayBuffer> => {
   let receiptSigner = signer
   const protectedHeaderMap = new Map()
   const unprotectedHeaderMap = new Map()
   const cwtClaimsMap = new Map()
   cwtClaimsMap.set(1, iss)
   cwtClaimsMap.set(2, sub)
+  if (x5c) {
+    protectedHeaderMap.set(33, x5c) // x5chain https://www.iana.org/assignments/cose/cose.xhtml
+  }
   if (secretCoseKey) {
     const secretKeyJwk = await key.exportJWK(secretCoseKey as any)
     secretKeyJwk.alg = key.utils.algorithms.toJOSE.get(secretCoseKey.get(3) as number)

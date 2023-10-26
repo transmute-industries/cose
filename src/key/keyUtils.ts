@@ -16,8 +16,6 @@ const algorithms = {
   toCOSE: reverse(algsMap)
 }
 
-
-// Reserved for Private Use: less than -65536
 const paramsMap = new Map([
   [1, 'kty'],
   [2, 'kid'],
@@ -26,7 +24,9 @@ const paramsMap = new Map([
   [-2, 'x'],
   [-3, 'y'],
   [-4, 'd'],
-  [-66666, 'x5c']
+  // Reserved for Private Use: less than -65536
+  [-66666, 'x5c'],
+  [-66667, `x5t#S256`]
 ]);
 
 const parameters = {
