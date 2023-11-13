@@ -18,7 +18,7 @@ ${addComment(`18(`, 'COSE Sign 1')}
     [
 ${addComment(protectedHeaderLine, 'Protected')}
 ${unprotectedHeaderLines}
-${addComment(payloadLine, decoded.value[2].length > 0 ? `Payload` : `Detached payload`)}
+${addComment(payloadLine, decoded.value[2] !== null ? `Payload` : `Detached payload`)}
 ${addComment(signatureLine, 'Signature')}
     ]
 )

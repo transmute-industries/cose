@@ -1,7 +1,5 @@
 # JOSE
 
-🔥 Experimental 🔥
-
 Inspired by https://datatracker.ietf.org/doc/html/rfc7516#section-7.2.1
 
 ~~~~ text
@@ -29,8 +27,8 @@ Inspired by https://datatracker.ietf.org/doc/html/rfc7516#section-7.2.1
   "crv": "P-256",
   "alg": "HPKE-Base-P256-SHA256-AES128GCM",
   "kid": "test-key-42",
-  "x": "xXCWZk-jG9Tjd7M361sAEUi8JvKBxFIQgqhqkZa5cgs",
-  "y": "y-9jpXy5gNhxl9BV4smqO36MXRlbkrC3PvvjDOrpOgU",
+  "x": "BFzUqQqyrg5c3wkZN7Qs6shAxKRJXqlN2MVSoLprpmE",
+  "y": "UCvYMCp-7MCOl7JRRYUXdP7pPNRVFLrc2RZ_yLp5cqM",
   "use": "enc",
   "key_ops": [
     "deriveBits"
@@ -46,9 +44,9 @@ Inspired by https://datatracker.ietf.org/doc/html/rfc7516#section-7.2.1
   "crv": "P-256",
   "alg": "HPKE-Base-P256-SHA256-AES128GCM",
   "kid": "test-key-42",
-  "x": "xXCWZk-jG9Tjd7M361sAEUi8JvKBxFIQgqhqkZa5cgs",
-  "y": "y-9jpXy5gNhxl9BV4smqO36MXRlbkrC3PvvjDOrpOgU",
-  "d": "aRDKVwA-kwySgg9Z8jd9GsV-Kq2KoKlFAP79vbU7TRQ",
+  "x": "BFzUqQqyrg5c3wkZN7Qs6shAxKRJXqlN2MVSoLprpmE",
+  "y": "UCvYMCp-7MCOl7JRRYUXdP7pPNRVFLrc2RZ_yLp5cqM",
+  "d": "87Vyg4ckRaep1giXTZMG_q6dBISG3Wn8Whnp3HPn4fQ",
   "key_ops": [
     "deriveBits"
   ]
@@ -61,8 +59,8 @@ https://datatracker.ietf.org/doc/html/draft-rha-jose-hpke-encrypt-01#section-4.1
 
 ~~~~ json
 {
-  "protected": "eyJhbGciOiJIUEtFLUJhc2UtUDI1Ni1TSEEyNTYtQUVTMTI4R0NNIiwiZW5jIjoiQkIyaUpkbzZQM3ZYVVBQbUNoYlo5UjdUd0Y3dVEzTUpySWFIaWZUQnQyczZUZmgwNG9MWi1KOUtpX19QOXhfakZEYW9yZ0xwLUJUSG1OSi1FdmpVeHU4Iiwia2lkIjoidGVzdC1rZXktNDIifQ",
-  "ciphertext": "3239ChirVmfriy3SwN7m2SIpP8VgFoXxm1ZQ"
+  "protected": "eyJhbGciOiJIUEtFLUJhc2UtUDI1Ni1TSEEyNTYtQUVTMTI4R0NNIiwiZW5jIjoiQkpPV1JGNHRWZmVWZkRxUjBRTExuM2FlWnh6ankzeW8xaDNhVjNFbnh6LVpwamxJdzZWY3BLZ1lPR2FweEdOd2c1N0s5b3FFUnF0MjVqSWp0R0lJSFZzIiwia2lkIjoidGVzdC1rZXktNDIifQ",
+  "ciphertext": "-yHU4AniXNB1CvQqC-9whZ3vpsNiw_PqLlM_"
 }
 ~~~~
 
@@ -77,13 +75,13 @@ https://datatracker.ietf.org/doc/html/draft-rha-jose-hpke-encrypt-01#section-4.1
     "recipients": [
       {
         "kid": "test-key-42",
-        "enc": "BGKO2-0oc4lsB4u2E3IK9kI0AVNqyZpDwssNBEkDr1MYjSTS6yB9rS8A6hrRUdXVPzj05UiierQAMojlgySoJgk",
-        "encrypted_key": "RaN5dZFZR8Hr_CibbRiOPFkMW8ylue6lQ6T5cU7ZPtc"
+        "enc": "BLO6UFa5-QKzLAIbsy8I7J9hy6eD0X0iPxHkPLPWkAiPejDZQA89SlJQM9g-6scp3XjedYATtXC3xr71ot7DiXI",
+        "encrypted_key": "2i2tygZC46UFgwIZbdGoS2RGKgKOMDz1xWKWcw42Jrs"
       }
     ]
   },
-  "iv": "DojoBowHRBbJLffK",
-  "ciphertext": "Vuw6ChVjGp7inNdI-AiAQYq_3JvvqJUXAjjF"
+  "iv": "4TTSFSPxE3lsq7v_",
+  "ciphertext": "0tSAg4olHnqs5Cb_1e-M8OJdBaTY2ekQo7Ev"
 }
 ~~~~
 
@@ -127,8 +125,8 @@ Enc_structure = [
   2: h'74657374...792d3432',        / Identifier                    /
   3: TBD,                           / Algorithm                     /
   -1: 1,                            / Curve                         /
-  -2: h'c5709666...96b9720b',       / x public key component        /
-  -3: h'cbef63a5...eae93a05',       / y public key component        /
+  -2: h'045cd4a9...ba6ba661',       / x public key component        /
+  -3: h'502bd830...ba7972a3',       / y public key component        /
 }
 ~~~~
 
@@ -140,9 +138,9 @@ Enc_structure = [
   2: h'74657374...792d3432',        / Identifier                    /
   3: TBD,                           / Algorithm                     /
   -1: 1,                            / Curve                         /
-  -2: h'c5709666...96b9720b',       / x public key component        /
-  -3: h'cbef63a5...eae93a05',       / y public key component        /
-  -4: h'6910ca57...b53b4d14',       / d private key component       /
+  -2: h'045cd4a9...ba6ba661',       / x public key component        /
+  -3: h'502bd830...ba7972a3',       / y public key component        /
+  -4: h'f3b57283...73e7e1f4',       / d private key component       /
 }
 ~~~~
 
@@ -171,7 +169,7 @@ See https://datatracker.ietf.org/doc/html/draft-ietf-cose-hpke-07#section-3.1.2
   h'4F1EE8FE6B430057B83500FDC807EE679E0FE59F34B462CAC4AA8A', / encrypted content /
   [
     [
-      h'A10139D902', / protected header /
+      h'A10139D902', / protected header (repeated why?) /
       {
         -22222: h'04E8A00C...273E9D83', 
         4: h'746573742D6B65792D3432',  / recipient kid /
