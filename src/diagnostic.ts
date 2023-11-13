@@ -25,9 +25,14 @@ const alternateDiagnostic = async (
   let text = await cbor.diagnose(data, {
     separator: '\n'
   })
+  text = text.replace(/\{/gm, '{\n')
+  text = text.replace(/\}/gm, '\n}')
+
   text = text.replace(/\[/gm, '[\n')
-  text = text.replace(/, /gm, ',\n')
   text = text.replace(/\]/gm, '\n]')
+
+  text = text.replace(/, /gm, ',\n')
+
   return text
 
 }

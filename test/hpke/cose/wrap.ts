@@ -1,103 +1,16 @@
 import crypto from 'crypto'
 import * as cbor from 'cbor-web'
-import * as jose from 'jose'
-import { AeadId, KdfId, KemId, CipherSuite, } from 'hpke-js'
 
-import * as coseKey from '../../src/key'
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+import * as coseKey from '../../../src/key'
 
-type Suite0 = `HPKE-Base-P256-SHA256-AES128GCM`
-const Suite0 = 'HPKE-Base-P256-SHA256-AES128GCM' as Suite0 // aka APPLE-HPKE-v1
-
-type PublicCoseKeyMap = Map<string | number, string | number | Buffer | ArrayBuffer>
-
-type SecretCoseKeyMap = Map<string | number, string | number | Buffer | ArrayBuffer>
-
-
-const suites = {
-  [-55555]: new CipherSuite({
-    kem: KemId.DhkemP256HkdfSha256,
-    kdf: KdfId.HkdfSha256,
-    aead: AeadId.Aes128Gcm,
-  }),
-} as Record<number, CipherSuite>
-
-const directMode = {
-  // todo: use jwks instead...
-  encrypt: async (plaintext: Uint8Array, recipientPublic: PublicCoseKeyMap) => {
-    const alg = recipientPublic.get(3) || -55555
-    const kid = recipientPublic.get(2)
-    if (alg !== -55555) {
-      throw new Error('Unsupported algorithm')
-    }
-    const publicKeyJwk = coseKey.exportJWK(recipientPublic);
-    const publicKey = await crypto.subtle.importKey(
-      'jwk',
-      publicKeyJwk,
-      {
-        name: 'ECDH',
-        namedCurve: 'P-256',
-      },
-      true,
-      [],
-    )
-    const sender = await suites[alg].createSenderContext({
-      recipientPublicKey: publicKey,
-    })
-    const protectedHeaderMap = new Map();
-    protectedHeaderMap.set(1, alg) // alg : TBD / restrict alg by recipient key /
-    const encodedProtectedHeader = cbor.encode(protectedHeaderMap)
-    const unprotectedHeaderMap = new Map();
-    unprotectedHeaderMap.set(4, kid) // kid : ...
-    unprotectedHeaderMap.set(-22222, sender.enc) // https://datatracker.ietf.org/doc/html/draft-ietf-cose-hpke-07#section-3.1
-    const external_aad = Buffer.from(new Uint8Array())
-    const Enc_structure = ["Encrypt0", encodedProtectedHeader, external_aad]
-    const internal_aad = cbor.encode(Enc_structure)
-    const ciphertext = await sender.seal(plaintext, internal_aad)
-    return cbor.encode([
-      encodedProtectedHeader,
-      unprotectedHeaderMap,
-      ciphertext
-    ])
-
-  },
-  decrypt: async (coseEnc: ArrayBuffer, recipientPrivate: SecretCoseKeyMap) => {
-    const decoded = await cbor.decode(coseEnc)
-    const alg = recipientPrivate.get(3) || -55555
-    if (alg !== -55555) {
-      throw new Error('Unsupported algorithm')
-    }
-    const privateKeyJwk = coseKey.exportJWK(recipientPrivate) as any;
-    const privateKey = await crypto.subtle.importKey(
-      'jwk',
-      privateKeyJwk,
-      {
-        name: 'ECDH',
-        namedCurve: privateKeyJwk.crv,
-      },
-      true,
-      ['deriveBits'],
-    )
-    const [encodedProtectedHeader, unprotectedHeaderMap, ciphertext] = decoded
-    const external_aad = Buffer.from(new Uint8Array())
-    const Enc_structure = ["Encrypt0", encodedProtectedHeader, external_aad]
-    const internal_aad = cbor.encode(Enc_structure)
-    const enc = unprotectedHeaderMap.get(-22222)
-    const recipient = await suites[alg].createRecipientContext({
-      recipientKey: privateKey, // rkp (CryptoKeyPair) is also acceptable.
-      enc
-    })
-    const pt = await recipient.open(ciphertext, internal_aad)
-    return new Uint8Array(pt)
-  }
-}
+import { coseSuites, example_suite_label, encapsulated_key_header_label, PublicCoseKeyMap, SecretCoseKeyMap } from '../common'
 
 const indirectMode = {
   // todo: use jwks instead...
   encrypt: async (plaintext: Uint8Array, recipientPublic: PublicCoseKeyMap) => {
-    const alg = recipientPublic.get(3) || -55555
+    const alg = recipientPublic.get(3) || example_suite_label
     const kid = recipientPublic.get(2)
-    if (alg !== -55555) {
+    if (alg !== example_suite_label) {
       throw new Error('Unsupported algorithm')
     }
     const publicKeyJwk = coseKey.exportJWK(recipientPublic);
@@ -111,7 +24,7 @@ const indirectMode = {
       true,
       [],
     )
-    const sender = await suites[alg].createSenderContext({
+    const sender = await coseSuites[alg].createSenderContext({
       recipientPublicKey: publicKey,
     })
     const layer0ProtectedHeaderMap = new Map()
@@ -125,7 +38,7 @@ const indirectMode = {
     const cek = crypto.randomBytes(16)
     const iv = crypto.getRandomValues(new Uint8Array(12));
     const unprotectedHeaderMap = new Map();
-    unprotectedHeaderMap.set(-22222, sender.enc) // https://datatracker.ietf.org/doc/html/draft-ietf-cose-hpke-07#section-3.1
+    unprotectedHeaderMap.set(encapsulated_key_header_label, sender.enc) // https://datatracker.ietf.org/doc/html/draft-ietf-cose-hpke-07#section-3.1
     unprotectedHeaderMap.set(4, kid) // kid : ...
     unprotectedHeaderMap.set(5, Buffer.from(iv)) // https://datatracker.ietf.org/doc/html/rfc8152#appendix-C.4.1
     const key = await crypto.subtle.importKey('raw', cek, {
@@ -148,8 +61,8 @@ const indirectMode = {
 
   },
   decrypt: async (coseEnc: ArrayBuffer, recipientPrivate: SecretCoseKeyMap) => {
-    const alg = recipientPrivate.get(3) || -55555
-    if (alg !== -55555) {
+    const alg = recipientPrivate.get(3) || example_suite_label
+    if (alg !== example_suite_label) {
       throw new Error('Unsupported algorithm')
     }
     const privateKeyJwk = coseKey.exportJWK(recipientPrivate) as any;
@@ -170,9 +83,9 @@ const indirectMode = {
     })
     const [layer1EncodedProtectedHeader, uphm, encCek] = recipientArray
     const external_aad = Buffer.from(new Uint8Array())
-    const enc = uphm.get(-22222)
+    const enc = uphm.get(encapsulated_key_header_label)
     const iv = uphm.get(5)
-    const recipient = await suites[alg].createRecipientContext({
+    const recipient = await coseSuites[alg].createRecipientContext({
       recipientKey: privateKey, // rkp (CryptoKeyPair) is also acceptable.
       enc
     })
@@ -196,12 +109,4 @@ const indirectMode = {
   }
 }
 
-const hpke = {
-  Suite0,
-  suites,
-  coseKey,
-  direct: directMode,
-  indirect: indirectMode
-}
-const api = { hpke }
-export default api
+export default indirectMode

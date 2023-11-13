@@ -27,8 +27,8 @@ Inspired by https://datatracker.ietf.org/doc/html/rfc7516#section-7.2.1
   "crv": "P-256",
   "alg": "HPKE-Base-P256-SHA256-AES128GCM",
   "kid": "test-key-42",
-  "x": "BFzUqQqyrg5c3wkZN7Qs6shAxKRJXqlN2MVSoLprpmE",
-  "y": "UCvYMCp-7MCOl7JRRYUXdP7pPNRVFLrc2RZ_yLp5cqM",
+  "x": "2JStVF6Qnj_okF-tMh83YmHGloNG0YAUnUm7ft0EZNo",
+  "y": "LFkWC9_frlU71b1yNKc7f_eAsosKCOuwZ7-3GjTo3f8",
   "use": "enc",
   "key_ops": [
     "deriveBits"
@@ -44,9 +44,9 @@ Inspired by https://datatracker.ietf.org/doc/html/rfc7516#section-7.2.1
   "crv": "P-256",
   "alg": "HPKE-Base-P256-SHA256-AES128GCM",
   "kid": "test-key-42",
-  "x": "BFzUqQqyrg5c3wkZN7Qs6shAxKRJXqlN2MVSoLprpmE",
-  "y": "UCvYMCp-7MCOl7JRRYUXdP7pPNRVFLrc2RZ_yLp5cqM",
-  "d": "87Vyg4ckRaep1giXTZMG_q6dBISG3Wn8Whnp3HPn4fQ",
+  "x": "2JStVF6Qnj_okF-tMh83YmHGloNG0YAUnUm7ft0EZNo",
+  "y": "LFkWC9_frlU71b1yNKc7f_eAsosKCOuwZ7-3GjTo3f8",
+  "d": "aba0qLA8Usjo9-a_BCIQmpBpx0R8txWw9ghqfhNyU0o",
   "key_ops": [
     "deriveBits"
   ]
@@ -59,8 +59,8 @@ https://datatracker.ietf.org/doc/html/draft-rha-jose-hpke-encrypt-01#section-4.1
 
 ~~~~ json
 {
-  "protected": "eyJhbGciOiJIUEtFLUJhc2UtUDI1Ni1TSEEyNTYtQUVTMTI4R0NNIiwiZW5jIjoiQkpPV1JGNHRWZmVWZkRxUjBRTExuM2FlWnh6ankzeW8xaDNhVjNFbnh6LVpwamxJdzZWY3BLZ1lPR2FweEdOd2c1N0s5b3FFUnF0MjVqSWp0R0lJSFZzIiwia2lkIjoidGVzdC1rZXktNDIifQ",
-  "ciphertext": "-yHU4AniXNB1CvQqC-9whZ3vpsNiw_PqLlM_"
+  "protected": "eyJhbGciOiJIUEtFLUJhc2UtUDI1Ni1TSEEyNTYtQUVTMTI4R0NNIiwiZW5jIjoiQkZvRnhpQU5KdnBNZ0t5dUlOdU0wVzhJTF9vdnQxTy1QUkZHTVdPcFByR3gtWTMzMEFHSDlKTGYzNDNRVFZzSXJZV2F4bnc4WHdvaVFfd1I3dk0xdWxvIiwia2lkIjoidGVzdC1rZXktNDIifQ",
+  "ciphertext": "QlzHZ4vj-N2ZBqidEpzg6XKZ1tDGHsFntXnu"
 }
 ~~~~
 
@@ -75,13 +75,13 @@ https://datatracker.ietf.org/doc/html/draft-rha-jose-hpke-encrypt-01#section-4.1
     "recipients": [
       {
         "kid": "test-key-42",
-        "enc": "BLO6UFa5-QKzLAIbsy8I7J9hy6eD0X0iPxHkPLPWkAiPejDZQA89SlJQM9g-6scp3XjedYATtXC3xr71ot7DiXI",
-        "encrypted_key": "2i2tygZC46UFgwIZbdGoS2RGKgKOMDz1xWKWcw42Jrs"
+        "enc": "BGSJWJGMxKF2eihNqjLfTS9TNPq43QwKJvQCJVRyqIMree-kM_bcF475OU0mqvIwt-IPp9PDdIVd2eVIeK2TuUY",
+        "encrypted_key": "YwtPrU7hK7_j5QoFoWoyOaoAsVTAWCo8mtIrlU_XhaA"
       }
     ]
   },
-  "iv": "4TTSFSPxE3lsq7v_",
-  "ciphertext": "0tSAg4olHnqs5Cb_1e-M8OJdBaTY2ekQo7Ev"
+  "iv": "ZJ-tN_AYmy8TtGsx",
+  "ciphertext": "3_csqoDkolTdG3VgtG-sm7ZpuWYa0kG4_N8m"
 }
 ~~~~
 
@@ -117,33 +117,6 @@ Enc_structure = [
 
 ~~~~
 
-## Public Key
-
-~~~~ cbor-diag
-{                                   / COSE Key                      /
-  1: 2,                             / Type                          /
-  2: h'74657374...792d3432',        / Identifier                    /
-  3: TBD,                           / Algorithm                     /
-  -1: 1,                            / Curve                         /
-  -2: h'045cd4a9...ba6ba661',       / x public key component        /
-  -3: h'502bd830...ba7972a3',       / y public key component        /
-}
-~~~~
-
-## Private Key
-
-~~~~ cbor-diag
-{                                   / COSE Key                      /
-  1: 2,                             / Type                          /
-  2: h'74657374...792d3432',        / Identifier                    /
-  3: TBD,                           / Algorithm                     /
-  -1: 1,                            / Curve                         /
-  -2: h'045cd4a9...ba6ba661',       / x public key component        /
-  -3: h'502bd830...ba7972a3',       / y public key component        /
-  -4: h'f3b57283...73e7e1f4',       / d private key component       /
-}
-~~~~
-
 ## Single Recipient / One Layer Structure 
 
 See https://datatracker.ietf.org/doc/html/draft-ietf-cose-hpke-07#section-3.1.1
@@ -169,7 +142,7 @@ See https://datatracker.ietf.org/doc/html/draft-ietf-cose-hpke-07#section-3.1.2
   h'4F1EE8FE6B430057B83500FDC807EE679E0FE59F34B462CAC4AA8A', / encrypted content /
   [
     [
-      h'A10139D902', / protected header (repeated why?) /
+      h'A10139D902', / protected header /
       {
         -22222: h'04E8A00C...273E9D83', 
         4: h'746573742D6B65792D3432',  / recipient kid /
