@@ -1,5 +1,7 @@
 # JOSE
 
+🔥 Experimental 🔥
+
 Inspired by https://datatracker.ietf.org/doc/html/rfc7516#section-7.2.1
 
 ~~~~ text
@@ -169,7 +171,7 @@ See https://datatracker.ietf.org/doc/html/draft-ietf-cose-hpke-07#section-3.1.2
   h'4F1EE8FE6B430057B83500FDC807EE679E0FE59F34B462CAC4AA8A', / encrypted content /
   [
     [
-      h'A10139D902', / protected header (repeated why?) /
+      h'A10139D902', / protected header /
       {
         -22222: h'04E8A00C...273E9D83', 
         4: h'746573742D6B65792D3432',  / recipient kid /

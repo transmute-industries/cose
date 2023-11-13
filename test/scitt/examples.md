@@ -11,18 +11,18 @@ const diagnosticOfSecretKey = await cose.key.edn(secretCoseKey)
 ```
 
 ~~~~ text
-urn:ietf:params:oauth:ckt:sha-256:K61ZLN2R7_1IVZ9Fbkm0AJLKdHYi-Hj-c4rU3LPFJv8
+urn:ietf:params:oauth:ckt:sha-256:YFIh3DlkmZtCYV9c7iZdMRNh5SmFFr82mcZQyQZ5bpE
 ~~~~
 
 ~~~~ cbor-diag
 {                                   / COSE Key                      /
   1: 2,                             / Type                          /
-  2: h'31754f2d...66696159',        / Identifier                    /
+  2: h'4b4f6146...73684838',        / Identifier                    /
   3: -7,                            / Algorithm                     /
   -1: 1,                            / Curve                         /
-  -2: h'ef03e2c9...091a4da1',       / x public key component        /
-  -3: h'5d5a53b1...b7942be1',       / y public key component        /
-  -4: h'6829a8df...d2b1d2c2',       / d private key component       /
+  -2: h'fa13a4ec...6d487296',       / x public key component        /
+  -3: h'6b0baad6...83531295',       / y public key component        /
+  -4: h'88147dc6...85733c4e',       / d private key component       /
 }
 ~~~~
 
@@ -35,17 +35,17 @@ const diagnosticOfPublicKey = await cose.key.edn(publicCoseKey)
 ```
 
 ~~~~ text
-urn:ietf:params:oauth:ckt:sha-256:K61ZLN2R7_1IVZ9Fbkm0AJLKdHYi-Hj-c4rU3LPFJv8
+urn:ietf:params:oauth:ckt:sha-256:YFIh3DlkmZtCYV9c7iZdMRNh5SmFFr82mcZQyQZ5bpE
 ~~~~
 
 ~~~~ cbor-diag
 {                                   / COSE Key                      /
   1: 2,                             / Type                          /
-  2: h'31754f2d...66696159',        / Identifier                    /
+  2: h'4b4f6146...73684838',        / Identifier                    /
   3: -7,                            / Algorithm                     /
   -1: 1,                            / Curve                         /
-  -2: h'ef03e2c9...091a4da1',       / x public key component        /
-  -3: h'5d5a53b1...b7942be1',       / y public key component        /
+  -2: h'fa13a4ec...6d487296',       / x public key component        /
+  -3: h'6b0baad6...83531295',       / y public key component        /
 }
 ~~~~
 
@@ -79,7 +79,7 @@ const diagnostic = await cose.scitt.receipt.edn(receipt)
         },
       },
       h'',                          / Detached payload              /
-      h'98192c9f...34b4191c'        / Signature                     /
+      h'1f5d76a4...28479338'        / Signature                     /
     ]
 )
 ~~~~
@@ -87,7 +87,7 @@ const diagnostic = await cose.scitt.receipt.edn(receipt)
 ~~~~ cbor-diag
 {                                   / Protected                     /
   1: -7,                            / Algorithm                     /
-  4: h'31754f2d...66696159',        / Key identifier                /
+  4: h'4b4f6146...73684838',        / Key identifier                /
   -11111: 1                         / Verifiable data structure     /
 }
 ~~~~
