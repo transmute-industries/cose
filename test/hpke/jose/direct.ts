@@ -27,14 +27,16 @@ const directMode = {
     })
     const encodedEnc = jose.base64url.encode(new Uint8Array(sender.enc))
 
-    const encodedProtectedHeader = craftProtectedHeader({ alg, enc: encodedEnc, kid: recipientPublicKeyJwk.kid })
+    const encodedProtectedHeader = craftProtectedHeader({ alg })
     const aad = jose.base64url.decode(encodedProtectedHeader)
 
     // todo: generate content encryption key
     const ct = await sender.seal(plaintext, aad)
     const ciphertext = jose.base64url.encode(new Uint8Array(ct))
+    const unprotectedHeader = { kid: recipientPublicKeyJwk.kid, encapsulated_key: encodedEnc }
     return {
       protected: encodedProtectedHeader,
+      unprotected: jose.base64url.encode(JSON.stringify(unprotectedHeader)),
       ciphertext,
     }
   },
@@ -58,9 +60,9 @@ const directMode = {
     )
 
     const aad = jose.base64url.decode(jwe.protected)
-    const decodedUntrustedProtectedHeader = new TextDecoder().decode(aad)
-    const parsedUntrustedProtectedHeader = JSON.parse(decodedUntrustedProtectedHeader)
-    const decodedEnc = jose.base64url.decode(parsedUntrustedProtectedHeader.enc)
+    const unprotected = JSON.parse(jose.base64url.decode(jwe.unprotected).toString())
+
+    const decodedEnc = jose.base64url.decode(unprotected.encapsulated_key)
     const recipient = await joseSuites[alg].createRecipientContext({
       recipientKey: privateKey, // rkp (CryptoKeyPair) is also acceptable.
       enc: decodedEnc

@@ -4,7 +4,7 @@ import * as cbor from 'cbor-web'
 import * as coseKey from '../../../src/key'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 
-import { coseSuites, example_suite_label, encapsulated_key_header_label, PublicCoseKeyMap, SecretCoseKeyMap } from '../common'
+import { COSE_EncryptTag, coseSuites, example_suite_label, encapsulated_key_header_label, PublicCoseKeyMap, SecretCoseKeyMap } from '../common'
 
 
 const directMode = {
@@ -15,6 +15,7 @@ const directMode = {
     if (alg !== example_suite_label) {
       throw new Error('Unsupported algorithm')
     }
+    recipientPublic.delete(2) // prevent export issue
     const publicKeyJwk = coseKey.exportJWK(recipientPublic);
     const publicKey = await crypto.subtle.importKey(
       'jwk',
@@ -39,17 +40,16 @@ const directMode = {
     const Enc_structure = ["Encrypt0", encodedProtectedHeader, external_aad]
     const internal_aad = cbor.encode(Enc_structure)
     const ciphertext = await sender.seal(plaintext, internal_aad)
-    return cbor.encode([
-      encodedProtectedHeader,
-      unprotectedHeaderMap,
-      ciphertext
-    ])
-
-    // cbor.encodeAsync(new Tagged(Sign1Tag, coseSign1Structure), { canonical: true })
-
+    const coseEncrypt = [
+      encodedProtectedHeader, // protected header
+      unprotectedHeaderMap, // unprotected header
+      ciphertext // cipher text
+    ]
+    return cbor.encodeAsync(new cbor.Tagged(COSE_EncryptTag, coseEncrypt), { canonical: true })
   },
   decrypt: async (coseEnc: ArrayBuffer, recipientPrivate: SecretCoseKeyMap) => {
-    const decoded = await cbor.decode(coseEnc)
+    const decodedTagged = await cbor.decode(coseEnc)
+    const decoded = decodedTagged.value
     const alg = recipientPrivate.get(3) || example_suite_label
     if (alg !== example_suite_label) {
       throw new Error('Unsupported algorithm')

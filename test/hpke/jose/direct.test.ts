@@ -10,6 +10,7 @@ it('sanity', async () => {
   const m = new TextEncoder().encode(pt)
 
   const c = await direct.encrypt(m, k.publicKeyJwk)
+  // console.log(c)
   const d = await direct.decrypt(c, k.privateKeyJwk)
   const rpt = new TextDecoder().decode(d)
   expect(rpt).toBe(pt)

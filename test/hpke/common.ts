@@ -11,6 +11,9 @@ export type SecretCoseKeyMap = Map<string | number, string | number | Buffer | A
 export const encapsulated_key_header_label = -22222;
 export const example_suite_label = -55555;
 
+
+export const COSE_EncryptTag = 96
+
 const suite0 = new CipherSuite({
   kem: KemId.DhkemP256HkdfSha256,
   kdf: KdfId.HkdfSha256,
@@ -20,8 +23,6 @@ const suite0 = new CipherSuite({
 export const coseSuites = {
   [example_suite_label]: suite0,
 } as Record<number, CipherSuite>
-
-
 
 export const joseSuites = {
   [Suite0]: suite0,
