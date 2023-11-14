@@ -1,16 +1,16 @@
 ~~~~ cbor-diag
 18(                                 / COSE Sign 1                   /
     [
-      h'a3012604...392b6601',       / Protected                     /
+      h'a3012604...65386e01',       / Protected                     /
       {                             / Unprotected                   /
-        -22222: {                   / Proofs                        /
-          1: [                      / Inclusion proofs (1)          /
+        -222: {                     / Proofs                        /
+          -1: [                     / Inclusion proofs (1)          /
             h'83040282...1f487bb1', / Inclusion proof 1             /
           ]
         },
       },
-      nil,                          / Detached payload              /
-      h'0f0f7eff...f1f5b993'        / Signature                     /
+      h'',                          / Detached payload              /
+      h'b89d6787...619dfa8c'        / Signature                     /
     ]
 )
 ~~~~
@@ -19,7 +19,7 @@
 {                                   / Protected                     /
   1: -7,                            / Algorithm                     /
   4: h'68747470...6d706c65',        / Key identifier                /
-  -11111: 1                         / Verifiable data structure     /
+  -111: 1,                          / Verifiable Data Structure     /
 }
 ~~~~
 

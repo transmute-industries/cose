@@ -15,6 +15,10 @@
 
 ## Usage
 
+🔥 This package is not stable or suitable for product use cases 🚧
+
+This package is mostly developed to support various COSE related IETF drafts.
+
 ```bash
 npm install '@transmute/cose'
 ```

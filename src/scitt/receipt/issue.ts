@@ -16,6 +16,8 @@ import { SecretCoseKeyMap } from '../../key/types'
 import getSigner from "../../lib/signer"
 
 export type RequestScittReceipt = {
+  iss: string
+  sub: string
   index: number
   entries?: ArrayBuffer[]
   leaves?: Uint8Array[]
@@ -24,7 +26,7 @@ export type RequestScittReceipt = {
   secretCoseKey?: SecretCoseKeyMap
 }
 
-export const issue = async ({ index, entries, leaves, signer, secretCoseKey }: RequestScittReceipt): Promise<ArrayBuffer> => {
+export const issue = async ({ iss, sub, index, entries, leaves, signer, secretCoseKey }: RequestScittReceipt): Promise<ArrayBuffer> => {
   let treeLeaves = leaves
   if (entries) {
     treeLeaves = entries.map((entry: ArrayBuffer) => {
@@ -41,12 +43,16 @@ export const issue = async ({ index, entries, leaves, signer, secretCoseKey }: R
   )
   let receiptSigner = signer
   const protectedHeaderMap = new Map()
+  const cwtClaimsMap = new Map()
+  cwtClaimsMap.set(1, iss)
+  cwtClaimsMap.set(2, sub)
   if (secretCoseKey) {
     const secretKeyJwk = await key.exportJWK(secretCoseKey as any)
     secretKeyJwk.alg = key.utils.algorithms.toJOSE.get(secretCoseKey.get(3) as number)
     protectedHeaderMap.set(1, secretCoseKey.get(3) as number) // set alg from the restricted key
     protectedHeaderMap.set(4, secretCoseKey.get(2) as number) // set kid from the restricted key
     protectedHeaderMap.set(unprotectedHeader.verifiable_data_structure, 1) // using RFC9162 verifiable data structure
+    protectedHeaderMap.set(13, cwtClaimsMap)
     receiptSigner = getSigner({
       secretKeyJwk: secretKeyJwk as any
     })

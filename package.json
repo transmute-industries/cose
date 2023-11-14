@@ -1,6 +1,6 @@
 {
   "name": "@transmute/cose",
-  "version": "0.0.17",
+  "version": "0.0.24",
   "description": "COSE and related work.",
   "main": "./dist/index.js",
   "typings": "dist/index.d.ts",
@@ -31,6 +31,7 @@
   },
   "homepage": "https://github.com/transmute-industries/cose#readme",
   "devDependencies": {
+    "@peculiar/x509": "^1.9.5",
     "@types/jest": "^29.2.4",
     "@typescript-eslint/eslint-plugin": "^5.47.1",
     "@typescript-eslint/parser": "^5.47.1",

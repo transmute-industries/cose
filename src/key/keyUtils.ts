@@ -25,6 +25,9 @@ const paramsMap = new Map([
   [-2, 'x'],
   [-3, 'y'],
   [-4, 'd'],
+  // Reserved for Private Use: less than -65536
+  [-66666, 'x5c'],
+  [-66667, `x5t#S256`]
 ]);
 
 const parameters = {

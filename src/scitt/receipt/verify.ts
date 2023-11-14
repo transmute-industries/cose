@@ -10,14 +10,14 @@ import verifiable_data_structure_proofs from '../../verifiable_data_structure_pr
 
 import * as key from '../../key'
 
-import { SecretCoseKeyMap } from '../../key/types'
+import { PublicCoseKeyMap } from '../../key/types'
 
 import getVerifier from "../../lib/verifier"
 
 export type RequestScittReceiptVerify = {
   receipt: ArrayBuffer
 
-  publicCoseKey?: SecretCoseKeyMap
+  publicCoseKey?: PublicCoseKeyMap
   verifier?: any
 
   entry?: ArrayBuffer
