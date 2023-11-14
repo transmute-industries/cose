@@ -1,4 +1,4 @@
-
+import fs from 'fs'
 import generate from '../jose/generate'
 import wrap from './wrap'
 import * as coseKey from '../../../src/key'
@@ -35,4 +35,24 @@ it('sanity', async () => {
   const d4 = await wrap.decrypt(c4, k2.cosePrivateKey)
   const rpt4 = new TextDecoder().decode(d4)
   expect(rpt4).toBe(pt)
+
+  const markdown = `
+
+# COSE HPKE Wrap / 2 Layer
+
+## Key
+
+~~~~ cbor-diag
+${await coseKey.beautify(k2.cosePrivateKey)}
+~~~~
+
+## Envelope
+
+~~~~ cbor-diag
+${c4Diagnostic.trim()}
+~~~~
+  
+  `.trim()
+
+  fs.writeFileSync('test/hpke/cose/wrap.md', markdown)
 })
