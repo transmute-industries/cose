@@ -10,9 +10,8 @@ it('wrap', async () => {
   const m = new TextEncoder().encode(pt)
 
   const c2 = await wrap.encrypt(m, k.publicKeyJwk)
+  // console.log(JSON.stringify(c2, null, 2))
   const d2 = await wrap.decrypt(c2, k.privateKeyJwk)
   const rpt2 = new TextDecoder().decode(d2)
   expect(rpt2).toBe(pt)
-
-
 })

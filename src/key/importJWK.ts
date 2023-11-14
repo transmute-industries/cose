@@ -6,7 +6,6 @@ import keyUtils from './keyUtils'
 
 const jwkToCoseKey = (jwk: Record<string, unknown>): CoseKeyMap => {
   const coseKey = new Map();
-  const textEncoder = new TextEncoder()
   for (const [key, value] of Object.entries(jwk)) {
     const coseKeyParam = keyUtils.parameters.toCOSE.get(key)
     switch (key) {
@@ -16,8 +15,7 @@ const jwkToCoseKey = (jwk: Record<string, unknown>): CoseKeyMap => {
         break
       }
       case 'kid': {
-        const asBstr = textEncoder.encode(value as string)
-        coseKey.set(coseKeyParam, typedArrayToBuffer(asBstr))
+        coseKey.set(coseKeyParam, value)
         break
       }
       case 'alg': {

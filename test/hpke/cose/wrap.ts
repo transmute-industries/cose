@@ -3,7 +3,7 @@ import * as cbor from 'cbor-web'
 
 import * as coseKey from '../../../src/key'
 
-import { coseSuites, example_suite_label, encapsulated_key_header_label, PublicCoseKeyMap, SecretCoseKeyMap } from '../common'
+import { COSE_EncryptTag, coseSuites, example_suite_label, encapsulated_key_header_label, PublicCoseKeyMap, SecretCoseKeyMap } from '../common'
 
 const indirectMode = {
   // todo: use jwks instead...
@@ -33,14 +33,24 @@ const indirectMode = {
     const layer1ProtectedHeaderMap = new Map();
     layer1ProtectedHeaderMap.set(1, alg) // alg : TBD / restrict alg by recipient key /
     const layer1EncodedProtectedHeader = cbor.encode(layer1ProtectedHeaderMap)
-    const external_aad = Buffer.from(new Uint8Array())
+
     // 16 for AES-128-GCM
     const cek = crypto.randomBytes(16)
     const iv = crypto.getRandomValues(new Uint8Array(12));
-    const unprotectedHeaderMap = new Map();
-    unprotectedHeaderMap.set(encapsulated_key_header_label, sender.enc) // https://datatracker.ietf.org/doc/html/draft-ietf-cose-hpke-07#section-3.1
-    unprotectedHeaderMap.set(4, kid) // kid : ...
-    unprotectedHeaderMap.set(5, Buffer.from(iv)) // https://datatracker.ietf.org/doc/html/rfc8152#appendix-C.4.1
+    const layer1UnprotectedHeader = new Map();
+    layer1UnprotectedHeader.set(encapsulated_key_header_label, sender.enc) // https://datatracker.ietf.org/doc/html/draft-ietf-cose-hpke-07#section-3.1
+    layer1UnprotectedHeader.set(4, kid) // kid : ...
+
+    // should we mitigate cross mode attack on aead here?
+    // let external_aad be the layer 0 protected header
+    const external_aad = Buffer.from(layer0EncodedProtectedHeader)
+    const Enc_structure = ["Encrypt0", layer1EncodedProtectedHeader, external_aad]
+    const internal_aad = cbor.encode(Enc_structure)
+    const encCEK = await sender.seal(cek, internal_aad)
+    const recipient = [layer1EncodedProtectedHeader, layer1UnprotectedHeader, encCEK]
+    const layer0UnprotectedHeader = new Map()
+    layer0UnprotectedHeader.set(5, Buffer.from(iv)) // https://datatracker.ietf.org/doc/html/rfc8152#appendix-C.4.1
+
     const key = await crypto.subtle.importKey('raw', cek, {
       name: "AES-GCM",
     }, true, ["encrypt", "decrypt"])
@@ -49,15 +59,15 @@ const indirectMode = {
       key,
       plaintext,
     );
-    const Enc_structure = ["Encrypt0", layer1EncodedProtectedHeader, external_aad]
-    const internal_aad = cbor.encode(Enc_structure)
-    const encCEK = await sender.seal(cek, internal_aad)
-    const recipient = [layer1EncodedProtectedHeader, unprotectedHeaderMap, encCEK]
-    return cbor.encode([
+
+    const coseEncrypt = [
       layer0EncodedProtectedHeader,
+      layer0UnprotectedHeader,
       encrypted_content,
       [recipient]
-    ])
+    ]
+
+    return cbor.encodeAsync(new cbor.Tagged(COSE_EncryptTag, coseEncrypt), { canonical: true })
 
   },
   decrypt: async (coseEnc: ArrayBuffer, recipientPrivate: SecretCoseKeyMap) => {
@@ -76,15 +86,17 @@ const indirectMode = {
       true,
       ['deriveBits'],
     )
-    const decoded = await cbor.decode(coseEnc)
-    const [layer0EncodedProtectedHeader, encrypted_content, recipients] = decoded
+    const decodedTagged = await cbor.decode(coseEnc)
+    const decoded = decodedTagged.value
+    const [layer0EncodedProtectedHeader, layer0UnprotectedHeader, encrypted_content, recipients] = decoded
     const recipientArray = recipients.find(([ph, uphm, encCek]: any) => {
-      return Buffer.from(uphm.get(4)).toString() === Buffer.from(recipientPrivate.get(2) as any).toString() // header.kid === privateKey.kid
+      return uphm.get(4) === recipientPrivate.get(2) // header.kid === privateKey.kid
     })
     const [layer1EncodedProtectedHeader, uphm, encCek] = recipientArray
-    const external_aad = Buffer.from(new Uint8Array())
+    // mitigating cross mode attacks on aead here.
+    const external_aad = Buffer.from(layer0EncodedProtectedHeader)
     const enc = uphm.get(encapsulated_key_header_label)
-    const iv = uphm.get(5)
+    const iv = layer0UnprotectedHeader.get(5)
     const recipient = await coseSuites[alg].createRecipientContext({
       recipientKey: privateKey, // rkp (CryptoKeyPair) is also acceptable.
       enc

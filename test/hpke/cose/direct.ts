@@ -15,7 +15,7 @@ const directMode = {
     if (alg !== example_suite_label) {
       throw new Error('Unsupported algorithm')
     }
-    recipientPublic.delete(2) // prevent export issue
+
     const publicKeyJwk = coseKey.exportJWK(recipientPublic);
     const publicKey = await crypto.subtle.importKey(
       'jwk',

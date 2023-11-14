@@ -37,14 +37,14 @@ const indirectMode = {
       recipientPublicKey: publicKey,
     })
     const encodedEnc = jose.base64url.encode(new Uint8Array(sender.enc))
-    const encodedProtectedHeader = craftProtectedHeader({ alg })
+    const encodedProtectedHeader = craftProtectedHeader({ enc: 'A128GCM' })
     const internal_aad = jose.base64url.decode(encodedProtectedHeader)
     const encCEK = await sender.seal(cek, internal_aad)
     const unprotected = {
       recipients: [
         {
           kid: recipientPublicKeyJwk.kid,
-          enc: encodedEnc,
+          encapsulated_key: encodedEnc,
           encrypted_key: jose.base64url.encode(new Uint8Array(encCEK))
         }
       ]
@@ -78,7 +78,7 @@ const indirectMode = {
     const recipientObj = jwe.unprotected.recipients.find((r: any) => {
       return r.kid === privateKeyJwk.kid
     })
-    const decodedEnc = jose.base64url.decode(recipientObj.enc)
+    const decodedEnc = jose.base64url.decode(recipientObj.encapsulated_key)
     const recipient = await joseSuites[alg].createRecipientContext({
       recipientKey: privateKey, // rkp (CryptoKeyPair) is also acceptable.
       enc: decodedEnc

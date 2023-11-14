@@ -19,7 +19,7 @@ const coseKeyToJwk = (coseKey: CoseKeyMap): Record<string, unknown> => {
         break
       }
       case 2: {
-        jwk.kid = textDecoder.decode(value as Buffer)
+        jwk.kid = typeof value === 'string' ? value : textDecoder.decode(value as Buffer)
         break
       }
       case 3: {

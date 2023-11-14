@@ -43,7 +43,7 @@ export const algToCrv = {
 // https://datatracker.ietf.org/doc/html/draft-rha-jose-hpke-encrypt-01#section-4.1.1
 // In both modes, the sender MUST specify the 'alg' parameter in the protected header to indicate the use of HPKE.
 
-export const craftProtectedHeader = ({ alg, enc, kid }: { alg: Suite0, enc?: string, kid?: string }) => {
+export const craftProtectedHeader = ({ alg, enc, kid }: { alg?: string, enc?: string, kid?: string }) => {
   return jose.base64url.encode(JSON.stringify({
     alg, enc, kid
   }))
