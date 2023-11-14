@@ -18,20 +18,20 @@
 
 ~~~~ cbor-diag
 96([
-h'a10101',
-{
-5: h'1055c405225922b9be457289'
-},
-h'8cc01dfc141d2e79d7c77f47e344a8d14db3b93857e96952b4a1e8',
-[
-[
-h'a10139d902',
-{
-4: "test-key-42",
--22222: h'04650319ba16f134b8f099aedd181ae9e0f4342ed26f1f8d5532e0638d93d89355ea2f1014d782d439af6e256593fd15c14fd30f13dd8aba02e7d97cfa3c93fa9f'
-},
-h'9a78b4020d7320d7ffc9aff1f440acc7557a431497ff158dcc04b6644a20cda5'
-]
-]
+  h'a10101',
+  {
+    5: h'1055c405225922b9be457289' / iv /
+  },
+  h'8cc01dfc141d2e79d7c77f47e344a8d14db3b93857e96952b4a1e8', / ciphertext /
+  [
+    [
+      h'a10139d902',
+      {
+        4: "test-key-42",
+        -22222: h'0465031...c93fa9f' / encapsulated key /
+      },
+      h'9a78b4020d7320d7ffc9aff1f440acc7557a431497ff158dcc04b6644a20cda5' / encrypted key /
+    ]
+  ]
 ])
 ~~~~

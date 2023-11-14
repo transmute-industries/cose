@@ -18,11 +18,11 @@
 
 ~~~~ cbor-diag
 96([
-h'a10139d902',
-{
-4: "test-key-42",
--22222: h'042b5c4227c3120ce2a62540e1bee59c5e0acde2783b9fcb3b343feebb4162f550c172747b5a8f543bbf8910fdea86cbf6eecd82d5e037c8e7619bc2e8ed24ca04'
-},
-h'a054152691ebb37a679699be32e88979454aa474f87f05c866ad84'
+  h'a10139d902',
+  {
+    4: "test-key-42",
+    -22222: h'042b5c4...ed24ca04' / encapsulated key /
+  },
+  h'a054152691ebb37a679699be32e88979454aa474f87f05c866ad84' / cipher text /
 ])
 ~~~~
