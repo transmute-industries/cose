@@ -9,6 +9,7 @@ const algsMap = new Map([
   [-7, 'ES256'],
   [-35, 'ES384'],
   [-36, 'ES512'],
+  [-55555, 'HPKE-Base-P256-SHA256-AES128GCM']
 ]);
 
 const algorithms = {
