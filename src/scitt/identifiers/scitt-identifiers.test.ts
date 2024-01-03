@@ -97,3 +97,8 @@ describe('should produce a URL from a SCITT URN', () => {
     // For example, it is not recommended to return custom base encodings that destructure scitt data URLs.
   })
 })
+
+// SCITT does not require Text Encoded Identifiers (URLs or URNs)
+// Binary Encoded Identifiers for URLs or URNs
+// MAY be constructed according to __RFC__.
+// SCRAPI does not define http interfaces for working with binary identifiers.
