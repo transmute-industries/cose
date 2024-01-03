@@ -43,7 +43,7 @@
   },
   "dependencies": {
     "@transmute/rfc9162": "^0.0.4",
-    "cbor-web": "^9.0.0",
+    "cbor-web": "^9.0.1",
     "cose-js": "^0.8.4",
     "jose": "^4.14.4"
   }
