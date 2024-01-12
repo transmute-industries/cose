@@ -12,6 +12,10 @@ const nodeCryptoToIanaNamedHashFunctions = {
   [nodeCryptoHashFunction]: 'sha-256'
 }
 
+// TODO:
+// Update to align with the TBS requirement in 
+// https://github.com/ietf-wg-scitt/draft-ietf-scitt-architecture/pull/145
+
 describe('should produce a SCITT URN for SCITT Messages', () => {
   it('should produce a statement identifier', () => {
     // in SCITT, statements are opaque bytes of a known content type
