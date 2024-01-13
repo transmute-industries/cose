@@ -28,7 +28,7 @@
       h'a10139d902',
       {
         4: "test-key-42",
-        -22222: h'0465031...c93fa9f' / encapsulated key /
+        -4: h'0465031...c93fa9f' / encapsulated key /
       },
       h'9a78b4020d7320d7ffc9aff1f440acc7557a431497ff158dcc04b6644a20cda5' / encrypted key /
     ]

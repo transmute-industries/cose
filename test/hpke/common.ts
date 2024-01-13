@@ -8,7 +8,7 @@ export const Suite0 = 'HPKE-Base-P256-SHA256-AES128GCM' as Suite0 // aka APPLE-H
 export type PublicCoseKeyMap = Map<string | number, string | number | Buffer | ArrayBuffer>
 export type SecretCoseKeyMap = Map<string | number, string | number | Buffer | ArrayBuffer>
 
-export const encapsulated_key_header_label = -22222;
+export const encapsulated_key_header_label = -4;
 export const example_suite_label = 35;
 
 

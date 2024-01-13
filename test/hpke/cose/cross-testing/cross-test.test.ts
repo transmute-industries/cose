@@ -36,6 +36,25 @@ it('send 2 layer to friend', async () => {
   const pt = 'hello world'
   const m = new TextEncoder().encode(pt)
   const c4 = await wrap.encrypt(m, recipientPublicKey)
-  console.log(c4)
-
+  // console.log(c4.toString('hex'))
+  // d8608443a10101a1054cc76efc0f1b057e5776bd70d0581b86ca9fcb76c70878e21a3a060b5783e9aed4be2826f95b9cacd766818344a1011823a20442303123584104cd5924f279ef1cd99ba24243cec2b5f795058e657f973d873ea99fa8a020d31b980644528636ec1cb1011e9b0828d4598054004188bd28b64da3bab0eb2fcc5c5820114637018aaac9cf03c81db3fa9c5fa15ef4b0d140edd4da815eada6e053fd9e
+  const diagnostic = await cbor.diagnose(c4)
+  // console.log(diagnostic)
+  // 96([
+  //   h'a10101', 
+  //   {
+  //     5: h'c76efc0f1b057e5776bd70d0'
+  //   }, 
+  //   h'86ca9fcb76c70878e21a3a060b5783e9aed4be2826f95b9cacd766', 
+  //   [
+  //     [
+  //       h'a1011823', 
+  //       {
+  //         4: h'3031',
+  //         -4: h'04cd5924f279ef1cd99ba24243cec2b5f795058e657f973d873ea99fa8a020d31b980644528636ec1cb1011e9b0828d4598054004188bd28b64da3bab0eb2fcc5c'
+  //       }, 
+  //       h'114637018aaac9cf03c81db3fa9c5fa15ef4b0d140edd4da815eada6e053fd9e'
+  //     ]
+  //   ]
+  // ])
 })
