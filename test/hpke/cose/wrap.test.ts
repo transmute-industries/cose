@@ -26,7 +26,7 @@ it.skip('sanity', async () => {
   const dL1Protected = await alternateDiagnostic(decoded.value[3][0][0])
   // console.log(dL1Protected)
   expect(dL1Protected).toBe(`{
-1: -55555
+1: 35
 }
 `)
   const c4Diagnostic = await alternateDiagnostic(c4)

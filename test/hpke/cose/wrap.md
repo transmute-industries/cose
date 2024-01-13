@@ -6,7 +6,7 @@
 {                                   / COSE Key                      /
   1: 2,                             / Type                          /
   2: h'74657374...792d3432',        / Identifier                    /
-  3: -55555,                        / Algorithm                     /
+  3: 35,                            / Algorithm                     /
   -1: 1,                            / Curve                         /
   -2: h'11198ff1...e6e82d47',       / x public key component        /
   -3: h'8779a21b...a2b5c32d',       / y public key component        /
