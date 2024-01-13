@@ -102,5 +102,5 @@ ${diag}
 
 afterAll(() => {
   const final = lines.join('\n\n')
-  fs.writeFileSync('test/keys/examples.md', final)
+  // fs.writeFileSync('test/keys/examples.md', final)
 })
