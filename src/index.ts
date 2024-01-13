@@ -23,8 +23,11 @@ import * as lib from './lib'
 
 import * as scitt from './scitt'
 
+import { extractTBS } from './extractTBS'
+
 const cose = {
   key,
+  extractTBS,
   scitt,
   lib,
   utils,
