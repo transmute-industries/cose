@@ -32,6 +32,6 @@ ${JSON.stringify(c, null, 2)}
   
   `.trim()
 
-  fs.writeFileSync('test/hpke/jose/direct.md', markdown)
+  // fs.writeFileSync('test/hpke/jose/direct.md', markdown)
 
 })

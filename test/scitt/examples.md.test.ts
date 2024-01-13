@@ -364,7 +364,7 @@ it('x5c example', async () => {
 
 })
 
-afterAll(() => {
-  const final = lines.join('\n\n')
-  fs.writeFileSync('test/scitt/examples.md', final)
-})
+// afterAll(() => {
+//   const final = lines.join('\n\n')
+//   fs.writeFileSync('test/scitt/examples.md', final)
+// })

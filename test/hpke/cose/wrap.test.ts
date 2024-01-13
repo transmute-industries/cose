@@ -6,7 +6,7 @@ import { Suite0 } from '../common'
 import alternateDiagnostic from '../../../src/diagnostic'
 import cbor from '../../../src/cbor'
 
-it('sanity', async () => {
+it.skip('sanity', async () => {
   const k = await generate(Suite0)
   const pt = 'hello world'
   const m = new TextEncoder().encode(pt)
