@@ -1,5 +1,5 @@
 
-import { decodeFirst, decodeFirstSync, encode } from '../../cbor'
+import { decodeFirst, decodeFirstSync, encode, EMPTY_BUFFER } from '../../cbor'
 
 import { RequestCoseSign1Verifier, CoseSign1Bytes } from './types'
 
@@ -7,8 +7,6 @@ import getAlgFromVerificationKey from './getAlgFromVerificationKey'
 import getDigestFromVerificationKey from './getDigestFromVerificationKey'
 
 import { DecodedToBeSigned, ProtectedHeaderMap } from './types'
-
-import { EMPTY_BUFFER } from './common'
 
 import subtleCryptoProvider from '../../crypto/subtleCryptoProvider'
 

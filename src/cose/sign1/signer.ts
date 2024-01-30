@@ -1,7 +1,6 @@
 
-import { encode, encodeAsync } from '../../cbor'
+import { encode, encodeAsync, EMPTY_BUFFER, Tagged, Sign1Tag } from '../../cbor'
 
-import { EMPTY_BUFFER, Tagged, Sign1Tag } from './common'
 import { RequestCoseSign1Signer, RequestCoseSign1 } from "./types"
 import getDigestFromVerificationKey from './getDigestFromVerificationKey'
 import subtleCryptoProvider from '../../crypto/subtleCryptoProvider'
