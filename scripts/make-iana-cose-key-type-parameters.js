@@ -1,9 +1,14 @@
 
+
+
+
+
+
 const axios = require('axios');
 const fs = require('fs');
 const csv = require('csv-parser');
 
-const iana = 'https://www.iana.org/assignments/cose/algorithms.csv';
+const iana = 'https://www.iana.org/assignments/cose/key-type-parameters.csv';
 
 (async () => {
   const response = await axios.get(iana, {
@@ -11,26 +16,27 @@ const iana = 'https://www.iana.org/assignments/cose/algorithms.csv';
     responseType: 'stream'
   });
   const stream = response.data.pipe(csv());
-  const IANACOSEAlgorithms = {}
+  const IANACOSEKeyTypeParameters = {}
   stream.on('data', row => {
     if (row.Reference.startsWith('[RFC')) {
       row.Reference = `https://datatracker.ietf.org/doc/${row.Reference.substring(1, row.Reference.length - 1)}`
     }
-    IANACOSEAlgorithms[row.Value] = row
+    IANACOSEKeyTypeParameters[row.Label] = row
   });
   stream.on('end', () => {
     const file = `
-export type IANACOSEAlgorithm = {
-  Name: string
-  Value: string
+
+export type IANACOSEKeyCommonParameter = {
+  'Key Type': string
+  'Name': string
+  'Label': string
+  'CBOR Type': string
   Description: string
-  Capabilities: string
-  'Change Controller': string
-  Recommended: string
   Reference: string
 }
-export const IANACOSEAlgorithms: Record<string, IANACOSEAlgorithm> = ${JSON.stringify(IANACOSEAlgorithms, null, 2)};
+
+export const IANACOSEKeyCommonParameters: Record<string, IANACOSEKeyCommonParameter> = ${JSON.stringify(IANACOSEKeyTypeParameters, null, 2)};
             `
-    fs.writeFileSync('./src/cose/algorithms.ts', file.trim())
+    fs.writeFileSync('./src/cose/key-type-parameters.ts', file.trim())
   });
 })()

@@ -21,7 +21,7 @@ const iana = 'https://www.iana.org/assignments/cose/header-parameters.csv';
   stream.on('end', () => {
     const file = `
 
-export type IANACOSEHeader = {
+export type IANACOSEHeaderParameter = {
   Name: string
   Label: string
   'Value Type': string
@@ -30,8 +30,8 @@ export type IANACOSEHeader = {
   Reference: string
 }
 
-export const IANACOSEHeaders: Record<string, IANACOSEHeader> = ${JSON.stringify(IANACOSEHeaders, null, 2)};
+export const IANACOSEHeaderParameters: Record<string, IANACOSEHeaderParameter> = ${JSON.stringify(IANACOSEHeaders, null, 2)};
             `
-    fs.writeFileSync('./src/cose/headers.ts', file.trim())
+    fs.writeFileSync('./src/cose/header-parameters.ts', file.trim())
   });
 })()
