@@ -100,7 +100,8 @@ ${diag}
     `.trim())
 })
 
-afterAll(() => {
-  const final = lines.join('\n\n')
-  fs.writeFileSync('test/keys/examples.md', final)
-})
+// uncomment to generate
+// afterAll(() => {
+//   const final = lines.join('\n\n')
+//   fs.writeFileSync('test/keys/examples.md', final)
+// })
