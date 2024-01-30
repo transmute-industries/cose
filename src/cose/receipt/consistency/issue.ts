@@ -3,7 +3,7 @@ import { CoMETRE } from '@transmute/rfc9162'
 
 import { cbor } from '../../..'
 
-import { CoseSign1Bytes, CoseSign1Signer, ProtectedHeaderMap } from "../../../cose/sign1"
+import { CoseSign1Bytes, CoseSign1Signer, ProtectedHeaderMap } from "../../sign1"
 import { toArrayBuffer } from '../../../cbor'
 
 export type RequestIssueConsistencyReceipt = {

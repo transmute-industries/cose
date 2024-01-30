@@ -21,6 +21,6 @@ export * from './cose/sign1'
 
 import * as cbor from './cbor'
 
-export * from './spice'
+import * as receipt from './cose/receipt'
 
-export { cbor, key, attached, detached }
+export { cbor, key, attached, detached, receipt }

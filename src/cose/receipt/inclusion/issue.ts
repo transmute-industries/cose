@@ -3,7 +3,7 @@ import { CoMETRE } from '@transmute/rfc9162'
 
 import { cbor } from '../../..'
 
-import { CoseSign1Signer, ProtectedHeaderMap } from "../../../cose/sign1"
+import { CoseSign1Signer, ProtectedHeaderMap } from "../../sign1"
 
 export type RequestIssueInclusionReceipt = {
   protectedHeader: ProtectedHeaderMap

@@ -3,16 +3,17 @@ import { CoMETRE } from '@transmute/rfc9162'
 
 import { cbor } from '../../..'
 
-import { CoseSign1Bytes, CoseSign1DetachedVerifier } from "../../../cose/sign1"
+import { CoseSign1Bytes, CoseSign1DetachedVerifier } from "../../sign1"
 
-export type RequestVerifyInclusionReceipt = {
-  entry: Uint8Array,
+export type RequestVerifyConsistencyReceipt = {
+  oldRoot: ArrayBuffer,
+  newRoot: ArrayBuffer,
   receipt: CoseSign1Bytes,
   verifier: CoseSign1DetachedVerifier
 }
 
-export const verify = async (req: RequestVerifyInclusionReceipt) => {
-  const { entry, receipt, verifier } = req
+export const verify = async (req: RequestVerifyConsistencyReceipt) => {
+  const { newRoot, oldRoot, receipt, verifier } = req
   const { tag, value } = cbor.decode(receipt);
   if (tag !== 18) {
     throw new Error('Receipt is not tagged cose sign1')
@@ -24,23 +25,25 @@ export const verify = async (req: RequestVerifyInclusionReceipt) => {
     throw new Error('Unsupported verifiable data structure. See https://datatracker.ietf.org/doc/draft-ietf-cose-merkle-tree-proofs')
   }
   const proofs = unprotectedHeaderMap.get(-222)
-  const [inclusion] = proofs.get(-1) // get first inclusion proof
+  const [consistency] = proofs.get(-2) // get first consistency proof
   if (payload !== undefined) {
     throw new Error('payload must be undefined for this type of proof')
   }
-  const [tree_size, leaf_index, inclusion_path] = cbor.decode(inclusion)
-  const root = await CoMETRE.RFC9162_SHA256.verify_inclusion_proof(
-    entry,
+  const [tree_size_1,
+    tree_size_2,
+    consistency_path] = cbor.decode(consistency)
+
+  const verifiedNewRoot = await verifier.verify({ coseSign1: receipt, payload: newRoot })
+  const verified = await CoMETRE.RFC9162_SHA256.verify_consistency_proof(
+    new Uint8Array(oldRoot),
+    new Uint8Array(verifiedNewRoot),
     {
       log_id: '',
-      tree_size,
-      leaf_index,
-      inclusion_path,
+      tree_size_1,
+      tree_size_2,
+      consistency_path,
     },
   )
-  const verified = verifier.verify({
-    coseSign1: receipt,
-    payload: root
-  })
   return verified
+
 }
