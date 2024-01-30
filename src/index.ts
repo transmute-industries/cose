@@ -21,4 +21,6 @@ export * from './cose/sign1'
 
 import * as cbor from './cbor'
 
+export * from './spice'
+
 export { cbor, key, attached, detached }

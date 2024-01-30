@@ -28,7 +28,6 @@ export type CoseSign1Signer = {
   sign: (req: RequestCoseSign1) => Promise<CoseSign1Bytes>
 }
 
-
 export type RequestCoseSign1Verifier = { publicKeyJwk: PublicKeyJwk }
 
 export type RequestCoseSign1Verify = {
@@ -44,5 +43,13 @@ export type RequestCoseSign1VerifyDetached = {
 
 export type CoseSign1Verifier = {
   verify: (req: RequestCoseSign1Verify) => Promise<ArrayBuffer>
+}
+
+export type RequestCoseSign1DectachedVerify = RequestCoseSign1Verify & {
+  payload: ArrayBuffer
+}
+
+export type CoseSign1DetachedVerifier = {
+  verify: (req: RequestCoseSign1DectachedVerify) => Promise<ArrayBuffer>
 }
 
