@@ -21,7 +21,7 @@ const verifier = ({ publicKeyJwk }: RequestCoseSign1Verifier) => {
       const subtle = await subtleCryptoProvider()
       const obj = await cbor.decodeFirst(coseSign1Bytes);
       const signatureStructure = obj.value;
-      const verificationKeyAlgorithm = getAlgFromVerificationKey(publicKeyJwk.alg)
+      const algInPublicKey = getAlgFromVerificationKey(publicKeyJwk.alg)
       if (!Array.isArray(signatureStructure)) {
         throw new Error('Expecting Array');
       }
@@ -30,9 +30,9 @@ const verifier = ({ publicKeyJwk }: RequestCoseSign1Verifier) => {
       }
       const [protectedHeaderBytes, unprotectedHeaderMap, payload, signature] = signatureStructure;
       const protectedHeaderMap: ProtectedHeaderMap = (!protectedHeaderBytes.length) ? new Map() : cbor.decodeFirstSync(protectedHeaderBytes);
-      const envelopeAlgorithm = getCommonParameter(protectedHeaderMap, unprotectedHeaderMap, labelToTag.get('alg'))
-      if (envelopeAlgorithm !== verificationKeyAlgorithm) {
-        throw new Error('Verification key does not support algorithm: ' + envelopeAlgorithm);
+      const algInHeader = protectedHeaderMap.get(1)
+      if (algInHeader !== algInPublicKey) {
+        throw new Error('Verification key does not support algorithm: ' + algInHeader);
       }
       if (!signature) {
         throw new Error('No signature to verify');
