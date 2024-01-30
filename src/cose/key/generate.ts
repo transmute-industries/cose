@@ -11,32 +11,31 @@ export type PrivateKeyContentType = ContentTypeOfCoseKey | ContentTypeOfJsonWebK
 
 import { convertJsonWebKeyToCoseKey } from './convertJsonWebKeyToCoseKey'
 
+import { thumbprint } from "./thumbprint"
+
 export const generate = async (alg: CoseSignatureAlgorithms, contentType: PrivateKeyContentType = 'application/jwk+json') => {
   const knownAlgorithm = Object.values(IANACOSEAlgorithms).find((
     entry
   ) => {
     return entry.Name === alg
   })
-
   if (!knownAlgorithm) {
     throw new Error('Algorithm is not supported.')
   }
-
   const cryptoKeyPair = await generateKeyPair(knownAlgorithm.Name, { extractable: true });
   const secretKeyJwk = await exportJWK(cryptoKeyPair.privateKey)
   const jwkThumbprint = await calculateJwkThumbprint(secretKeyJwk)
   secretKeyJwk.kid = jwkThumbprint
-
   if (contentType === 'application/jwk+json') {
     return secretKeyJwk as JWK
   }
-
   if (contentType === 'application/cose-key') {
-    return convertJsonWebKeyToCoseKey(secretKeyJwk)
+    delete secretKeyJwk.kid;
+    const secretKeyCoseKey = convertJsonWebKeyToCoseKey(secretKeyJwk)
+    const coseKeyThumbprint = await thumbprint.calculateCoseKeyThumbprint(secretKeyCoseKey)
+    secretKeyCoseKey.set(2, coseKeyThumbprint)
+    return secretKeyCoseKey
   }
-
-
-
 }
 
 
