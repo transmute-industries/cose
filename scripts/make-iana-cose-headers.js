@@ -11,17 +11,17 @@ const iana = 'https://www.iana.org/assignments/cose/header-parameters.csv';
     responseType: 'stream'
   });
   const stream = response.data.pipe(csv());
-  const IANACOSEHeaderParameters = {}
+  const IANACOSEHeaders = {}
   stream.on('data', row => {
     if (row.Reference.startsWith('[RFC')) {
       row.Reference = `https://datatracker.ietf.org/doc/${row.Reference.substring(1, row.Reference.length - 1)}`
     }
-    IANACOSEHeaderParameters[row.Label] = row
+    IANACOSEHeaders[row.Label] = row
   });
   stream.on('end', () => {
     const file = `
 
-export type IANACOSEHeaderParameter = {
+export type IANACOSEHeader = {
   Name: string
   Label: string
   'Value Type': string
@@ -30,7 +30,7 @@ export type IANACOSEHeaderParameter = {
   Reference: string
 }
 
-export const IANACOSEHeaderParameters: Record<string, IANACOSEHeaderParameter> = ${JSON.stringify(IANACOSEHeaderParameters, null, 2)};
+export const IANACOSEHeaders: Record<string, IANACOSEHeader> = ${JSON.stringify(IANACOSEHeaders, null, 2)};
             `
     fs.writeFileSync('./src/cose/headers.ts', file.trim())
   });

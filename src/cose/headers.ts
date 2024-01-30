@@ -1,4 +1,4 @@
-export type IANACOSEHeaderParameter = {
+export type IANACOSEHeader = {
   Name: string
   Label: string
   'Value Type': string
@@ -7,7 +7,7 @@ export type IANACOSEHeaderParameter = {
   Reference: string
 }
 
-export const IANACOSEHeaderParameters: Record<string, IANACOSEHeaderParameter> = {
+export const IANACOSEHeaders: Record<string, IANACOSEHeader> = {
   "0": {
     "Name": "Reserved",
     "Label": "0",

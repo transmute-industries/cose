@@ -1,4 +1,4 @@
-import transmute from '../../src'
+import * as transmute from '../../src'
 import * as jose from 'jose'
 import cose from 'cose-js'
 
@@ -36,12 +36,12 @@ it('sanity', async () => {
     },
   })
   expect(new TextDecoder().decode(v1)).toBe(message)
-  const s2 = await transmute.lib.signer({ secretKeyJwk }).sign({
+  const s2 = await transmute.signer({ secretKeyJwk }).sign({
     protectedHeader,
     unprotectedHeader,
     payload: payload
   });
-  const v2 = await transmute.lib.verifier({ publicKeyJwk }).verify(s2);
+  const v2 = await transmute.verifier({ publicKeyJwk }).verify(s2);
   expect(new TextDecoder().decode(v2)).toBe(message)
   const v3 = await cose.sign.verify(s2, {
     key: {
@@ -50,6 +50,6 @@ it('sanity', async () => {
     },
   })
   expect(new TextDecoder().decode(v3)).toBe(message)
-  const v4 = await transmute.lib.verifier({ publicKeyJwk }).verify(s1);
+  const v4 = await transmute.verifier({ publicKeyJwk }).verify(s1);
   expect(new TextDecoder().decode(v4)).toBe(message)
 })

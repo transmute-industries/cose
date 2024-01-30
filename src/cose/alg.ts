@@ -7,7 +7,7 @@ export type IANACOSEAlgorithm = {
   Recommended: string
   Reference: string
 }
-export const IANACOSEHeaderParameters: Record<string, IANACOSEAlgorithm> = {
+export const IANACOSEAlgorithms: Record<string, IANACOSEAlgorithm> = {
   "0": {
     "Name": "Reserved",
     "Value": "0",

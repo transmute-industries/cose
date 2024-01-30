@@ -30,7 +30,7 @@ export type IANACOSEAlgorithm = {
   Recommended: string
   Reference: string
 }
-export const IANACOSEHeaderParameters: Record<string, IANACOSEAlgorithm> = ${JSON.stringify(IANACOSEAlgorithms, null, 2)};
+export const IANACOSEAlgorithms: Record<string, IANACOSEAlgorithm> = ${JSON.stringify(IANACOSEAlgorithms, null, 2)};
             `
     fs.writeFileSync('./src/cose/alg.ts', file.trim())
   });
