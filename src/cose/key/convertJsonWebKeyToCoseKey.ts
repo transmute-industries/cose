@@ -1,6 +1,6 @@
 
 import { JWK, base64url } from 'jose'
-import { typedArrayToBuffer } from '../../utils'
+import { toArrayBuffer } from '../../cbor'
 
 import { IANACOSEKeyCommonParameters } from '../key-common-parameters';
 import { IANACOSEAlgorithms } from '../algorithms';
@@ -110,18 +110,18 @@ export const convertJsonWebKeyToCoseKey = (jwk: JWK): Map<any, any> => {
       case 'y':
       case 'd': {
         label = getKeyTypeSpecificLabel(coseKty, key)
-        coseKey.set(label, typedArrayToBuffer(base64url.decode(value as string)))
+        coseKey.set(label, toArrayBuffer(base64url.decode(value as string)))
         break
       }
       case 'x5c': {
         const items = (value as string[] || []).map((item: string) => {
-          return typedArrayToBuffer(base64url.decode(item as string))
+          return toArrayBuffer(base64url.decode(item as string))
         })
         coseKey.set(label, items)
         break
       }
       case 'x5t#S256': {
-        coseKey.set(label, typedArrayToBuffer(base64url.decode(value as string)))
+        coseKey.set(label, toArrayBuffer(base64url.decode(value as string)))
         break
       }
       default: {

@@ -5,7 +5,6 @@ export type ProtectedHeaderMap = Map<string | number, any>
 export type ProtectedHeaderLabels = 'alg' | 'crit' | 'content_type' | 'kid' | 'counter_signature'
 export type ProtectedHeaderTags = 1 | 2 | 3 | 4 | 7
 
-import { default as tags } from '../unprotectedHeader'
 
 export const labelToTag = new Map<ProtectedHeaderLabels, ProtectedHeaderTags>()
 labelToTag.set('alg', 1)
@@ -49,7 +48,7 @@ const HeaderParameters = {
   counter_signature: 7,
   x5chain: 33,
   // will be registered in https://github.com/ietf-scitt/draft-steele-cose-merkle-tree-proofs
-  verifiable_data_structure: tags.verifiable_data_structure
+  // verifiable_data_structure: tags.verifiable_data_structure
 } as any;
 
 

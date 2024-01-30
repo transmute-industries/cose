@@ -1,5 +1,5 @@
 
-import * as transmute from '../../src'
+import * as transmute from '../src'
 
 it('generate cose key', async () => {
   const secretKeyJwk1 = await transmute.key.generate<transmute.JsonWebKey>('ES256', 'application/jwk+json')

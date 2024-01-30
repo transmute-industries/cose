@@ -1,4 +1,4 @@
-import * as transmute from '../../src'
+import * as transmute from '../src'
 import * as jose from 'jose'
 import cose from 'cose-js'
 

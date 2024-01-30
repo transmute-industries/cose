@@ -12,7 +12,7 @@ import { DecodedToBeSigned } from './types'
 import { labelToTag, ProtectedHeaderMap, getCommonParameter } from './HeaderParameters';
 import { EMPTY_BUFFER } from './common'
 
-import subtleCryptoProvider from './subtleCryptoProvider'
+import subtleCryptoProvider from '../crypto/subtleCryptoProvider'
 
 const verifier = ({ publicKeyJwk }: RequestCoseSign1Verifier) => {
   const digest = getDigestFromVerificationKey(publicKeyJwk)

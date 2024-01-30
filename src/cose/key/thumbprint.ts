@@ -1,8 +1,8 @@
 import { calculateJwkThumbprint, calculateJwkThumbprintUri, base64url } from "jose";
 
-import cbor from "../../cbor";
+import { encodeCanonical } from "../../cbor";
 
-import subtleCryptoProvider from "../../lib/subtleCryptoProvider";
+import subtleCryptoProvider from "../../crypto/subtleCryptoProvider";
 
 // https://www.ietf.org/archive/id/draft-ietf-cose-key-thumbprint-01.html#section-6
 const calculateCoseKeyThumbprint = async (coseKey: Map<any, any>): Promise<ArrayBuffer> => {
@@ -13,7 +13,7 @@ const calculateCoseKeyThumbprint = async (coseKey: Map<any, any>): Promise<Array
       onlyRequiredMap.set(key, value)
     }
   }
-  const encoded = cbor.web.encodeCanonical(onlyRequiredMap)
+  const encoded = encodeCanonical(onlyRequiredMap)
   const subtle = await subtleCryptoProvider()
   const digest = subtle.digest("SHA-256", encoded)
   return digest
