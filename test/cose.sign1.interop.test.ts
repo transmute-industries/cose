@@ -42,7 +42,7 @@ it('cross test sign and verify', async () => {
     unprotectedHeader,
     payload: payload
   });
-  const v2 = await transmute.verifier({ publicKeyJwk }).verify(s2);
+  const v2 = await transmute.verifier({ publicKeyJwk }).verify({ coseSign1: s2 });
   expect(new TextDecoder().decode(v2)).toBe(message)
   const v3 = await cose.sign.verify(s2, {
     key: {
@@ -51,6 +51,6 @@ it('cross test sign and verify', async () => {
     },
   })
   expect(new TextDecoder().decode(v3)).toBe(message)
-  const v4 = await transmute.verifier({ publicKeyJwk }).verify(s1);
+  const v4 = await transmute.verifier({ publicKeyJwk }).verify({ coseSign1: s1 });
   expect(new TextDecoder().decode(v4)).toBe(message)
 })
