@@ -1,14 +1,12 @@
 
-
-import * as cbor from 'cbor-web'
+import { decodeFirst, decodeFirstSync, encode } from '../../cbor'
 
 import { RequestCoseSign1Verifier, CoseSign1Bytes } from './types'
 
 import getAlgFromVerificationKey from './getAlgFromVerificationKey'
 import getDigestFromVerificationKey from './getDigestFromVerificationKey'
 
-import { DecodedToBeSigned } from './types'
-
+import { DecodedToBeSigned, ProtectedHeaderMap } from './types'
 
 import { EMPTY_BUFFER } from './common'
 
@@ -20,7 +18,7 @@ const verifier = ({ publicKeyJwk }: RequestCoseSign1Verifier) => {
   return {
     verify: async (coseSign1Bytes: CoseSign1Bytes, externalAAD = EMPTY_BUFFER): Promise<Buffer> => {
       const subtle = await subtleCryptoProvider()
-      const obj = await cbor.decodeFirst(coseSign1Bytes);
+      const obj = await decodeFirst(coseSign1Bytes);
       const signatureStructure = obj.value;
       if (!Array.isArray(signatureStructure)) {
         throw new Error('Expecting Array');
@@ -29,7 +27,7 @@ const verifier = ({ publicKeyJwk }: RequestCoseSign1Verifier) => {
         throw new Error('Expecting Array of length 4');
       }
       const [protectedHeaderBytes, _, payload, signature] = signatureStructure;
-      const protectedHeaderMap: Map<any, any> = (!protectedHeaderBytes.length) ? new Map() : cbor.decodeFirstSync(protectedHeaderBytes);
+      const protectedHeaderMap: ProtectedHeaderMap = (!protectedHeaderBytes.length) ? new Map() : decodeFirstSync(protectedHeaderBytes);
       const algInHeader = protectedHeaderMap.get(1)
       if (algInHeader !== algInPublicKey) {
         throw new Error('Verification key does not support algorithm: ' + algInHeader);
@@ -53,7 +51,7 @@ const verifier = ({ publicKeyJwk }: RequestCoseSign1Verifier) => {
         true,
         ["verify"],
       )
-      const encodedToBeSigned = cbor.encode(decodedToBeSigned);
+      const encodedToBeSigned = encode(decodedToBeSigned);
       const verified = await subtle.verify(
         {
           name: "ECDSA",

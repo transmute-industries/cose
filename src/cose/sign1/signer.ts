@@ -1,12 +1,10 @@
 
-import * as cbor from 'cbor-web'
+import { encode, encodeAsync } from '../../cbor'
 
 import { EMPTY_BUFFER, Tagged, Sign1Tag } from './common'
 import { RequestCoseSign1Signer, RequestCoseSign1 } from "./types"
 import getDigestFromVerificationKey from './getDigestFromVerificationKey'
-
 import subtleCryptoProvider from '../../crypto/subtleCryptoProvider'
-
 
 const signer = ({ secretKeyJwk }: RequestCoseSign1Signer) => {
   const digest = getDigestFromVerificationKey(`${secretKeyJwk.alg}`)
@@ -14,14 +12,14 @@ const signer = ({ secretKeyJwk }: RequestCoseSign1Signer) => {
     sign: async ({ protectedHeader, unprotectedHeader, externalAAD, payload }: RequestCoseSign1) => {
       const subtle = await subtleCryptoProvider()
       const payloadBuffer = payload
-      const protectedHeaderBytes = (protectedHeader.size === 0) ? EMPTY_BUFFER : cbor.encode(protectedHeader);
+      const protectedHeaderBytes = (protectedHeader.size === 0) ? EMPTY_BUFFER : encode(protectedHeader);
       const decodedToBeSigned = [
         'Signature1',
         protectedHeaderBytes,
         externalAAD || EMPTY_BUFFER,
         payloadBuffer
       ]
-      const encodedToBeSigned = cbor.encode(decodedToBeSigned);
+      const encodedToBeSigned = encode(decodedToBeSigned);
       const signingKey = await subtle.importKey(
         "jwk",
         secretKeyJwk,
@@ -41,7 +39,7 @@ const signer = ({ secretKeyJwk }: RequestCoseSign1Signer) => {
         encodedToBeSigned,
       );
       const coseSign1Structure = [protectedHeaderBytes, unprotectedHeader, payloadBuffer, signature];
-      return cbor.encodeAsync(new Tagged(Sign1Tag, coseSign1Structure), { canonical: true });
+      return encodeAsync(new Tagged(Sign1Tag, coseSign1Structure), { canonical: true });
     }
   }
 }
