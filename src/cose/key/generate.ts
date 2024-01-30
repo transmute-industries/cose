@@ -13,7 +13,9 @@ import { convertJsonWebKeyToCoseKey } from './convertJsonWebKeyToCoseKey'
 
 import { thumbprint } from "./thumbprint"
 
-export const generate = async (alg: CoseSignatureAlgorithms, contentType: PrivateKeyContentType = 'application/jwk+json') => {
+import { formatJwk } from './formatJwk'
+
+export const generate = async <T>(alg: CoseSignatureAlgorithms, contentType: PrivateKeyContentType = 'application/jwk+json'): Promise<T> => {
   const knownAlgorithm = Object.values(IANACOSEAlgorithms).find((
     entry
   ) => {
@@ -27,15 +29,16 @@ export const generate = async (alg: CoseSignatureAlgorithms, contentType: Privat
   const jwkThumbprint = await calculateJwkThumbprint(secretKeyJwk)
   secretKeyJwk.kid = jwkThumbprint
   if (contentType === 'application/jwk+json') {
-    return secretKeyJwk as JWK
+    return formatJwk(secretKeyJwk) as T
   }
   if (contentType === 'application/cose-key') {
     delete secretKeyJwk.kid;
     const secretKeyCoseKey = convertJsonWebKeyToCoseKey(secretKeyJwk)
     const coseKeyThumbprint = await thumbprint.calculateCoseKeyThumbprint(secretKeyCoseKey)
     secretKeyCoseKey.set(2, coseKeyThumbprint)
-    return secretKeyCoseKey
+    return secretKeyCoseKey as T
   }
+  throw new Error('Unsupported content type.')
 }
 
 

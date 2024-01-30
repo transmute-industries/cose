@@ -1,5 +1,5 @@
 
-import * as jose from 'jose'
+import { JWK, base64url } from 'jose'
 import { typedArrayToBuffer } from '../../utils'
 
 import { IANACOSEKeyCommonParameters } from '../key-common-parameters';
@@ -39,7 +39,7 @@ const getKeyTypeSpecificLabel = (keyType: 'EC2' | 'OKP', keyTypeParam: string) =
   return label
 }
 
-export const convertJsonWebKeyToCoseKey = (jwk: Record<string, unknown>): Map<any, any> => {
+export const convertJsonWebKeyToCoseKey = (jwk: JWK): Map<any, any> => {
 
   const { kty } = jwk
   let coseKty = `${kty}` as 'OKP' | 'EC' | 'EC2'; // evidence of terrible design.
@@ -110,18 +110,18 @@ export const convertJsonWebKeyToCoseKey = (jwk: Record<string, unknown>): Map<an
       case 'y':
       case 'd': {
         label = getKeyTypeSpecificLabel(coseKty, key)
-        coseKey.set(label, typedArrayToBuffer(jose.base64url.decode(value as string)))
+        coseKey.set(label, typedArrayToBuffer(base64url.decode(value as string)))
         break
       }
       case 'x5c': {
         const items = (value as string[] || []).map((item: string) => {
-          return typedArrayToBuffer(jose.base64url.decode(item as string))
+          return typedArrayToBuffer(base64url.decode(item as string))
         })
         coseKey.set(label, items)
         break
       }
       case 'x5t#S256': {
-        coseKey.set(label, typedArrayToBuffer(jose.base64url.decode(value as string)))
+        coseKey.set(label, typedArrayToBuffer(base64url.decode(value as string)))
         break
       }
       default: {

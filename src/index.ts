@@ -1,3 +1,15 @@
+
+
+import { JWK } from 'jose'
+
+
+export type JsonWebKey = JWK
+
+export type CoseMapKey = string | number
+export type CoseMapValue = ArrayBuffer | string | number | Map<CoseMapKey, unknown>
+
+export type CoseKey = Map<CoseMapKey, CoseMapValue>
+
 export * from './lib'
 
 export * from './cose/algorithms'
