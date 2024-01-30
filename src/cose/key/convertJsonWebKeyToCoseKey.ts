@@ -24,8 +24,7 @@ export const convertJsonWebKeyToCoseKey = (jwk: Record<string, unknown>): Map<an
       label = parseInt(foundCommonParam.Label, 10)
     }
 
-    console.log({ key, value, foundCommonParam })
-    //   const coseKeyParam = keyUtils.parameters.toCOSE.get(key)
+
     switch (key) {
       case 'kty': {
 

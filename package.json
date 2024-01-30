@@ -19,7 +19,7 @@
     "coverage": "jest --ci --coverage",
     "lint": "eslint ./src ./test --fix",
     "shove": "git add -A; git commit -m ':rocket:'; git push origin main",
-    "generate:iana:ts": "node scripts/make-iana-cose-algorithms.js; node scripts/make-iana-cose-header-parameters.js; node scripts/make-iana-key-common-parameters.js; node scripts/make-iana-cose-key-type-parameters.js;"
+    "generate:iana:ts": "./scripts/make-iana.sh"
   },
   "repository": {
     "type": "git",
