@@ -15,7 +15,8 @@ const csvUrlToMap = async (url) => {
       if (row.Reference.startsWith('[RFC')) {
         row.Reference = `https://datatracker.ietf.org/doc/${row.Reference.substring(1, row.Reference.length - 1)}`
       }
-      map[row.Value] = row
+      const index = row.Label || row.Value || row.Name
+      map[index] = row
     });
     stream.on('end', () => {
       resolve(map)

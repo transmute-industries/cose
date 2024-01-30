@@ -3,11 +3,16 @@ import * as jose from 'jose'
 import { typedArrayToBuffer } from '../../utils'
 
 import { IANACOSEKeyCommonParameters } from '../key-common-parameters';
+import { IANACOSEKeyTypeParameters } from '../key-type-parameters';
+
+
+const commonParams = Object.values(IANACOSEKeyCommonParameters)
+const keyParams = Object.values(IANACOSEKeyTypeParameters)
 
 
 export const convertJsonWebKeyToCoseKey = (jwk: Record<string, unknown>): Map<any, any> => {
   const coseKey = new Map();
-  const commonParams = Object.values(IANACOSEKeyCommonParameters)
+
   for (const [key, value] of Object.entries(jwk)) {
     const foundCommonParam = commonParams.find((param) => {
       return param.Name === key
@@ -23,8 +28,12 @@ export const convertJsonWebKeyToCoseKey = (jwk: Record<string, unknown>): Map<an
     //   const coseKeyParam = keyUtils.parameters.toCOSE.get(key)
     switch (key) {
       case 'kty': {
-        const coseKeyValue = keyUtils.types.toCOSE.get(value)
-        coseKey.set(label, coseKeyValue)
+
+        const foundKeyTypeParam = keyParams.find((param) => {
+          return param.Name === value
+        })
+        console.log({ foundKeyTypeParam })
+        // coseKey.set(label, coseKeyValue)
         break
       }
       // case 'kid': {
