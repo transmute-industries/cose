@@ -1,17 +1,6 @@
-import { ProtectedHeaderMap, UnprotectedHeaderMap } from './HeaderParameters'
 
-export type PublicKeyJwk = {
-  alg: string
-  kty: string
-  crv: string
-  x: string
-  y: string
-}
-
-export type SecretKeyJwk = PublicKeyJwk & {
-  d: string
-}
-
+export type ProtectedHeaderMap = Map<any, any>
+export type UnprotectedHeaderMap = Map<any, any>
 
 export type CoseSign1Structure = [Buffer, UnprotectedHeaderMap, Buffer, Buffer]
 export type DecodedToBeSigned = [string, Buffer, Buffer, Buffer]
@@ -19,6 +8,8 @@ export type DecodedCoseSign1 = {
   value: CoseSign1Structure
 }
 
+export type SecretKeyJwk = JsonWebKey & { d: string }
+export type PublicKeyJwk = Omit<SecretKeyJwk, 'd'>
 
 export type RequestCoseSign1Signer = {
   secretKeyJwk: SecretKeyJwk

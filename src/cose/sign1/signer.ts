@@ -9,7 +9,7 @@ import subtleCryptoProvider from '../../crypto/subtleCryptoProvider'
 
 
 const signer = ({ secretKeyJwk }: RequestCoseSign1Signer) => {
-  const digest = getDigestFromVerificationKey(secretKeyJwk)
+  const digest = getDigestFromVerificationKey(`${secretKeyJwk.alg}`)
   return {
     sign: async ({ protectedHeader, unprotectedHeader, externalAAD, payload }: RequestCoseSign1) => {
       const subtle = await subtleCryptoProvider()
