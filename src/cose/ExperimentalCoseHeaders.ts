@@ -1,4 +1,4 @@
-import { IANACOSEHeaderParameters } from './headers'
+import { IANACOSEHeaderParameters } from './header-parameters'
 
 const ExperimentalCoseHeaders = IANACOSEHeaderParameters
 

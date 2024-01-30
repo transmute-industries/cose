@@ -8,7 +8,7 @@ export const signer = ({ secretKeyJwk }: sign1.RequestCoseSign1Signer) => {
     sign: async (req: sign1.RequestCoseSign1) => {
       const coseSign1 = await signer.sign(req)
       const decoded = decodeFirstSync(coseSign1)
-      decoded.value[2] = undefined // set the payload to null
+      decoded.value[2] = undefined // set the payload to nil (undefined, because null causes diagnostic to crash)
       return encodeAsync(new Tagged(Sign1Tag, decoded.value), { canonical: true })
     }
   }

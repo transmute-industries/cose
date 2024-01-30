@@ -1,4 +1,4 @@
-// import fs from 'fs'
+import fs from 'fs'
 import * as transmute from '../src'
 
 it('sign and verify', async () => {
@@ -22,5 +22,5 @@ it('sign and verify', async () => {
   const verified = await verifier.verify({ coseSign1, payload })
   expect(new TextDecoder().decode(verified)).toBe(message)
 
-  // fs.writeFileSync('./examples/detached.cose-sign1.cbor', Buffer.from(coseSign1))
+  fs.writeFileSync('./examples/detached.cose-sign1.cbor', Buffer.from(coseSign1))
 })
