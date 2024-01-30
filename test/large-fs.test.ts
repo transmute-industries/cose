@@ -30,7 +30,7 @@ beforeAll(async () => {
 
 it('detached api large objects', async () => {
   const protectedHeader = { alg: 'ES256', kid: log_id, content_type: 'image/png' }
-  const content = fs.readFileSync('1765337807_A cyberpunk painting of trees made of light, zeros_xl-beta-v2-2-2.png')
+  const content = fs.readFileSync('./test/1765337807_A cyberpunk painting of trees made of light, zeros_xl-beta-v2-2-2.png')
   const { payload, signature, } = await signer.sign({ protectedHeader, payload: content })
   const verified = await verifier.verify({ payload, signature, })
   const contentType = cose.getContentType(signature)

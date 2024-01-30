@@ -9,6 +9,7 @@ const secretKeyJwk = {
   y: jose.base64url.encode(Buffer.from('60f7f1a780d8a783bfb7a2dd6b2796e8128dbbcef9d3d168db9529971a36e7b9', 'hex')),
   d: jose.base64url.encode(Buffer.from('6c1382765aec5358f117733d281c1c7bdc39884d04a45a1e6c67c858bc206c19', 'hex')),
 }
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const { d, ...publicKeyJwk } = secretKeyJwk
 const payload = Buffer.from('Important message!');
 

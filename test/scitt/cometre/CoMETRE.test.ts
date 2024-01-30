@@ -1,4 +1,4 @@
-import cose, { CoseSigner, CoseVerifier } from '../../src'
+import cose, { CoseSigner, CoseVerifier } from '../../../src'
 import fs from 'fs'
 
 const log_id = `https://transparency.example`
@@ -65,9 +65,6 @@ it('inclusion proof', async () => {
     verifier,
   })
 
-  const proofBlocks = await cose.rfc.diag(signed_inclusion_proof)
-  fs.writeFileSync('test/cometre/inclusion-proof.md', await cose.rfc.blocks(proofBlocks))
-
   expect(verified_inclusion_proof).toBe(
     true,
   )
@@ -104,8 +101,6 @@ it('consistency proof', async () => {
     signed_consistency_proof,
     verifier,
   })
-  const proofBlocks = await cose.rfc.diag(signed_consistency_proof)
-  fs.writeFileSync('test/cometre/consistency-proof.md', await cose.rfc.blocks(proofBlocks))
   expect(verified).toBe(true)
   const verified_root = await verifier.verify(signed_consistency_proof)
   expect(verified_root).toEqual(new_root)

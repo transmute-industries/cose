@@ -1,6 +1,6 @@
 
 
-import cose from '../../../src'
+import cose from '../../src'
 
 let signedStatement: Buffer;
 let receipt: Buffer;
