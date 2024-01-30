@@ -49,3 +49,5 @@ it('generate thumbprints', async () => {
   const decoded = base64url.decode(cktUri.split(':').pop() as string)
   expect(Buffer.from(decoded)).toEqual(Buffer.from(ckt))
 })
+
+it.todo('public from private for JWK and cose key')

@@ -55,3 +55,7 @@ it('issue & verify', async () => {
   })
   expect(consistencyValidated).toBe(true)
 })
+
+it.todo("add / remove from unprotected header")
+
+it.todo("verify multiple receipts")
