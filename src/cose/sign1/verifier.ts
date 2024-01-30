@@ -6,13 +6,13 @@ import { RequestCoseSign1Verifier, CoseSign1Bytes } from './types'
 
 import getAlgFromVerificationKey from './getAlgFromVerificationKey'
 import getDigestFromVerificationKey from './getDigestFromVerificationKey'
-import { AlgFromTags } from './AlgFromTags'
+
 import { DecodedToBeSigned } from './types'
 
 import { labelToTag, ProtectedHeaderMap, getCommonParameter } from './HeaderParameters';
 import { EMPTY_BUFFER } from './common'
 
-import subtleCryptoProvider from '../crypto/subtleCryptoProvider'
+import subtleCryptoProvider from '../../crypto/subtleCryptoProvider'
 
 const verifier = ({ publicKeyJwk }: RequestCoseSign1Verifier) => {
   const digest = getDigestFromVerificationKey(publicKeyJwk)
@@ -21,7 +21,7 @@ const verifier = ({ publicKeyJwk }: RequestCoseSign1Verifier) => {
       const subtle = await subtleCryptoProvider()
       const obj = await cbor.decodeFirst(coseSign1Bytes);
       const signatureStructure = obj.value;
-      const verificationKeyAlgorithm = getAlgFromVerificationKey(publicKeyJwk)
+      const verificationKeyAlgorithm = getAlgFromVerificationKey(publicKeyJwk.alg)
       if (!Array.isArray(signatureStructure)) {
         throw new Error('Expecting Array');
       }
@@ -33,9 +33,6 @@ const verifier = ({ publicKeyJwk }: RequestCoseSign1Verifier) => {
       const envelopeAlgorithm = getCommonParameter(protectedHeaderMap, unprotectedHeaderMap, labelToTag.get('alg'))
       if (envelopeAlgorithm !== verificationKeyAlgorithm) {
         throw new Error('Verification key does not support algorithm: ' + envelopeAlgorithm);
-      }
-      if (!AlgFromTags[envelopeAlgorithm]) {
-        throw new Error('Unknown algorithm, ' + envelopeAlgorithm);
       }
       if (!signature) {
         throw new Error('No signature to verify');

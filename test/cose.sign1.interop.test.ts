@@ -17,9 +17,10 @@ const protectedHeader = new Map();
 protectedHeader.set(1, -7)
 const unprotectedHeader = new Map();
 
-it('sanity', async () => {
-  const message = 'hello'
-  const payload = Buffer.from(new TextEncoder().encode(message))
+const message = 'hello'
+const payload = Buffer.from(new TextEncoder().encode(message))
+
+it('cross test sign and verify', async () => {
   const s1 = await cose.sign.create(
     { p: { 'alg': 'ES256' }, u: unprotectedHeader },
     payload,

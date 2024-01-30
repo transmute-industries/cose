@@ -10,7 +10,7 @@ export type CoseMapValue = ArrayBuffer | string | number | Map<CoseMapKey, unkno
 
 export type CoseKey = Map<CoseMapKey, CoseMapValue>
 
-export * from './lib'
+export * from './cose/sign1'
 
 export * from './cose/algorithms'
 export * from './cose/header-parameters'

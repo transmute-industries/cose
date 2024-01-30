@@ -1,5 +1,5 @@
 import * as cbor from 'cbor-web'
-import { toArrayBuffer } from '../cbor'
+import { toArrayBuffer } from '../../cbor'
 
 export const Sign1Tag = 18;
 

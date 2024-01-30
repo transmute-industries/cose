@@ -5,7 +5,7 @@ import { EMPTY_BUFFER, Tagged, Sign1Tag } from './common'
 import { RequestCoseSign1Signer, RequestCoseSign1 } from "./types"
 import getDigestFromVerificationKey from './getDigestFromVerificationKey'
 
-import subtleCryptoProvider from '../crypto/subtleCryptoProvider'
+import subtleCryptoProvider from '../../crypto/subtleCryptoProvider'
 
 
 const signer = ({ secretKeyJwk }: RequestCoseSign1Signer) => {
