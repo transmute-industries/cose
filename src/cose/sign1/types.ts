@@ -15,16 +15,28 @@ export type RequestCoseSign1Signer = {
   secretKeyJwk: SecretKeyJwk
 }
 
-export type CoseSign1Signer = {
-  sign: (req: RequestCoseSign1) => Promise<Buffer>
-}
-
 export type RequestCoseSign1 = {
   protectedHeader: ProtectedHeaderMap,
   unprotectedHeader: UnprotectedHeaderMap,
-  payload: Buffer,
-  externalAAD?: Buffer
+  payload: ArrayBuffer,
+  externalAAD?: ArrayBuffer
 }
 
+export type CoseSign1Bytes = ArrayBuffer
+
+export type CoseSign1Signer = {
+  sign: (req: RequestCoseSign1) => Promise<CoseSign1Bytes>
+}
+
+
 export type RequestCoseSign1Verifier = { publicKeyJwk: PublicKeyJwk }
-export type CoseSign1Bytes = Buffer
+
+export type RequestCoseSign1Verify = {
+  coseSign1: CoseSign1Bytes,
+  externalAAD?: ArrayBuffer
+}
+
+export type CoseSign1Verifier = {
+  verify: (req: RequestCoseSign1Verify) => Promise<ArrayBuffer>
+}
+

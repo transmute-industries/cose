@@ -1,7 +1,7 @@
 
 import { decodeFirst, decodeFirstSync, encode, EMPTY_BUFFER } from '../../cbor'
 
-import { RequestCoseSign1Verifier, CoseSign1Bytes } from './types'
+import { RequestCoseSign1Verifier, CoseSign1Bytes, RequestCoseSign1Verify } from './types'
 
 import getAlgFromVerificationKey from './getAlgFromVerificationKey'
 import getDigestFromVerificationKey from './getDigestFromVerificationKey'
@@ -14,9 +14,9 @@ const verifier = ({ publicKeyJwk }: RequestCoseSign1Verifier) => {
   const algInPublicKey = getAlgFromVerificationKey(`${publicKeyJwk.alg}`)
   const digest = getDigestFromVerificationKey(`${publicKeyJwk.alg}`)
   return {
-    verify: async (coseSign1Bytes: CoseSign1Bytes, externalAAD = EMPTY_BUFFER): Promise<Buffer> => {
+    verify: async ({ coseSign1, externalAAD }: RequestCoseSign1Verify): Promise<Buffer> => {
       const subtle = await subtleCryptoProvider()
-      const obj = await decodeFirst(coseSign1Bytes);
+      const obj = await decodeFirst(coseSign1);
       const signatureStructure = obj.value;
       if (!Array.isArray(signatureStructure)) {
         throw new Error('Expecting Array');
@@ -36,9 +36,10 @@ const verifier = ({ publicKeyJwk }: RequestCoseSign1Verifier) => {
       const decodedToBeSigned = [
         'Signature1',
         protectedHeaderBytes,
-        externalAAD,
+        externalAAD || EMPTY_BUFFER,
         payload
       ] as DecodedToBeSigned
+      const encodedToBeSigned = encode(decodedToBeSigned);
       const verificationKey = await subtle.importKey(
         "jwk",
         publicKeyJwk,
@@ -49,7 +50,6 @@ const verifier = ({ publicKeyJwk }: RequestCoseSign1Verifier) => {
         true,
         ["verify"],
       )
-      const encodedToBeSigned = encode(decodedToBeSigned);
       const verified = await subtle.verify(
         {
           name: "ECDSA",

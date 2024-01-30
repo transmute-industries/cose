@@ -1,6 +1,6 @@
 
 
-import { generateKeyPair, exportJWK, calculateJwkThumbprint, JWK } from "jose"
+import { generateKeyPair, exportJWK, calculateJwkThumbprint } from "jose"
 
 import { IANACOSEAlgorithms } from "../algorithms"
 
@@ -17,7 +17,6 @@ import { thumbprint } from "./thumbprint"
 import { formatJwk } from './formatJwk'
 
 
-import { getRecommendedAlgorithmForCoseKey } from './getRecommendedAlgorithmForCoseKey'
 export const generate = async <T>(alg: CoseSignatureAlgorithms, contentType: PrivateKeyContentType = 'application/jwk+json'): Promise<T> => {
   const knownAlgorithm = Object.values(IANACOSEAlgorithms).find((
     entry
