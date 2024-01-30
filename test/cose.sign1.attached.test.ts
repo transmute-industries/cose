@@ -1,4 +1,4 @@
-
+// import fs from 'fs'
 import * as transmute from '../src'
 
 it('sign and verify', async () => {
@@ -14,9 +14,9 @@ it('sign and verify', async () => {
   })
   // ... the network ...
 
-  // console.log(await transmute.cbor.diagnose(coseSign1))
-
   const verifier = transmute.attached.verifier({ publicKeyJwk })
   const verified = await verifier.verify({ coseSign1 })
   expect(new TextDecoder().decode(verified)).toBe(message)
+
+  // fs.writeFileSync('./examples/attached.cose-sign1.cbor', Buffer.from(coseSign1))
 })
