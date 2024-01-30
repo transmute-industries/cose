@@ -1,3 +1,4 @@
+import { base64url } from 'jose'
 
 import * as transmute from '../src'
 
@@ -26,5 +27,25 @@ it('generate cose key', async () => {
   const secretKeyJwk4 = await transmute.key.convertCoseKeyToJsonWebKey(secretKeyCose3)
   expect(secretKeyJwk4.kid).toBe(secretKeyJwk3.kid) // text identifiers survive key conversion
 
-
+})
+it('generate thumbprints', async () => {
+  const k1 = {
+    kty: 'EC',
+    kid: '6hnb34De4biE17mQd46iSzxMnYPtqy3UaUd22KYZ0xg',
+    alg: 'ES256',
+    crv: 'P-256',
+    x: '9YjGAfpSPQ9t8p9zc9eCqzkDGHu_j-0_tTkUvOk5U8E',
+    y: 'YBFDrB8IROK1G_mu5FceqQnEk4CoFbcz6MyhuQWkCTE',
+    d: 'FLvNjn-z8HOvl0eGcH8eBYnxZ4xoEKVvCYIB0ibqkfs'
+  }
+  const jkt = await transmute.key.thumbprint.calculateJwkThumbprint(k1)
+  const jktUri = await transmute.key.thumbprint.calculateJwkThumbprintUri(k1)
+  expect(jktUri).toBe('urn:ietf:params:oauth:jwk-thumbprint:sha-256:6hnb34De4biE17mQd46iSzxMnYPtqy3UaUd22KYZ0xg')
+  expect(jkt).toBe(k1.kid)
+  const k2 = await transmute.key.convertJsonWebKeyToCoseKey(k1)
+  const ckt = await transmute.key.thumbprint.calculateCoseKeyThumbprint(k2)
+  const cktUri = await transmute.key.thumbprint.calculateCoseKeyThumbprintUri(k2)
+  expect(cktUri).toBe('urn:ietf:params:oauth:ckt:sha-256:T6ixLT_utMNJDPXpM4qfsGD_EyGfMa0JZsZNmvYK1lY')
+  const decoded = base64url.decode(cktUri.split(':').pop() as string)
+  expect(Buffer.from(decoded)).toEqual(Buffer.from(ckt))
 })
