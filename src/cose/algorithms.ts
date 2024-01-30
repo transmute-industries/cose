@@ -1,13 +1,13 @@
 export type IANACOSEAlgorithm = {
-  Name: string
-  Value: string
-  Description: string
-  Capabilities: string
-  'Change Controller': string
-  Recommended: string
-  Reference: string
-}
-export const IANACOSEAlgorithms: Record<string, IANACOSEAlgorithm> = {
+    Name: string
+    Value: string
+    Description: string
+    Capabilities: string
+    'Change Controller': string
+    Recommended: string
+    Reference: string
+  }
+  export const IANACOSEAlgorithms: Record<string, IANACOSEAlgorithm> = {
   "0": {
     "Name": "Reserved",
     "Value": "0",
