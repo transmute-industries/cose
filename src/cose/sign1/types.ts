@@ -36,6 +36,12 @@ export type RequestCoseSign1Verify = {
   externalAAD?: ArrayBuffer
 }
 
+export type RequestCoseSign1VerifyDetached = {
+  coseSign1: CoseSign1Bytes,
+  payload: ArrayBuffer
+  externalAAD?: ArrayBuffer
+}
+
 export type CoseSign1Verifier = {
   verify: (req: RequestCoseSign1Verify) => Promise<ArrayBuffer>
 }

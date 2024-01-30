@@ -5,12 +5,14 @@ import { RequestCoseSign1Signer, RequestCoseSign1, CoseSign1Bytes } from "./type
 import getDigestFromVerificationKey from './getDigestFromVerificationKey'
 import subtleCryptoProvider from '../../crypto/subtleCryptoProvider'
 
+
 const signer = ({ secretKeyJwk }: RequestCoseSign1Signer) => {
   const digest = getDigestFromVerificationKey(`${secretKeyJwk.alg}`)
   return {
     sign: async ({ protectedHeader, unprotectedHeader, externalAAD, payload }: RequestCoseSign1): Promise<CoseSign1Bytes> => {
+      // assume the caller does not realize that cbor will preserve the the View Type, and remove it.
+      const payloadBuffer = toArrayBuffer(payload);
       const subtle = await subtleCryptoProvider()
-      const payloadBuffer = payload
       const protectedHeaderBytes = (protectedHeader.size === 0) ? EMPTY_BUFFER : encode(protectedHeader);
       const decodedToBeSigned = [
         'Signature1',

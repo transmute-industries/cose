@@ -16,6 +16,9 @@ export * from './cose/key-common-parameters'
 
 import * as key from './cose/key'
 import * as attached from './cose/attached'
+import * as detached from './cose/detached'
 export * from './cose/sign1'
 
-export { key, attached }
+import * as cbor from './cbor'
+
+export { cbor, key, attached, detached }

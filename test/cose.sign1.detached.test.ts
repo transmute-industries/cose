@@ -5,18 +5,22 @@ it('sign and verify', async () => {
   const secretKeyJwk = await transmute.key.generate<transmute.SecretKeyJwk>('ES256', 'application/jwk+json')
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { d, ...publicKeyJwk } = secretKeyJwk
-  const signer = transmute.attached.signer({ secretKeyJwk })
+  const signer = transmute.detached.signer({ secretKeyJwk })
   const message = '💣 test ✨ mesage 🔥'
+  const payload = new TextEncoder().encode(message)
   const coseSign1 = await signer.sign({
     protectedHeader: new Map([[1, -7]]),
     unprotectedHeader: new Map(),
-    payload: new TextEncoder().encode(message)
+    payload
   })
+  const { tag, value } = await transmute.cbor.decode(coseSign1)
+  expect(tag).toBe(18) // cose sign 1
+  expect(value[2]).toBe(null) // detached payload
+
+  // console.log(transmute.cbor.diagnose(coseSign1))
+
   // ... the network ...
-
-  // console.log(await transmute.cbor.diagnose(coseSign1))
-
-  const verifier = transmute.attached.verifier({ publicKeyJwk })
-  const verified = await verifier.verify({ coseSign1 })
+  const verifier = transmute.detached.verifier({ publicKeyJwk })
+  const verified = await verifier.verify({ coseSign1, payload })
   expect(new TextDecoder().decode(verified)).toBe(message)
 })
