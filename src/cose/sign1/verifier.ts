@@ -1,7 +1,7 @@
 
 import { decodeFirst, decodeFirstSync, encode, EMPTY_BUFFER } from '../../cbor'
 
-import { RequestCoseSign1Verifier, CoseSign1Bytes, RequestCoseSign1Verify } from './types'
+import { RequestCoseSign1Verifier, RequestCoseSign1Verify } from './types'
 
 import getAlgFromVerificationKey from './getAlgFromVerificationKey'
 import getDigestFromVerificationKey from './getDigestFromVerificationKey'
@@ -14,7 +14,7 @@ const verifier = ({ publicKeyJwk }: RequestCoseSign1Verifier) => {
   const algInPublicKey = getAlgFromVerificationKey(`${publicKeyJwk.alg}`)
   const digest = getDigestFromVerificationKey(`${publicKeyJwk.alg}`)
   return {
-    verify: async ({ coseSign1, externalAAD }: RequestCoseSign1Verify): Promise<Buffer> => {
+    verify: async ({ coseSign1, externalAAD }: RequestCoseSign1Verify): Promise<ArrayBuffer> => {
       const subtle = await subtleCryptoProvider()
       const obj = await decodeFirst(coseSign1);
       const signatureStructure = obj.value;
