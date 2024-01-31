@@ -61,6 +61,17 @@ const test = async () => {
   })
 
   console.log('consistency', consistencyValidated);
+
+  const cert = await transmute.certificate.root({
+    alg: 'ES256',
+    iss: 'vendor.example',
+    sub: 'vendor.example',
+    nbf: '2024-01-31T20:50:16.139Z',
+    exp: '2124-01-31T20:50:16.139Z'
+  })
+
+  console.log(cert.public);
+
   console.log('test complete.');
 }
 // setup exports on window

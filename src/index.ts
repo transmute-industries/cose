@@ -18,6 +18,7 @@ import * as key from './cose/key'
 import * as attached from './cose/attached'
 import * as detached from './cose/detached'
 export * from './cose/sign1'
+export * from './x509'
 
 import * as cbor from './cbor'
 
