@@ -50,4 +50,15 @@ it('generate thumbprints', async () => {
   expect(Buffer.from(decoded)).toEqual(Buffer.from(ckt))
 })
 
-it.todo('public from private for JWK and cose key')
+it('public from private for JWK and cose key', async () => {
+  const secretKeyJwk = await transmute.key.generate<transmute.SecretKeyJwk>('ES256', 'application/jwk+json')
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { d, ...expectedPublicKeyJwk } = secretKeyJwk
+  const publicKeyJwk = transmute.key.publicFromPrivate<transmute.PublicKeyJwk>(secretKeyJwk)
+  expect(publicKeyJwk).toEqual(expectedPublicKeyJwk)
+  const secretKeyCose = await transmute.key.generate<transmute.CoseKey>('ES256', 'application/cose-key')
+  const expectedPublicKeyCose = new Map(secretKeyCose.entries())
+  expectedPublicKeyCose.delete(-4)
+  const publicKeyCose = transmute.key.publicFromPrivate<transmute.CoseKey>(secretKeyCose)
+  expect(publicKeyCose).toEqual(expectedPublicKeyCose)
+})

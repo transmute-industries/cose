@@ -3,4 +3,4 @@ export { thumbprint }
 export * from './generate'
 export * from './convertJsonWebKeyToCoseKey'
 export * from './convertCoseKeyToJsonWebKey'
-
+export * from './publicFromPrivate'
