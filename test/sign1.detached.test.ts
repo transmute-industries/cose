@@ -46,11 +46,4 @@ it('sign and verify large image from file system', async () => {
   // faster to compare hex strings.
   expect(Buffer.from(verified).toString('hex')).toEqual(content.toString('hex'))
 
-  const coseKey = transmute.key.convertJsonWebKeyToCoseKey(publicKeyJwk)
-  coseKey.set(2, await transmute.key.thumbprint.calculateCoseKeyThumbprintUri(coseKey))
-  const publicKey = transmute.key.serialize<Buffer>(coseKey)
-  expect(publicKey).toBeDefined();
-  // fs.writeFileSync('./examples/image.ckt.signature.cbor', coseSign1)
-  // fs.writeFileSync('./examples/image.ckt.public-key.cbor', publicKey)
-
 })

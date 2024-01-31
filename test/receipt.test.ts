@@ -1,6 +1,7 @@
 
 
 
+import fs from 'fs'
 
 import * as transmute from '../src'
 const encoder = new TextEncoder();
@@ -59,5 +60,40 @@ it('issue & verify', async () => {
   expect(consistencyValidated).toBe(true)
 })
 
-it.todo("add / remove from unprotected header")
+it("add / remove from receipts", async () => {
+  const secretKeyJwk = await transmute.key.generate<transmute.SecretKeyJwk>('ES256', 'application/jwk+json')
+  const publicKeyJwk = await transmute.key.publicFromPrivate<transmute.PublicKeyJwk>(secretKeyJwk)
+  const signer = transmute.detached.signer({ secretKeyJwk })
+  const content = fs.readFileSync('./examples/image.png')
+  const signatureForImage = await signer.sign({
+    protectedHeader: new Map<number, any>([
+      [1, -7], // alg ES256
+      [3, "image/png"], // content_type image/png
+    ]),
+    unprotectedHeader: new Map(),
+    payload: content
+  })
+  const transparencyLogContainingImageSignatures = [await transmute.receipt.leaf(signatureForImage)]
+  // inclusion proof receipt for image signature
+  const receiptForImageSignature = await transmute.receipt.inclusion.issue({
+    protectedHeader: new Map([
+      [1, -7],  // alg ES256
+      [-111, 1] // vds RFC9162
+    ]),
+    entry: 0,
+    entries: transparencyLogContainingImageSignatures,
+    signer
+  })
+  const transparentSignature = await transmute.receipt.add(signatureForImage, receiptForImageSignature)
+  const { value } = transmute.cbor.decode(transparentSignature)
+  expect(value[1].get(394).length).toBe(1) // expect 1 receipt
+  const receipts = await transmute.receipt.get(transparentSignature)
+  expect(receipts.length).toBe(1) // expect 1 receipt
+  const coseKey = transmute.key.convertJsonWebKeyToCoseKey(publicKeyJwk)
+  coseKey.set(2, await transmute.key.thumbprint.calculateCoseKeyThumbprintUri(coseKey))
+  const publicKey = transmute.key.serialize<Buffer>(coseKey)
+  expect(publicKey).toBeDefined();
+  // fs.writeFileSync('./examples/image.ckt.signature.cbor', Buffer.from(transparentSignature))
+  // fs.writeFileSync('./examples/image.ckt.public-key.cbor', publicKey)
+})
 
