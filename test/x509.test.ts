@@ -1,3 +1,4 @@
+import fs from 'fs'
 import moment from 'moment'
 
 import * as transmute from '../src'
@@ -16,15 +17,15 @@ it('sign and verify with x5t and key resolver', async () => {
   // }
   const rootCertificateThumbprint = await transmute.certificate.thumbprint(cert.public)
   const signer = await transmute.certificate.signer({ alg: -7, privateKeyPKCS8: cert.private })
-  const message = '💣 test ✨ mesage 🔥'
-  const payload = new TextEncoder().encode(message)
+  const content = fs.readFileSync('./examples/image.png')
   const coseSign1 = await signer.sign({
     protectedHeader: new Map<number, any>([
       [1, -7],  // alg ES256
-      [34, rootCertificateThumbprint] // xt5 thumbprint
+      [34, rootCertificateThumbprint], // xt5 thumbprint
+      [3, "image/png"], // content_type image/png
     ]),
     unprotectedHeader: new Map(),
-    payload
+    payload: content
   })
   const certificateFromThumbprint = async (x5t: [number, ArrayBuffer]): Promise<string> => {
     const [alg, hash] = x5t;
@@ -39,8 +40,11 @@ it('sign and verify with x5t and key resolver', async () => {
   const verifier = transmute.certificate.verifier({
     resolve: certificateFromThumbprint
   })
-  const verified = await verifier.verify({ coseSign1, payload })
-  expect(new TextDecoder().decode(verified)).toBe(message)
+  const verified = await verifier.verify({ coseSign1, payload: content })
+  // faster to compare hex strings.
+  expect(Buffer.from(verified).toString('hex')).toEqual(content.toString('hex'))
 
-
+  // fs.writeFileSync('./examples/image.x5t.cbor', coseSign1)
+  // fs.writeFileSync('./examples/image.x5t.crt', cert.public)
+  // fs.writeFileSync('./examples/cert.private.pem', cert.private)
 })
