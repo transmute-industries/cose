@@ -1,7 +1,7 @@
 
 import { encode } from '../../cbor'
 import { JWK } from 'jose'
-import { CoseKey } from '../..'
+import { CoseKey } from '.'
 
 export const serialize = <T>(key: JWK | CoseKey) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

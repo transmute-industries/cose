@@ -1,5 +1,5 @@
 
-import { JWK, base64url } from 'jose'
+import { base64url } from 'jose'
 import { toArrayBuffer } from '../../cbor'
 
 import { IANACOSEKeyCommonParameters } from '../key-common-parameters';
@@ -7,6 +7,7 @@ import { IANACOSEAlgorithms } from '../algorithms';
 import { IANACOSEKeyTypeParameters, IANACOSEKeyTypeParameter } from '../key-type-parameters';
 import { IANACOSEKeyTypes } from '../key-type';
 import { IANACOSEEllipticCurves } from '../elliptic-curves';
+import { PublicKeyJwk, SecretKeyJwk } from '../sign1';
 
 
 const algorithms = Object.values(IANACOSEAlgorithms)
@@ -39,7 +40,7 @@ const getKeyTypeSpecificLabel = (keyType: 'EC2' | 'OKP', keyTypeParam: string) =
   return label
 }
 
-export const convertJsonWebKeyToCoseKey = (jwk: JWK): Map<any, any> => {
+export const convertJsonWebKeyToCoseKey = async <T>(jwk: PublicKeyJwk | SecretKeyJwk): Promise<T> => {
 
   const { kty } = jwk
   let coseKty = `${kty}` as 'OKP' | 'EC' | 'EC2'; // evidence of terrible design.
@@ -134,7 +135,7 @@ export const convertJsonWebKeyToCoseKey = (jwk: JWK): Map<any, any> => {
 
 
   // TODO: Length checks on x, y, d
-  return coseKey
+  return coseKey as T
 }
 
 

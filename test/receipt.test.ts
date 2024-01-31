@@ -89,7 +89,7 @@ it("add / remove from receipts", async () => {
   expect(value[1].get(394).length).toBe(1) // expect 1 receipt
   const receipts = await transmute.receipt.get(transparentSignature)
   expect(receipts.length).toBe(1) // expect 1 receipt
-  const coseKey = transmute.key.convertJsonWebKeyToCoseKey(publicKeyJwk)
+  const coseKey = await transmute.key.convertJsonWebKeyToCoseKey<transmute.key.CoseKey>(publicKeyJwk)
   coseKey.set(2, await transmute.key.thumbprint.calculateCoseKeyThumbprintUri(coseKey))
   const publicKey = transmute.key.serialize<Buffer>(coseKey)
   expect(publicKey).toBeDefined();

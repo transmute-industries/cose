@@ -1,4 +1,5 @@
 import { exportJWK, exportPKCS8, importPKCS8, importX509 } from 'jose';
+import { ProtectedHeaderMap, PublicKeyJwk } from "../cose/sign1"
 
 import * as x509 from "@peculiar/x509";
 import { v4 } from 'uuid';
@@ -102,7 +103,7 @@ const signer = async ({ alg, privateKeyPKCS8 }: { alg: number, privateKeyPKCS8: 
 }
 
 export type RequestCertificateVerifier = {
-  resolve: (x5t: [number, ArrayBuffer]) => Promise<string>
+  resolve: (protectedHeaderMap: ProtectedHeaderMap) => Promise<PublicKeyJwk>
 }
 
 const verifier = ({ resolve }: RequestCertificateVerifier) => {
@@ -114,20 +115,7 @@ const verifier = ({ resolve }: RequestCertificateVerifier) => {
       }
       const [protectedHeaderBytes] = value;
       const protectedHeaderMap = decodeFirstSync(protectedHeaderBytes)
-      const alg = protectedHeaderMap.get(1)
-      const x5t = protectedHeaderMap.get(34) // get x5t
-      if (!x5t) {
-        throw new Error('x5t is required in protected header to use the certificate verifer exposed by this library')
-      }
-      const cert = await resolve(x5t)
-      const foundAlgorithm = Object.values(IANACOSEAlgorithms).find((entry) => {
-        return entry.Value === `${alg}`
-      })
-      if (!foundAlgorithm) {
-        throw new Error('Could not find algorithm in registry for: ' + alg)
-      }
-      const publicKeyJwk = await exportJWK(await importX509(cert, foundAlgorithm.Name))
-      publicKeyJwk.alg = foundAlgorithm.Name
+      const publicKeyJwk = await resolve(protectedHeaderMap)
       const verifier = detached.verifier({ publicKeyJwk })
       return verifier.verify(req)
     }

@@ -4,6 +4,8 @@ import { generateKeyPair, exportJWK, calculateJwkThumbprint } from "jose"
 
 import { IANACOSEAlgorithms } from "../algorithms"
 
+
+import { CoseKey } from '.'
 export type CoseKeyAgreementAlgorithms = 'ECDH-ES+A128KW'
 export type CoseSignatureAlgorithms = 'ES256' | 'ES384' | 'ES512'
 export type ContentTypeOfJsonWebKey = 'application/jwk+json'
@@ -36,7 +38,7 @@ export const generate = async <T>(alg: CoseSignatureAlgorithms, contentType: Pri
   }
   if (contentType === 'application/cose-key') {
     delete secretKeyJwk.kid;
-    const secretKeyCoseKey = convertJsonWebKeyToCoseKey(secretKeyJwk)
+    const secretKeyCoseKey = await convertJsonWebKeyToCoseKey<CoseKey>(secretKeyJwk)
     const coseKeyThumbprint = await thumbprint.calculateCoseKeyThumbprint(secretKeyCoseKey)
     secretKeyCoseKey.set(2, coseKeyThumbprint)
     return secretKeyCoseKey as T

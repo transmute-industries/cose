@@ -1,6 +1,6 @@
 import fs from 'fs'
 import moment from 'moment'
-
+import * as jose from 'jose'
 import * as transmute from '../src'
 
 it('sign and verify with x5t and key resolver', async () => {
@@ -27,12 +27,27 @@ it('sign and verify with x5t and key resolver', async () => {
     unprotectedHeader: new Map(),
     payload: content
   })
-  const certificateFromThumbprint = async (x5t: [number, ArrayBuffer]): Promise<string> => {
-    const [alg, hash] = x5t;
+  const certificateFromThumbprint = async (protectedHeaderMap: transmute.ProtectedHeaderMap): Promise<transmute.PublicKeyJwk> => {
+
+    const alg = protectedHeaderMap.get(1)
+    const x5t = protectedHeaderMap.get(34) // get x5t
+    if (!x5t) {
+      throw new Error('x5t is required in protected header to use the certificate verifer exposed by this library')
+    }
+    const [hashAlgorith, hash] = x5t;
     // normally this would be a trust store lookup
-    if (alg === rootCertificateThumbprint[0]) {
+    if (hashAlgorith === rootCertificateThumbprint[0]) {
       if (Buffer.from(hash).toString('hex') === Buffer.from(rootCertificateThumbprint[1]).toString('hex')) {
-        return cert.public
+        const foundAlgorithm = Object.values(transmute.IANACOSEAlgorithms).find((entry) => {
+          return entry.Value === `${alg}`
+        })
+        if (!foundAlgorithm) {
+          throw new Error('Could not find algorithm in registry for: ' + alg)
+        }
+        // could do extra certificate policy validation here...
+        const publicKeyJwk = await jose.exportJWK(await jose.importX509(cert.public, foundAlgorithm.Name))
+        publicKeyJwk.alg = foundAlgorithm.Name
+        return publicKeyJwk
       }
     }
     throw new Error('Certificate is not trusted.')

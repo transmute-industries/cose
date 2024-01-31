@@ -1,5 +1,5 @@
 import { base64url, calculateJwkThumbprint } from "jose";
-import { CoseKey, JsonWebKey } from "../..";
+import { CoseKey } from ".";
 
 
 import { IANACOSEAlgorithms } from '../algorithms';
@@ -10,7 +10,7 @@ const curves = Object.values(IANACOSEEllipticCurves)
 
 import { formatJwk } from "./formatJwk";
 
-export const convertCoseKeyToJsonWebKey = async (coseKey: CoseKey): Promise<JsonWebKey> => {
+export const convertCoseKeyToJsonWebKey = async <T>(coseKey: CoseKey): Promise<T> => {
   const kty = coseKey.get(1) as number
   const kid = coseKey.get(2)
   const alg = coseKey.get(3)
@@ -34,7 +34,7 @@ export const convertCoseKeyToJsonWebKey = async (coseKey: CoseKey): Promise<Json
     kty: 'EC',
     alg: foundAlgorithm.Name,
     crv: foundCurve.Name
-  } as JsonWebKey
+  } as any
   const x = coseKey.get(-2) as any
   const y = coseKey.get(-3) as any
   const d = coseKey.get(-4) as any
@@ -53,5 +53,5 @@ export const convertCoseKeyToJsonWebKey = async (coseKey: CoseKey): Promise<Json
   } else {
     jwk.kid = await calculateJwkThumbprint(jwk)
   }
-  return formatJwk(jwk)
+  return formatJwk(jwk) as T
 }

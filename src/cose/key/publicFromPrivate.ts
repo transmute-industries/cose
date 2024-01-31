@@ -1,4 +1,4 @@
-import { CoseKey } from "../..";
+import { CoseKey } from ".";
 import { SecretKeyJwk } from "../sign1";
 
 
