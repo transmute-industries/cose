@@ -44,7 +44,7 @@ it('sign and verify with x5t and key resolver', async () => {
   // faster to compare hex strings.
   expect(Buffer.from(verified).toString('hex')).toEqual(content.toString('hex'))
 
-  // fs.writeFileSync('./examples/image.x5t.cbor', coseSign1)
-  // fs.writeFileSync('./examples/image.x5t.crt', cert.public)
+  // fs.writeFileSync('./examples/image.x5t.signature.cbor', coseSign1)
+  // fs.writeFileSync('./examples/image.x5t.public-key.crt', cert.public)
   // fs.writeFileSync('./examples/cert.private.pem', cert.private)
 })

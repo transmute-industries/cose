@@ -30,9 +30,7 @@ it('sign and verify large image from file system', async () => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { d, ...publicKeyJwk } = secretKeyJwk
   const signer = transmute.detached.signer({ secretKeyJwk })
-
   const content = fs.readFileSync('./examples/image.png')
-
   const coseSign1 = await signer.sign({
     protectedHeader: new Map<number, any>([
       [1, -7], // alg ES256
@@ -45,5 +43,14 @@ it('sign and verify large image from file system', async () => {
   // ... the network ...
   const verifier = transmute.detached.verifier({ publicKeyJwk })
   const verified = await verifier.verify({ coseSign1, payload: content })
-  expect(Buffer.from(verified).toString('hex')).toEqual(content.toString('hex')) // faster to compare hex strings.
+  // faster to compare hex strings.
+  expect(Buffer.from(verified).toString('hex')).toEqual(content.toString('hex'))
+
+  const coseKey = transmute.key.convertJsonWebKeyToCoseKey(publicKeyJwk)
+  coseKey.set(2, await transmute.key.thumbprint.calculateCoseKeyThumbprintUri(coseKey))
+  const publicKey = transmute.key.serialize<Buffer>(coseKey)
+  expect(publicKey).toBeDefined();
+  // fs.writeFileSync('./examples/image.ckt.signature.cbor', coseSign1)
+  // fs.writeFileSync('./examples/image.ckt.public-key.cbor', publicKey)
+
 })
