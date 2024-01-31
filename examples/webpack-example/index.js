@@ -16,6 +16,51 @@ const test = async () => {
   const verifier = transmute.detached.verifier({ publicKeyJwk: transmute.key.publicFromPrivate(k2) })
   const verified = await verifier.verify({ coseSign1, payload })
   console.log(decoder.decode(verified));
+
+
+  const entries = await Promise.all([`💣 test`, `✨ test`, `🔥 test`]
+    .map((entry) => {
+      return encoder.encode(entry)
+    })
+    .map((entry) => {
+      return transmute.receipt.leaf(entry)
+    }))
+
+  const inclusion = await transmute.receipt.inclusion.issue({
+    protectedHeader: new Map([
+      [1, -7],  // alg ES256
+      [-111, 1] // vds RFC9162
+    ]),
+    entry: 1,
+    entries,
+    signer
+  })
+
+  const oldVerifiedRoot = await transmute.receipt.inclusion.verify({
+    entry: entries[1],
+    receipt: inclusion,
+    verifier
+  })
+
+  entries.push(await transmute.receipt.leaf(encoder.encode('✨ new entry ✨')))
+
+  const { root, receipt } = await transmute.receipt.consistency.issue({
+    protectedHeader: new Map([
+      [1, -7],  // alg ES256
+      [-111, 1] // vds RFC9162
+    ]),
+    receipt: inclusion,
+    entries,
+    signer
+  })
+  const consistencyValidated = await transmute.receipt.consistency.verify({
+    oldRoot: oldVerifiedRoot,
+    newRoot: root,
+    receipt: receipt,
+    verifier
+  })
+
+  console.log('consistency', consistencyValidated);
   console.log('test complete.');
 }
 // setup exports on window
