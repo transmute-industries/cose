@@ -26,8 +26,8 @@ export const verify = async (req: RequestVerifyConsistencyReceipt) => {
   }
   const proofs = unprotectedHeaderMap.get(-222)
   const [consistency] = proofs.get(-2) // get first consistency proof
-  if (payload !== undefined) {
-    throw new Error('payload must be undefined for this type of proof')
+  if (payload !== null) {
+    throw new Error('payload must be null for this type of proof')
   }
   const [tree_size_1,
     tree_size_2,

@@ -15,7 +15,7 @@ it('sign and verify', async () => {
   })
   const { tag, value } = await transmute.cbor.decode(coseSign1)
   expect(tag).toBe(18) // cose sign 1
-  expect(value[2]).toBe(undefined) // detached payload
+  expect(value[2]).toBe(null) // detached payload
 
   // ... the network ...
   const verifier = transmute.detached.verifier({ publicKeyJwk })

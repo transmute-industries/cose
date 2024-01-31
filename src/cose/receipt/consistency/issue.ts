@@ -33,8 +33,8 @@ export const issue = async (req: RequestIssueConsistencyReceipt) => {
   }
 
   const [inclusion] = unprotectedHeaderMap.get(-222).get(-1) // get first inclusion proof
-  if (payload !== undefined) {
-    throw new Error('payload must be undefined for this type of proof')
+  if (payload !== null) {
+    throw new Error('payload must be null for this type of proof')
   }
   const [tree_size, leaf_index, inclusion_path] = cbor.decode(inclusion)
 
