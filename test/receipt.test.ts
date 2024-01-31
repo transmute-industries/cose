@@ -61,4 +61,3 @@ it('issue & verify', async () => {
 
 it.todo("add / remove from unprotected header")
 
-it.todo("verify multiple receipts")

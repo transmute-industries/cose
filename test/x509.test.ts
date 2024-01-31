@@ -41,4 +41,6 @@ it('sign and verify with x5t and key resolver', async () => {
   })
   const verified = await verifier.verify({ coseSign1, payload })
   expect(new TextDecoder().decode(verified)).toBe(message)
+
+
 })
