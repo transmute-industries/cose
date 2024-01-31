@@ -18,8 +18,8 @@ export const issue = async (req: RequestIssueInclusionReceipt) => {
   if (vds !== 1) {
     throw new Error('Unsupported verifiable data structure. See https://datatracker.ietf.org/doc/draft-ietf-cose-merkle-tree-proofs')
   }
-  const root = CoMETRE.RFC9162_SHA256.root(entries)
-  const proof = CoMETRE.RFC9162_SHA256.inclusion_proof(
+  const root = await CoMETRE.RFC9162_SHA256.root(entries)
+  const proof = await CoMETRE.RFC9162_SHA256.inclusion_proof(
     entry,
     entries,
   )

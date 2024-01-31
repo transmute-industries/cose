@@ -4,15 +4,18 @@
 import { CoMETRE } from '@transmute/rfc9162'
 import * as transmute from '../src'
 const encoder = new TextEncoder();
-const entries = [`💣 test`, `✨ test`, `🔥 test`]
-  .map((entry) => {
-    return encoder.encode(entry)
-  })
-  .map((entry) => {
-    return CoMETRE.RFC9162_SHA256.leaf(entry)
-  })
 
 it('issue & verify', async () => {
+
+  const entries = await Promise.all([`💣 test`, `✨ test`, `🔥 test`]
+    .map((entry) => {
+      return encoder.encode(entry)
+    })
+    .map((entry) => {
+      return CoMETRE.RFC9162_SHA256.leaf(entry)
+    }))
+
+
   const secretKeyJwk = await transmute.key.generate<transmute.SecretKeyJwk>('ES256', 'application/jwk+json')
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { d, ...publicKeyJwk } = secretKeyJwk
@@ -35,7 +38,7 @@ it('issue & verify', async () => {
   // because entries are stable, verified root is stable.
   expect(Buffer.from(oldVerifiedRoot).toString('hex')).toBe('d82bd9d3f1e3dd82506d1ab09dd2ed6790596b1a2fe95a64d504dc9e2f90dab6')
   // new entries are added over time.
-  entries.push(CoMETRE.RFC9162_SHA256.leaf(encoder.encode('✨ new entry ✨')))
+  entries.push(await CoMETRE.RFC9162_SHA256.leaf(encoder.encode('✨ new entry ✨')))
   // ask the transparency service for the latest root, and a consistency proof
   // based on a previous receipt
   const { root, receipt } = await transmute.receipt.consistency.issue({

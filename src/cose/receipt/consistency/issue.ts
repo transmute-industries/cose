@@ -38,7 +38,7 @@ export const issue = async (req: RequestIssueConsistencyReceipt) => {
   }
   const [tree_size, leaf_index, inclusion_path] = cbor.decode(inclusion)
 
-  const consistency_proof = CoMETRE.RFC9162_SHA256.consistency_proof(
+  const consistency_proof = await CoMETRE.RFC9162_SHA256.consistency_proof(
     {
       log_id: '',
       tree_size,
@@ -48,7 +48,7 @@ export const issue = async (req: RequestIssueConsistencyReceipt) => {
     entries,
   )
 
-  const root = CoMETRE.RFC9162_SHA256.root(entries)
+  const root = await CoMETRE.RFC9162_SHA256.root(entries)
 
   const proofs = new Map();
   proofs.set(-2, [ // -2 is consistency proof for -111 (vds), 1 (RFC9162)
