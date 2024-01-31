@@ -45,7 +45,7 @@ export const verifier = async (opt: RequestHeaderVerifier) => {
         for (const receipt of receipts) {
           const verifier = await getVerifierForMessage({
             coseSign1: receipt,
-            payload: req.coseSign1
+            payload: bytesOnLedger
           }, opt)
           const verifiedLedgerHead = await inclusion.verify({
             entry: await leaf(new Uint8Array(bytesOnLedger)),
