@@ -22,7 +22,7 @@ it('verify multiple receipts', async () => {
   const content = fs.readFileSync('./examples/image.png')
   const signatureForImage = await issuerSigner.sign({
     protectedHeader: new Map<number, any>([
-      [2, issuerCkt], // kid urn:ietf:params:oauth:ckt:sha-256:T6ixLT_utMNJ...
+      [4, issuerCkt], // kid urn:ietf:params:oauth:ckt:sha-256:T6ixLT_utMNJ...
       [1, -7], // alg ES256
       [3, "image/png"], // content_type image/png
     ]),
@@ -33,7 +33,7 @@ it('verify multiple receipts', async () => {
   // inclusion proof receipt for image signature
   const receiptForImageSignature1 = await transmute.receipt.inclusion.issue({
     protectedHeader: new Map<number, any>([
-      [2, notary1Ckt], // kid urn:ietf:params:oauth:ckt:sha-256:T6ixLT_utMNJ...
+      [4, notary1Ckt], // kid urn:ietf:params:oauth:ckt:sha-256:T6ixLT_utMNJ...
       [1, -7],  // alg ES256
       [-111, 1] // vds RFC9162
     ]),
@@ -43,7 +43,7 @@ it('verify multiple receipts', async () => {
   })
   const receiptForImageSignature2 = await transmute.receipt.inclusion.issue({
     protectedHeader: new Map<number, any>([
-      [2, notary2Ckt], // kid urn:ietf:params:oauth:ckt:sha-256:T6ixLT_utMNJ...
+      [4, notary2Ckt], // kid urn:ietf:params:oauth:ckt:sha-256:T6ixLT_utMNJ...
       [1, -7],  // alg ES256
       [-111, 1] // vds RFC9162
     ]),
@@ -54,7 +54,7 @@ it('verify multiple receipts', async () => {
   const transparentSignature1 = await transmute.receipt.add(signatureForImage, receiptForImageSignature1)
   const transparentSignature = await transmute.receipt.add(transparentSignature1, receiptForImageSignature2)
   const resolve = async (header: transmute.ProtectedHeaderMap): Promise<transmute.PublicKeyJwk> => {
-    const kid = header.get(2);
+    const kid = header.get(4);
     if (kid === issuerCkt) {
       return transmute.key.convertCoseKeyToJsonWebKey(
         await transmute.key.publicFromPrivate(issuerSecretKey)
