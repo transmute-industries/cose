@@ -15,9 +15,7 @@
 
 ## Usage
 
-🔥 This package is not stable or suitable for product use cases 🚧
-
-This package is mostly developed to support various COSE related IETF drafts.
+🔥 This package is not stable or suitable for production use 🚧
 
 ```bash
 npm install '@transmute/cose'
@@ -97,6 +95,19 @@ const verified = await verifier.verify({
   payload: content,
 });
 ```
+
+## IETF
+
+### RFCs
+
+- [RFC9360 - CBOR Object Signing and Encryption (COSE): Header Parameters for Carrying and Referencing X.509 Certificates](https://datatracker.ietf.org/doc/rfc9360/)
+- [RFC9052 - CBOR Object Signing and Encryption (COSE): Structures and Process](https://datatracker.ietf.org/doc/html/rfc9052)
+- [RFC9053 - CBOR Object Signing and Encryption (COSE): Initial Algorithms](https://datatracker.ietf.org/doc/html/rfc9053)
+
+### Drafts
+
+- [Concise Encoding of Signed Merkle Tree Proofs](https://datatracker.ietf.org/doc/draft-ietf-cose-merkle-tree-proofs/)
+- [An Architecture for Trustworthy and Transparent Digital Supply Chains](https://datatracker.ietf.org/doc/draft-ietf-scitt-architecture/)
 
 ## Develop
 
