@@ -15,172 +15,99 @@
 
 ## Usage
 
-🔥 This package is not stable or suitable for product use cases 🚧
-
-This package is mostly developed to support various COSE related IETF drafts.
+🔥 This package is not stable or suitable for production use 🚧
 
 ```bash
 npm install '@transmute/cose'
 ```
 
 ```ts
-import cose from '@transmute/cose'
+import * as cose from "@transmute/cose";
 ```
 
 ```js
-const cose = require('@transmute/cose')
+const cose = require("@transmute/cose");
 ```
 
-### Inclusion Proof
-
 ```ts
-const signed_inclusion_proof = await cose.merkle.inclusion_proof({
-    alg: signer.alg,
-    kid: log_id,
-    leaf_index: 2,
-    leaves,
-    signer,
-  })
-```
+const issuerSecretKeyJwk = await cose.key.generate<cose.SecretKeyJwk>(
+  "ES256",
+  "application/jwk+json"
+);
+const issuerPublicKeyJwk = await cose.key.publicFromPrivate<cose.PublicKeyJwk>(
+  issuerSecretKeyJwk
+);
 
-~~~~ cbor-diag
-18(                                 / COSE Single Signer Data Object        /
-    [
-      h'a2012604...6d706c65',       / Protected header                      /
-      {                             / Unprotected header                    /
-        100: [                      / Inclusion proofs (2)                  /
-          h'83040282...1f487bb1',   / Inclusion proof 1                     /
-          h'83040382...1f487bb1',   / Inclusion proof 2                     /
-        ]
-      },
-      h'',                          / Payload                               /
-      h'efde9a59...b4cb142b'        / Signature                             /
-    ]
-)
-~~~~
+const notarySecretKeyJwk = await cose.key.generate<cose.SecretKeyJwk>(
+  "ES256",
+  "application/jwk+json"
+);
+const notaryPublicKeyJwk = await cose.key.publicFromPrivate<cose.PublicKeyJwk>(
+  notarySecretKeyJwk
+);
+const issuer = cose.detached.signer({ secretKeyJwk: issuerSecretKeyJwk });
+const notary = cose.detached.signer({ secretKeyJwk: notarySecretKeyJwk });
 
-~~~~ cbor-diag
-{                                   / Protected header                      /
-  1: -7,                            / Cryptographic algorithm to use        /
-  4: h'68747470...6d706c65'         / Key identifier                        /
-}
-~~~~
-
-~~~~ cbor-diag
-[                                   / Inclusion proof 1                     /
-  4,                                / Tree size                             /
-  2,                                / Leaf index                            /
-  [                                 / Inclusion hashes (2)                  /
-     h'a39655d4...d29a968a'         / Intermediate hash 1                   /
-     h'57187dff...1f487bb1'         / Intermediate hash 2                   /
-  ]
-]
-~~~~
-
-~~~~ cbor-diag
-[                                   / Inclusion proof 2                     /
-  4,                                / Tree size                             /
-  3,                                / Leaf index                            /
-  [                                 / Inclusion hashes (2)                  /
-     h'e7f16481...aab81688'         / Intermediate hash 1                   /
-     h'57187dff...1f487bb1'         / Intermediate hash 2                   /
-  ]
-]
-~~~~
-
-See also :
-
-- [RFC9162](https://datatracker.ietf.org/doc/rfc9162/).
-- [draft-steele-cose-merkle-tree-proofs](https://github.com/ietf-scitt/draft-steele-cose-merkle-tree-proofs).
-
-#### Setup
-
-```ts
-import cose from '@transmute/cose'
-const signer = await cose.signer({
-  privateKeyJwk: {
-    kty: 'EC',
-    crv: 'P-256',
-    alg: 'ES256',
-    d: 'o_95vWSheg19YU7viU3PmW_kRIWk14HiVLXDXiZjEL0',
-    x: 'LYdh0ITBGLOUpywy0adFxXyaIaQapIEOLgfw7933TRE',
-    y: 'I6R3hgQZf2topOWa0VBjEugRgHISJ39LvOlfVX29P0w',
-  },
-})
-const verifier = await cose.verifier({
-  publicKeyJwk: {
-    kty: 'EC',
-    crv: 'P-256',
-    alg: 'ES256',
-    x: 'LYdh0ITBGLOUpywy0adFxXyaIaQapIEOLgfw7933TRE',
-    y: 'I6R3hgQZf2topOWa0VBjEugRgHISJ39LvOlfVX29P0w',
-  },
-})
-```
-
-#### Issue Inclusion Proof
-
-```ts
-const message0 = cose.cbor.encode(0)
-const message1 = cose.cbor.encode('1')
-const message2 = cose.cbor.encode([2, 2])
-const message3 = cose.cbor.encode({ 3: 3 })
-
-const entries = [message0, message1, message2, message3]
-const leaves = entries.map(cose.merkle.leaf)
-const old_root = await cose.merkle.root({ leaves })
-
-const signed_inclusion_proof = await cose.merkle.inclusion_proof({
-  leaf_index: 2,
-  leaves,
-  signer,
-})
-```
-
-#### Verify Inclusion Proof
-
-```ts
-const verified_inclusion_proof = await cose.merkle.verify_inclusion_proof({
-  leaf: cose.merkle.leaf(entries[2]),
-  signed_inclusion_proof,
-  verifier,
-})
-```
-
-#### Multi Verify
-
-```ts
-const verified3 = await cose.merkle.verify_multiple(
-  {
-    leaves: [cose.merkle.leaf(entries[2]), cose.merkle.leaf(entries[3])],
-    signed_inclusion_proof: updated,
-    verifier
+const content = fs.readFileSync("./examples/image.png");
+const signatureForImage = await issuer.sign({
+  protectedHeader: new Map<number, any>([
+    [1, -7], // signing algorithm ES256
+    [3, "image/png"], // content type image/png
+    [4, issuerPublicKeyJwk.kid], // issuer key identifier
+  ]),
+  unprotectedHeader: new Map(),
+  payload: content,
+});
+const transparencyLogContainingImageSignatures = [
+  await cose.receipt.leaf(signatureForImage),
+];
+const receiptForImageSignature = await cose.receipt.inclusion.issue({
+  protectedHeader: new Map<number, any>([
+    [1, -7], // signing algorithm ES256
+    [-111, 1], // inclusion proof from RFC9162
+    [4, notaryPublicKeyJwk.kid], // notary key identifier
+  ]),
+  entry: 0,
+  entries: transparencyLogContainingImageSignatures,
+  signer: notary,
+});
+const transparentSignature = await cose.receipt.add(
+  signatureForImage,
+  receiptForImageSignature
+);
+const resolve = async (
+  header: cose.ProtectedHeaderMap
+): Promise<cose.PublicKeyJwk> => {
+  const kid = header.get(4);
+  if (kid === issuerPublicKeyJwk.kid) {
+    return issuerPublicKeyJwk;
   }
-)
+  if (kid === notaryPublicKeyJwk.kid) {
+    return notaryPublicKeyJwk;
+  }
+  throw new Error("No verification key found in trust store.");
+};
+const verifier = await cose.receipt.verifier({
+  resolve,
+});
+const verified = await verifier.verify({
+  coseSign1: transparentSignature,
+  payload: content,
+});
 ```
 
-#### Issue Consistency Proof
+## IETF
 
-```ts
-const message4 = cose.cbor.encode(['🔥', 4])
-const message5 = cose.cbor.encode({ five: '💀' })
-const leaves2 = entries.map(cose.merkle.leaf)
-const signed_consistency_proof = await cose.merkle.consistency_proof({
-  signed_inclusion_proof,
-  leaves: leaves2,
-  signer,
-})
-```
+### RFCs
 
-#### Verify Consistency Proof
+- [RFC9360 - CBOR Object Signing and Encryption (COSE): Header Parameters for Carrying and Referencing X.509 Certificates](https://datatracker.ietf.org/doc/rfc9360/)
+- [RFC9052 - CBOR Object Signing and Encryption (COSE): Structures and Process](https://datatracker.ietf.org/doc/html/rfc9052)
+- [RFC9053 - CBOR Object Signing and Encryption (COSE): Initial Algorithms](https://datatracker.ietf.org/doc/html/rfc9053)
 
-```ts
-const verified = await cose.merkle.verify_consistency_proof({
-  old_root,
-  signed_consistency_proof,
-  verifier,
-})
-```
+### Drafts
+
+- [Concise Encoding of Signed Merkle Tree Proofs](https://datatracker.ietf.org/doc/draft-ietf-cose-merkle-tree-proofs/)
+- [An Architecture for Trustworthy and Transparent Digital Supply Chains](https://datatracker.ietf.org/doc/draft-ietf-scitt-architecture/)
 
 ## Develop
 

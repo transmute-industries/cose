@@ -1,51 +1,21 @@
-import signer from './signer'
-import verifier from './verifier'
-import diagnostic from './diagnostic'
-import unprotectedHeader from './unprotectedHeader'
-import merkle from './merkle'
-import cbor from './cbor'
-import detachPayload from './detachPayload'
-import attachPayload from './attachPayload'
 
-import detached from './detached'
 
-import { RFC9162 } from '@transmute/rfc9162'
 
-import getKid from './getKid'
-import getContentType from './getContentType'
 
-import utils from './utils'
-import rfc from './rfc'
 
-import * as key from './key'
+export * from './cose/algorithms'
+export * from './cose/header-parameters'
+export * from './cose/key-common-parameters'
 
-import * as lib from './lib'
+import * as key from './cose/key'
+import * as attached from './cose/attached'
+import * as detached from './cose/detached'
+export * from './cose/sign1'
+export * from './x509'
 
-import * as scitt from './scitt'
+import * as cbor from './cbor'
 
-import { extractTBS } from './extractTBS'
+import * as receipt from './cose/receipt'
 
-const cose = {
-  key,
-  extractTBS,
-  scitt,
-  lib,
-  utils,
-  rfc,
-  detached,
-  getKid,
-  getContentType,
-  binToHex: RFC9162.binToHex,
-  hexToBin: RFC9162.hexToBin,
-  cbor,
-  merkle,
-  diagnostic,
-  detachPayload,
-  attachPayload,
-  unprotectedHeader,
-  signer,
-  verifier,
-}
 
-export * from './types'
-export default cose
+export { cbor, key, attached, detached, receipt }
