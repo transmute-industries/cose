@@ -7,8 +7,17 @@ it('readme', async () => {
 
   const notarySecretKeyJwk = await cose.key.generate<cose.SecretKeyJwk>('ES256', 'application/jwk+json')
   const notaryPublicKeyJwk = await cose.key.publicFromPrivate<cose.PublicKeyJwk>(notarySecretKeyJwk)
-  const issuer = cose.detached.signer({ secretKeyJwk: issuerSecretKeyJwk })
-  const notary = cose.detached.signer({ secretKeyJwk: notarySecretKeyJwk })
+
+  const issuer = cose.detached.signer({
+    rawSigner: cose.crypto.signer({
+      secretKeyJwk: issuerSecretKeyJwk
+    })
+  })
+  const notary = cose.detached.signer({
+    rawSigner: cose.crypto.signer({
+      secretKeyJwk: notarySecretKeyJwk
+    })
+  })
 
   const content = fs.readFileSync('./examples/image.png')
   const signatureForImage = await issuer.sign({

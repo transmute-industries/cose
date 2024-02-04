@@ -1,19 +1,19 @@
 import * as sign1 from "../sign1"
 
-export const signer = ({ secretKeyJwk }: sign1.RequestCoseSign1Signer) => {
-  const signer = sign1.signer({ secretKeyJwk })
+export const signer = ({ rawSigner }: sign1.RequestCoseSign1Signer) => {
+  const coseSign1Signer = sign1.signer({ rawSigner })
   return {
     sign: (req: sign1.RequestCoseSign1) => {
-      return signer.sign(req)
+      return coseSign1Signer.sign(req)
     }
   }
 }
 
 export const verifier = ({ publicKeyJwk }: sign1.RequestCoseSign1Verifier) => {
-  const verifier = sign1.verifier({ publicKeyJwk })
+  const coseSign1Verifier = sign1.verifier({ publicKeyJwk })
   return {
     verify: (req: sign1.RequestCoseSign1Verify) => {
-      return verifier.verify(req)
+      return coseSign1Verifier.verify(req)
     }
   }
 }

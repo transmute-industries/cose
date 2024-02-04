@@ -90,16 +90,8 @@ const root = async (req: RequestRootCertificate): Promise<RootCertificateRespons
 }
 
 
-const signer = async ({ alg, privateKeyPKCS8 }: { alg: number, privateKeyPKCS8: string }) => {
-  const foundAlgorithm = Object.values(IANACOSEAlgorithms).find((entry) => {
-    return entry.Value === `${alg}`
-  })
-  if (!foundAlgorithm) {
-    throw new Error('Could not find algorithm in registry for: ' + alg)
-  }
-  const secretKeyJwk = await exportJWK(await importPKCS8(privateKeyPKCS8, `${foundAlgorithm.Name}`)) as SecretKeyJwk
-  secretKeyJwk.alg = foundAlgorithm.Name;
-  return detached.signer({ secretKeyJwk })
+const signer = async ({ alg, rawSigner }: { alg: number, rawSigner: any }) => {
+  return detached.signer({ rawSigner })
 }
 
 export type RequestCertificateVerifier = {

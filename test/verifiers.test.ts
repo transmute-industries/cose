@@ -7,13 +7,21 @@ it('verify multiple receipts', async () => {
   const notary1SecretKey = await transmute.key.generate<transmute.key.CoseKey>('ES256', 'application/cose-key')
   const notary2SecretKey = await transmute.key.generate<transmute.key.CoseKey>('ES256', 'application/cose-key')
   const issuerSigner = transmute.detached.signer({
-    secretKeyJwk: await transmute.key.convertCoseKeyToJsonWebKey<transmute.SecretKeyJwk>(issuerSecretKey)
+    rawSigner: transmute.crypto.signer({
+      secretKeyJwk: await transmute.key.convertCoseKeyToJsonWebKey<transmute.SecretKeyJwk>(issuerSecretKey)
+    })
+
   })
   const notary1Signer = transmute.detached.signer({
-    secretKeyJwk: await transmute.key.convertCoseKeyToJsonWebKey<transmute.SecretKeyJwk>(notary1SecretKey)
+    rawSigner: transmute.crypto.signer({
+      secretKeyJwk: await transmute.key.convertCoseKeyToJsonWebKey<transmute.SecretKeyJwk>(notary1SecretKey)
+    })
+
   })
   const notary2Signer = transmute.detached.signer({
-    secretKeyJwk: await transmute.key.convertCoseKeyToJsonWebKey<transmute.SecretKeyJwk>(notary2SecretKey)
+    rawSigner: transmute.crypto.signer({
+      secretKeyJwk: await transmute.key.convertCoseKeyToJsonWebKey<transmute.SecretKeyJwk>(notary2SecretKey)
+    })
   })
   const issuerCkt = await transmute.key.thumbprint.calculateCoseKeyThumbprintUri(issuerSecretKey)
   const notary1Ckt = await transmute.key.thumbprint.calculateCoseKeyThumbprintUri(notary1SecretKey)

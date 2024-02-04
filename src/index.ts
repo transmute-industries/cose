@@ -17,5 +17,6 @@ import * as cbor from './cbor'
 
 import * as receipt from './cose/receipt'
 
+import * as crypto from './crypto'
 
-export { cbor, key, attached, detached, receipt }
+export { crypto, cbor, key, attached, detached, receipt }

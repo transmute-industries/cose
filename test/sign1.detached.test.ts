@@ -5,7 +5,11 @@ it('sign and verify', async () => {
   const secretKeyJwk = await transmute.key.generate<transmute.SecretKeyJwk>('ES256', 'application/jwk+json')
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { d, ...publicKeyJwk } = secretKeyJwk
-  const signer = transmute.detached.signer({ secretKeyJwk })
+  const signer = transmute.detached.signer({
+    rawSigner: transmute.crypto.signer({
+      secretKeyJwk
+    })
+  })
   const message = '💣 test ✨ mesage 🔥'
   const payload = new TextEncoder().encode(message)
   const coseSign1 = await signer.sign({
@@ -29,7 +33,11 @@ it('sign and verify large image from file system', async () => {
   const secretKeyJwk = await transmute.key.generate<transmute.SecretKeyJwk>('ES256', 'application/jwk+json')
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { d, ...publicKeyJwk } = secretKeyJwk
-  const signer = transmute.detached.signer({ secretKeyJwk })
+  const signer = transmute.detached.signer({
+    rawSigner: transmute.crypto.signer({
+      secretKeyJwk
+    })
+  })
   const content = fs.readFileSync('./examples/image.png')
   const coseSign1 = await signer.sign({
     protectedHeader: new Map<number, any>([

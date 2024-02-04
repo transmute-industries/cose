@@ -20,7 +20,11 @@ it('issue & verify', async () => {
   const secretKeyJwk = await transmute.key.generate<transmute.SecretKeyJwk>('ES256', 'application/jwk+json')
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { d, ...publicKeyJwk } = secretKeyJwk
-  const signer = transmute.detached.signer({ secretKeyJwk })
+  const signer = transmute.detached.signer({
+    rawSigner: transmute.crypto.signer({
+      secretKeyJwk
+    })
+  })
   const verifier = transmute.detached.verifier({ publicKeyJwk })
   const inclusion = await transmute.receipt.inclusion.issue({
     protectedHeader: new Map([
@@ -63,7 +67,11 @@ it('issue & verify', async () => {
 it("add / remove from receipts", async () => {
   const secretKeyJwk = await transmute.key.generate<transmute.SecretKeyJwk>('ES256', 'application/jwk+json')
   const publicKeyJwk = await transmute.key.publicFromPrivate<transmute.PublicKeyJwk>(secretKeyJwk)
-  const signer = transmute.detached.signer({ secretKeyJwk })
+  const signer = transmute.detached.signer({
+    rawSigner: transmute.crypto.signer({
+      secretKeyJwk
+    })
+  })
   const content = fs.readFileSync('./examples/image.png')
   const signatureForImage = await signer.sign({
     protectedHeader: new Map<number, any>([
