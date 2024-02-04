@@ -5,11 +5,12 @@ import getAlgFromVerificationKey from './getAlgFromVerificationKey'
 import { DecodedToBeSigned, ProtectedHeaderMap } from './types'
 import rawVerifier from '../../crypto/verifier'
 
-const verifier = ({ publicKeyJwk }: RequestCoseSign1Verifier) => {
-  const algInPublicKey = getAlgFromVerificationKey(`${publicKeyJwk.alg}`)
-  const ecdsa = rawVerifier({ publicKeyJwk })
+const verifier = ({ resolver }: RequestCoseSign1Verifier) => {
   return {
     verify: async ({ coseSign1, externalAAD }: RequestCoseSign1Verify): Promise<ArrayBuffer> => {
+      const publicKeyJwk = await resolver.resolve(coseSign1)
+      const algInPublicKey = getAlgFromVerificationKey(`${publicKeyJwk.alg}`)
+      const ecdsa = rawVerifier({ publicKeyJwk })
       const obj = await decodeFirst(coseSign1);
       const signatureStructure = obj.value;
       if (!Array.isArray(signatureStructure)) {

@@ -108,22 +108,16 @@ const pkcs8Signer = async ({ alg, privateKeyPKCS8 }: { alg: number, privateKeyPK
   })
 }
 
-
 export type RequestCertificateVerifier = {
-  resolve: (protectedHeaderMap: ProtectedHeaderMap) => Promise<PublicKeyJwk>
+  resolver: {
+    resolve: (signature: ArrayBuffer) => Promise<PublicKeyJwk>
+  }
 }
 
-const verifier = ({ resolve }: RequestCertificateVerifier) => {
+const verifier = ({ resolver }: RequestCertificateVerifier) => {
   return {
     verify: async (req: RequestCoseSign1VerifyDetached) => {
-      const { tag, value } = decodeFirstSync(req.coseSign1)
-      if (tag !== 18) {
-        throw new Error('Only tagged cose sign 1 are supported')
-      }
-      const [protectedHeaderBytes] = value;
-      const protectedHeaderMap = decodeFirstSync(protectedHeaderBytes)
-      const publicKeyJwk = await resolve(protectedHeaderMap)
-      const verifier = detached.verifier({ publicKeyJwk })
+      const verifier = detached.verifier({ resolver })
       return verifier.verify(req)
     }
   }

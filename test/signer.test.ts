@@ -23,7 +23,13 @@ it('sign and verify large image from file system', async () => {
   })
 
   // ... the network ...
-  const verifier = transmute.detached.verifier({ publicKeyJwk })
+  const verifier = transmute.detached.verifier({
+    resolver: {
+      resolve: async () => {
+        return publicKeyJwk
+      }
+    }
+  })
   const verified = await verifier.verify({ coseSign1, payload: content })
   // faster to compare hex strings.
   expect(Buffer.from(verified).toString('hex')).toEqual(content.toString('hex'))

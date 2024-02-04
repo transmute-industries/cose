@@ -18,7 +18,13 @@ it('sign and verify', async () => {
   })
   // ... the network ...
 
-  const verifier = transmute.attached.verifier({ publicKeyJwk })
+  const verifier = transmute.attached.verifier({
+    resolver: {
+      resolve: async () => {
+        return publicKeyJwk
+      }
+    }
+  })
   const verified = await verifier.verify({ coseSign1 })
   expect(new TextDecoder().decode(verified)).toBe(message)
 
@@ -47,7 +53,13 @@ it('sign and verify large image from file system', async () => {
   })
 
   // ... the network ...
-  const verifier = transmute.attached.verifier({ publicKeyJwk })
+  const verifier = transmute.attached.verifier({
+    resolver: {
+      resolve: async () => {
+        return publicKeyJwk
+      }
+    }
+  })
   const verified = await verifier.verify({ coseSign1 })
   expect(Buffer.from(verified).toString('hex')).toEqual(content.toString('hex')) // faster to compare hex strings.
 })

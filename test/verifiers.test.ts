@@ -61,8 +61,14 @@ it('verify multiple receipts', async () => {
   })
   const transparentSignature1 = await transmute.receipt.add(signatureForImage, receiptForImageSignature1)
   const transparentSignature = await transmute.receipt.add(transparentSignature1, receiptForImageSignature2)
-  const resolve = async (header: transmute.ProtectedHeaderMap): Promise<transmute.PublicKeyJwk> => {
-    const kid = header.get(4);
+  const resolve = async (coseSign1: transmute.CoseSign1Bytes): Promise<transmute.PublicKeyJwk> => {
+    const { tag, value } = transmute.cbor.decodeFirstSync(coseSign1)
+    if (tag !== 18) {
+      throw new Error('Only tagged cose sign 1 are supported')
+    }
+    const [protectedHeaderBytes] = value;
+    const protectedHeaderMap = transmute.cbor.decodeFirstSync(protectedHeaderBytes)
+    const kid = protectedHeaderMap.get(4);
     if (kid === issuerCkt) {
       return transmute.key.convertCoseKeyToJsonWebKey(
         await transmute.key.publicFromPrivate(issuerSecretKey)

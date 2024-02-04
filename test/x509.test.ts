@@ -27,8 +27,13 @@ it('sign and verify with x5t and key resolver', async () => {
     unprotectedHeader: new Map(),
     payload: content
   })
-  const certificateFromThumbprint = async (protectedHeaderMap: transmute.ProtectedHeaderMap): Promise<transmute.PublicKeyJwk> => {
-
+  const certificateFromThumbprint = async (coseSign1: transmute.CoseSign1Bytes): Promise<transmute.PublicKeyJwk> => {
+    const { tag, value } = transmute.cbor.decodeFirstSync(coseSign1)
+    if (tag !== 18) {
+      throw new Error('Only tagged cose sign 1 are supported')
+    }
+    const [protectedHeaderBytes] = value;
+    const protectedHeaderMap = transmute.cbor.decodeFirstSync(protectedHeaderBytes)
     const alg = protectedHeaderMap.get(1)
     const x5t = protectedHeaderMap.get(34) // get x5t
     if (!x5t) {
@@ -53,7 +58,9 @@ it('sign and verify with x5t and key resolver', async () => {
     throw new Error('Certificate is not trusted.')
   }
   const verifier = transmute.certificate.verifier({
-    resolve: certificateFromThumbprint
+    resolver: {
+      resolve: certificateFromThumbprint
+    }
   })
   const verified = await verifier.verify({ coseSign1, payload: content })
   // faster to compare hex strings.

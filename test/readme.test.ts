@@ -43,8 +43,14 @@ it('readme', async () => {
     signer: notary
   })
   const transparentSignature = await cose.receipt.add(signatureForImage, receiptForImageSignature)
-  const resolve = async (header: cose.ProtectedHeaderMap): Promise<cose.PublicKeyJwk> => {
-    const kid = header.get(4);
+  const resolve = async (coseSign1: cose.CoseSign1Bytes): Promise<cose.PublicKeyJwk> => {
+    const { tag, value } = cose.cbor.decodeFirstSync(coseSign1)
+    if (tag !== 18) {
+      throw new Error('Only tagged cose sign 1 are supported')
+    }
+    const [protectedHeaderBytes] = value;
+    const protectedHeaderMap = cose.cbor.decodeFirstSync(protectedHeaderBytes)
+    const kid = protectedHeaderMap.get(4);
     if (kid === issuerPublicKeyJwk.kid) {
       return issuerPublicKeyJwk
     }

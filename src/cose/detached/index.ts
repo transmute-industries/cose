@@ -14,8 +14,8 @@ export const signer = ({ remote }: sign1.RequestCoseSign1Signer) => {
   }
 }
 
-export const verifier = ({ publicKeyJwk }: sign1.RequestCoseSign1Verifier) => {
-  const verifier = sign1.verifier({ publicKeyJwk })
+export const verifier = ({ resolver }: sign1.RequestCoseSign1Verifier) => {
+  const verifier = sign1.verifier({ resolver })
   return {
     verify: async (req: sign1.RequestCoseSign1VerifyDetached) => {
       const decoded = decodeFirstSync(req.coseSign1)

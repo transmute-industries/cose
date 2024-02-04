@@ -9,10 +9,10 @@ export const signer = ({ remote }: sign1.RequestCoseSign1Signer) => {
   }
 }
 
-export const verifier = ({ publicKeyJwk }: sign1.RequestCoseSign1Verifier) => {
-  const coseSign1Verifier = sign1.verifier({ publicKeyJwk })
+export const verifier = ({ resolver }: sign1.RequestCoseSign1Verifier) => {
   return {
-    verify: (req: sign1.RequestCoseSign1Verify) => {
+    verify: async (req: sign1.RequestCoseSign1Verify) => {
+      const coseSign1Verifier = sign1.verifier({ resolver })
       return coseSign1Verifier.verify(req)
     }
   }

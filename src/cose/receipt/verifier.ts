@@ -10,18 +10,11 @@ import { leaf } from "./leaf"
 import { remove } from "./remove"
 
 export type RequestHeaderVerifier = {
-  resolve: (protectedHeaderMap: ProtectedHeaderMap) => Promise<PublicKeyJwk>
+  resolve: (signature: ArrayBuffer) => Promise<PublicKeyJwk>
 }
 
-const getVerifierForMessage = async (req: RequestCoseSign1DectachedVerify, opt: RequestHeaderVerifier) => {
-  const { tag, value } = decodeFirstSync(req.coseSign1)
-  if (tag !== 18) {
-    throw new Error('Only tagged cose sign 1 are supported')
-  }
-  const [protectedHeaderBytes] = value;
-  const protectedHeaderMap = decodeFirstSync(protectedHeaderBytes)
-  const publicKeyJwk = await opt.resolve(protectedHeaderMap);
-  const verifier = detached.verifier({ publicKeyJwk })
+const getVerifierForMessage = async (req: RequestCoseSign1DectachedVerify, resolver: RequestHeaderVerifier) => {
+  const verifier = detached.verifier({ resolver })
   return verifier
 }
 

@@ -25,7 +25,13 @@ it('issue & verify', async () => {
       secretKeyJwk
     })
   })
-  const verifier = transmute.detached.verifier({ publicKeyJwk })
+  const verifier = transmute.detached.verifier({
+    resolver: {
+      resolve: async () => {
+        return publicKeyJwk
+      }
+    }
+  })
   const inclusion = await transmute.receipt.inclusion.issue({
     protectedHeader: new Map([
       [1, -7],  // alg ES256

@@ -30,7 +30,11 @@ export type CoseSign1Signer = {
   sign: (req: RequestCoseSign1) => Promise<CoseSign1Bytes>
 }
 
-export type RequestCoseSign1Verifier = { publicKeyJwk: PublicKeyJwk }
+export type RequestCoseSign1Verifier = {
+  resolver: {
+    resolve: (signature: ArrayBuffer) => Promise<PublicKeyJwk>
+  }
+}
 
 export type RequestCoseSign1Verify = {
   coseSign1: CoseSign1Bytes,
