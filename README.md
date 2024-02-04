@@ -45,8 +45,17 @@ const notarySecretKeyJwk = await cose.key.generate<cose.SecretKeyJwk>(
 const notaryPublicKeyJwk = await cose.key.publicFromPrivate<cose.PublicKeyJwk>(
   notarySecretKeyJwk
 );
-const issuer = cose.detached.signer({ secretKeyJwk: issuerSecretKeyJwk });
-const notary = cose.detached.signer({ secretKeyJwk: notarySecretKeyJwk });
+
+const issuer = cose.detached.signer({
+  remote: cose.crypto.signer({
+    secretKeyJwk: issuerSecretKeyJwk,
+  }),
+});
+const notary = cose.detached.signer({
+  remote: cose.crypto.signer({
+    secretKeyJwk: notarySecretKeyJwk,
+  }),
+});
 
 const content = fs.readFileSync("./examples/image.png");
 const signatureForImage = await issuer.sign({
@@ -76,9 +85,15 @@ const transparentSignature = await cose.receipt.add(
   receiptForImageSignature
 );
 const resolve = async (
-  header: cose.ProtectedHeaderMap
+  coseSign1: cose.CoseSign1Bytes
 ): Promise<cose.PublicKeyJwk> => {
-  const kid = header.get(4);
+  const { tag, value } = cose.cbor.decodeFirstSync(coseSign1);
+  if (tag !== 18) {
+    throw new Error("Only tagged cose sign 1 are supported");
+  }
+  const [protectedHeaderBytes] = value;
+  const protectedHeaderMap = cose.cbor.decodeFirstSync(protectedHeaderBytes);
+  const kid = protectedHeaderMap.get(4);
   if (kid === issuerPublicKeyJwk.kid) {
     return issuerPublicKeyJwk;
   }
