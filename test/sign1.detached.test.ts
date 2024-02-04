@@ -6,7 +6,7 @@ it('sign and verify', async () => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { d, ...publicKeyJwk } = secretKeyJwk
   const signer = transmute.detached.signer({
-    rawSigner: transmute.crypto.signer({
+    remote: transmute.crypto.signer({
       secretKeyJwk
     })
   })
@@ -34,7 +34,7 @@ it('sign and verify large image from file system', async () => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { d, ...publicKeyJwk } = secretKeyJwk
   const signer = transmute.detached.signer({
-    rawSigner: transmute.crypto.signer({
+    remote: transmute.crypto.signer({
       secretKeyJwk
     })
   })

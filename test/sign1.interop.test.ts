@@ -38,7 +38,7 @@ it('cross test sign and verify', async () => {
   })
   expect(new TextDecoder().decode(v1)).toBe(message)
   const s2 = await transmute.signer({
-    rawSigner: transmute.crypto.signer({
+    remote: transmute.crypto.signer({
       secretKeyJwk
     })
   }).sign({

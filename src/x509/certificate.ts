@@ -102,7 +102,7 @@ const pkcs8Signer = async ({ alg, privateKeyPKCS8 }: { alg: number, privateKeyPK
   const secretKeyJwk = await exportJWK(await importPKCS8(privateKeyPKCS8, `${foundAlgorithm.Name}`)) as SecretKeyJwk
   secretKeyJwk.alg = foundAlgorithm.Name;
   return detached.signer({
-    rawSigner: crypto.signer({
+    remote: crypto.signer({
       secretKeyJwk
     })
   })

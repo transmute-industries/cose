@@ -7,19 +7,19 @@ it('verify multiple receipts', async () => {
   const notary1SecretKey = await transmute.key.generate<transmute.key.CoseKey>('ES256', 'application/cose-key')
   const notary2SecretKey = await transmute.key.generate<transmute.key.CoseKey>('ES256', 'application/cose-key')
   const issuerSigner = transmute.detached.signer({
-    rawSigner: transmute.crypto.signer({
+    remote: transmute.crypto.signer({
       secretKeyJwk: await transmute.key.convertCoseKeyToJsonWebKey<transmute.SecretKeyJwk>(issuerSecretKey)
     })
 
   })
   const notary1Signer = transmute.detached.signer({
-    rawSigner: transmute.crypto.signer({
+    remote: transmute.crypto.signer({
       secretKeyJwk: await transmute.key.convertCoseKeyToJsonWebKey<transmute.SecretKeyJwk>(notary1SecretKey)
     })
 
   })
   const notary2Signer = transmute.detached.signer({
-    rawSigner: transmute.crypto.signer({
+    remote: transmute.crypto.signer({
       secretKeyJwk: await transmute.key.convertCoseKeyToJsonWebKey<transmute.SecretKeyJwk>(notary2SecretKey)
     })
   })

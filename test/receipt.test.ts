@@ -21,7 +21,7 @@ it('issue & verify', async () => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { d, ...publicKeyJwk } = secretKeyJwk
   const signer = transmute.detached.signer({
-    rawSigner: transmute.crypto.signer({
+    remote: transmute.crypto.signer({
       secretKeyJwk
     })
   })
@@ -68,7 +68,7 @@ it("add / remove from receipts", async () => {
   const secretKeyJwk = await transmute.key.generate<transmute.SecretKeyJwk>('ES256', 'application/jwk+json')
   const publicKeyJwk = await transmute.key.publicFromPrivate<transmute.PublicKeyJwk>(secretKeyJwk)
   const signer = transmute.detached.signer({
-    rawSigner: transmute.crypto.signer({
+    remote: transmute.crypto.signer({
       secretKeyJwk
     })
   })

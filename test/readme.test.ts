@@ -9,12 +9,12 @@ it('readme', async () => {
   const notaryPublicKeyJwk = await cose.key.publicFromPrivate<cose.PublicKeyJwk>(notarySecretKeyJwk)
 
   const issuer = cose.detached.signer({
-    rawSigner: cose.crypto.signer({
+    remote: cose.crypto.signer({
       secretKeyJwk: issuerSecretKeyJwk
     })
   })
   const notary = cose.detached.signer({
-    rawSigner: cose.crypto.signer({
+    remote: cose.crypto.signer({
       secretKeyJwk: notarySecretKeyJwk
     })
   })

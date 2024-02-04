@@ -12,7 +12,7 @@ export type SecretKeyJwk = JsonWebKey & { d: string, kid?: string }
 export type PublicKeyJwk = Omit<SecretKeyJwk, 'd'>
 
 export type RequestCoseSign1Signer = {
-  rawSigner: {
+  remote: {
     sign: (toBeSigned: ArrayBuffer) => Promise<ArrayBuffer>
   }
 }

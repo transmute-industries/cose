@@ -2,8 +2,8 @@ import * as sign1 from "../sign1"
 
 import { decodeFirstSync, encodeAsync, Sign1Tag, Tagged, toArrayBuffer } from '../../cbor'
 
-export const signer = ({ rawSigner }: sign1.RequestCoseSign1Signer) => {
-  const coseSign1Signer = sign1.signer({ rawSigner })
+export const signer = ({ remote }: sign1.RequestCoseSign1Signer) => {
+  const coseSign1Signer = sign1.signer({ remote })
   return {
     sign: async (req: sign1.RequestCoseSign1) => {
       const coseSign1 = await coseSign1Signer.sign(req)
