@@ -1,4 +1,4 @@
-import { exportJWK, exportPKCS8, importPKCS8, importX509 } from 'jose';
+import { exportJWK, exportPKCS8, importPKCS8 } from 'jose';
 import { ProtectedHeaderMap, PublicKeyJwk } from "../cose/sign1"
 
 import * as x509 from "@peculiar/x509";
@@ -9,6 +9,8 @@ import { IANACOSEAlgorithms, SecretKeyJwk, detached, RequestCoseSign1VerifyDetac
 
 
 import { decodeFirstSync } from '../cbor'
+
+import { crypto } from '..';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 const nodeCrypto = import('crypto').catch(() => { })
@@ -90,9 +92,22 @@ const root = async (req: RequestRootCertificate): Promise<RootCertificateRespons
 }
 
 
-const signer = async ({ alg, rawSigner }: { alg: number, rawSigner: any }) => {
-  return detached.signer({ rawSigner })
+const pkcs8Signer = async ({ alg, privateKeyPKCS8 }: { alg: number, privateKeyPKCS8: string }) => {
+  const foundAlgorithm = Object.values(IANACOSEAlgorithms).find((entry) => {
+    return entry.Value === `${alg}`
+  })
+  if (!foundAlgorithm) {
+    throw new Error('Could not find algorithm in registry for: ' + alg)
+  }
+  const secretKeyJwk = await exportJWK(await importPKCS8(privateKeyPKCS8, `${foundAlgorithm.Name}`)) as SecretKeyJwk
+  secretKeyJwk.alg = foundAlgorithm.Name;
+  return detached.signer({
+    rawSigner: crypto.signer({
+      secretKeyJwk
+    })
+  })
 }
+
 
 export type RequestCertificateVerifier = {
   resolve: (protectedHeaderMap: ProtectedHeaderMap) => Promise<PublicKeyJwk>
@@ -114,4 +129,4 @@ const verifier = ({ resolve }: RequestCertificateVerifier) => {
   }
 }
 
-export const certificate = { thumbprint, root, signer, verifier }
+export const certificate = { thumbprint, root, pkcs8Signer, verifier }
