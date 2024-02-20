@@ -2,24 +2,7 @@ import cose from 'cose-js';
 
 import { cbor } from '@transmute/cose';
 
-
-
-it('symmetric sanity encrypt / decrypt', async () => {
-  const plaintext = '❤️‍🔥 Secret message! ❤️‍🔥';
-  const key = Buffer.from('231f4c4d4d3051fdc2ec0a3851d5b383', 'hex');
-  const headers = {
-    p: { alg: 'A128GCM' },
-    u: { kid: 'our-secret' }
-  };
-  const recipient = {
-    key
-  };
-  const ciphertext = await cose.encrypt.create(headers, plaintext, recipient);
-  const recoveredPlaintext = await cose.encrypt.read(ciphertext, key);
-  expect(recoveredPlaintext.toString('utf8')).toBe(plaintext)
-})
-
-it('direct key agreement sanity encrypt / decrypt', async () => {
+it('p256-hkdf-256-01: ECDH-ES direct w/ hkdf-sha-256 for 128-bit key', async () => {
   const example = {
     "title": "p256-hkdf-256-01: ECDH-ES direct w/ hkdf-sha-256 for 128-bit key",
     "input": {
@@ -115,4 +98,77 @@ it('direct key agreement sanity encrypt / decrypt', async () => {
   expect(crv).toBe(1) // crv : P-256
   const decodedRecipientProtectedHeader = cbor.decodeFirstSync(recipientProtectedHeader);
   expect(decodedRecipientProtectedHeader.get(1)).toBe(-25) // alg : ECDH-ES + HKDF-256
+})
+
+
+it('p256-wrap-128-01: ECDH-ES direct w/ key wrap 128 for 128-bit key', async () => {
+  const example = {
+    "title": "p256-wrap-128-01: ECDH-ES direct w/ key wrap 128 for 128-bit key",
+    "input": {
+      "plaintext": "This is the content.",
+      "enveloped": {
+        "protected": {
+          "alg": "A128GCM"
+        },
+        "recipients": [
+          {
+            "key": {
+              "kty": "EC",
+              "kid": "meriadoc.brandybuck@buckland.example",
+              "crv": "P-256",
+              "x": "Ze2loSV3wrroKUN_4zhwGhCqo3Xhu1td4QjeQ5wIVR0",
+              "y": "HlLtdXARY_f55A3fnzQbPcm6hgr34Mp8p-nuzQCE0Zw",
+              "d": "r_kHyZ-a06rmxM3yESK84r1otSg-aQcVStkRhA-iCM8"
+            },
+            "protected": {
+              "alg": "ECDH-ES-A128KW"
+            },
+            "unprotected": {
+              "kid": "meriadoc.brandybuck@buckland.example",
+              "epk": {
+                "kty": "EC",
+                "crv": "P-256",
+                "x": "mPUKT_bAWGHIhg0TpjjqVsP1rXWQu_vwVOHHtNkdYoA",
+                "y": "8BQAsImGeAS46fyWw5MhYfGTT0IjBpFw2SS34Dv4Irs"
+              }
+            }
+          }
+        ]
+      },
+      "rng_stream": [
+        "B2353161740AACF1F7163647984B522A",
+        "02D1F7E6F26C43D4868D87CE",
+        "848DF1C3C9CF4DF2FE6C632BF7886413F76E885255273703EE32E5A427A34F7B"
+      ]
+    },
+    "intermediates": {
+      "AAD_hex": "8367456E637279707443A1010140",
+      "CEK_hex": "B2353161740AACF1F7163647984B522A",
+      "recipients": [
+        {
+          "Context_hex": "842283F6F6F683F6F6F682188044A101381C",
+          "Secret_hex": "EE45F7C389FDB89923CA67C0E0CD29802DEC8F514EB818054BEEDD5DAFA78048",
+          "KEK_hex": "7C60CB35A78B24DCF40A394395E9E8CD"
+        }
+      ]
+    },
+    "output": {
+      "cbor_diag": "96([h'A10101', {5: h'02D1F7E6F26C43D4868D87CE'}, h'64F84D913BA60A76070A9A48F26E97E863E2852948658F0811139868826E89218A75715B', [[h'A101381C', {-1: {1: 2, -1: 1, -2: h'ECDBCEC636CC1408A503BBF6B7311B900C9AED9C5B71503848C89A07D0EF6F5B', -3: h'D6D1586710C02203E4E53B20DC7B233CA4C8B6853467B9FB8244A3840ACCD602'}, 4: h'6D65726961646F632E6272616E64796275636B406275636B6C616E642E6578616D706C65'}, h'D23BCA11C3F8E35BF6F81412794E159772E946FF4FB31BD1']]])",
+      "cbor": "D8608443A10101A1054C02D1F7E6F26C43D4868D87CE582464F84D913BA60A76070A9A48F26E97E863E2852948658F0811139868826E89218A75715B818344A101381CA220A401022001215820ECDBCEC636CC1408A503BBF6B7311B900C9AED9C5B71503848C89A07D0EF6F5B225820D6D1586710C02203E4E53B20DC7B233CA4C8B6853467B9FB8244A3840ACCD6020458246D65726961646F632E6272616E64796275636B406275636B6C616E642E6578616D706C655818D23BCA11C3F8E35BF6F81412794E159772E946FF4FB31BD1"
+    }
+  }
+  const expected = cbor.decode(Buffer.from(example.output.cbor, 'hex'))
+  const [protectedHeader, unprotectedHeader, ciphertext, recipients] = expected.value
+  const decodedProtectedHeader = cbor.decodeFirstSync(protectedHeader);
+  expect(decodedProtectedHeader.get(1)).toBe(1) // alg : A128GCM
+  const [[recipientProtectedHeader, recipientUnprotectedHeader, recipientCipherText]] = recipients
+  const kid = recipientUnprotectedHeader.get(4)
+  const epk = recipientUnprotectedHeader.get(-1)
+  expect(kid.toString()).toBe('meriadoc.brandybuck@buckland.example')
+  const kty = epk.get(1)
+  expect(kty).toBe(2) // kty : EC2
+  const crv = epk.get(-1) //
+  expect(crv).toBe(1) // crv : P-256
+  const decodedRecipientProtectedHeader = cbor.decodeFirstSync(recipientProtectedHeader);
+  expect(decodedRecipientProtectedHeader.get(1)).toBe(-29) // alg : ECDH-ES + A128KW
 })
