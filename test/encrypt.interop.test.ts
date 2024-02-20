@@ -1,7 +1,5 @@
 import cose from 'cose-js';
 
-import { base64url } from 'jose';
-
 import { cbor } from '@transmute/cose';
 
 
@@ -103,4 +101,18 @@ it('direct key agreement sanity encrypt / decrypt', async () => {
   const expected = cbor.decodeFirstSync(example.output.cbor);
   expect(actual.value[0].toString('hex')).toBe(expected.value[0].toString('hex').toString('hex'))
   expect(actual.value[2].toString('hex')).toBe(expected.value[2].toString('hex').toString('hex'))
+  // https://datatracker.ietf.org/doc/html/rfc9052#section-5.1
+  const [protectedHeader, unprotectedHeader, ciphertext, recipients] = actual.value
+  const decodedProtectedHeader = cbor.decodeFirstSync(protectedHeader);
+  expect(decodedProtectedHeader.get(1)).toBe(1) // alg : A128GCM
+  const [[recipientProtectedHeader, recipientUnprotectedHeader, recipientCipherText]] = recipients
+  const kid = recipientUnprotectedHeader.get(4)
+  const epk = recipientUnprotectedHeader.get(-1)
+  expect(kid.toString()).toBe('meriadoc.brandybuck@buckland.example')
+  const kty = epk.get(1)
+  expect(kty).toBe(2) // kty : EC2
+  const crv = epk.get(-1) //
+  expect(crv).toBe(1) // crv : P-256
+  const decodedRecipientProtectedHeader = cbor.decodeFirstSync(recipientProtectedHeader);
+  expect(decodedRecipientProtectedHeader.get(1)).toBe(-25) // alg : ECDH-ES + HKDF-256
 })
