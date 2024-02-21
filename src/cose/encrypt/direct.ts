@@ -211,27 +211,17 @@ export const decrypt = async (req: RequestDecryption) => {
   }
   const api = (await subtle())
   const receiverPrivateKey = req.recipients.keys[0]
-
-
   const sharedSecret = await api.deriveBits(
     { name: "ECDH", namedCurve: "P-256", public: await publicKeyFromJwk(epk) } as any,
     await privateKeyFromJwk(receiverPrivateKey),
     256
   );
-
-  // console.log('sharedSecretKey: ', Buffer.from(sharedSecret).toString('hex')) // correct
-
-  // console.log('cek: ', cek.toString('hex')) // ❌
   const partyUNonce = null
   const alg = decodedProtectedHeader.get(1) // top level protected algorithm
   const rp = recipientProtectedHeader;
   const context = await createContext(rp, alg, partyUNonce);
-  console.log('context: ', context.toString('hex'))
   const aad = await createAAD(protectedHeader, 'Encrypt', EMPTY_BUFFER)
-  console.log('aad: ', (await aad).toString('hex'))
-
   const iv = unprotectedHeader.get(5)
-  console.log('iv: ', iv.toString('hex'))
   const sharedSecretKey = await api.importKey(
     "raw",
     sharedSecret,
@@ -244,11 +234,6 @@ export const decrypt = async (req: RequestDecryption) => {
     sharedSecretKey,
     128
   );
-  const tagLength = authTagLength[alg];
-
-  const tag = ciphertext.slice(ciphertext.length - tagLength, ciphertext.length);
-  const ct = ciphertext.slice(0, ciphertext.length - tagLength);
-  console.log('tag: ', tag.toString('hex'))
   const pt2 = await decryptGCM(ciphertext, new Uint8Array(iv), new Uint8Array(cek), new Uint8Array(aad))
   return Buffer.from(pt2)
 
