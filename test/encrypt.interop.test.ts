@@ -102,7 +102,6 @@ it.only('p256-hkdf-256-01: ECDH-ES direct w/ hkdf-sha-256 for 128-bit key', asyn
   const decodedRecipientProtectedHeader = transmute.cbor.decodeFirstSync(recipientProtectedHeader);
   expect(decodedRecipientProtectedHeader.get(1)).toBe(-25) // alg : ECDH-ES + HKDF-256
   expect(recipientCipherText.length).toBe(0)
-
   const decrypted = await transmute.decrypt.direct({
     ciphertext: buf,
     recipients: {
@@ -116,6 +115,7 @@ it.only('p256-hkdf-256-01: ECDH-ES direct w/ hkdf-sha-256 for 128-bit key', asyn
       }]
     }
   })
+  expect(decrypted.toString()).toBe('This is the content.')
 })
 
 

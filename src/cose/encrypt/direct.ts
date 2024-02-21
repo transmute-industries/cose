@@ -204,13 +204,6 @@ export const decrypt = async (req: RequestDecryption) => {
     await privateKeyFromJwk(receiverPrivateKey),
     256
   );
-  const sharedSecretKey = await api.importKey(
-    "raw",
-    sharedSecret,
-    { name: "HKDF" },
-    false,
-    ["deriveKey", "deriveBits"]
-  );
 
   // console.log('sharedSecretKey: ', Buffer.from(sharedSecret).toString('hex')) // correct
 
@@ -225,49 +218,24 @@ export const decrypt = async (req: RequestDecryption) => {
 
   const iv = unprotectedHeader.get(5)
   console.log('iv: ', iv.toString('hex'))
-
-  // const suite = new CipherSuite({
-  //   kem: KemId.DhkemP256HkdfSha256,
-  //   kdf: KdfId.HkdfSha256,
-  //   aead: AeadId.Aes128Gcm,
-  // });
-
-  // const recipientPublicKey = Buffer.concat([
-  //   Buffer.from('04', 'hex'),
-  //   Buffer.from(receiverPrivateKey.x as any, 'base64'),
-  //   Buffer.from(receiverPrivateKey.y as any, 'base64'),
-  // ]);
-
-  // const hkdf = await suite.kdf.extract(context, cek)
-
-  // console.log(Buffer.from(hkdf).toString('hex'))
-
-  const ikm = Buffer.from(sharedSecret);
-  const hkdf = new HKDF('sha256', undefined, ikm);
-  const cek = hkdf.derive(context, 16); // A128GCM
-  console.log('key: ', cek.toString('hex'))
-
-
-  // const derived_key = await api.deriveBits(
-  //   { name: "HKDF", hash: "SHA-256", salt: new Uint8Array([]), info: new Uint8Array([]) },
-  //   sharedSecretKey,
-  //   256
-  // );
-
-  // // console.log({ derived_key })
-
-  // const cek = Buffer.from(derived_key)
-
-  // const symmetricKey = await api.importKey('raw', cek, "AES-GCM", true, [
-  //   "encrypt",
-  //   "decrypt",
-  // ])
-  // TODO: make this work end to end in node, then replace node functions with webcrypto.
+  const sharedSecretKey = await api.importKey(
+    "raw",
+    sharedSecret,
+    { name: "HKDF" },
+    false,
+    ["deriveKey", "deriveBits"]
+  );
+  const cek = await api.deriveBits(
+    { name: "HKDF", hash: "SHA-256", salt: new Uint8Array(), info: new Uint8Array(context) },
+    sharedSecretKey,
+    128
+  );
   const tagLength = authTagLength[alg];
   const tag = ciphertext.slice(ciphertext.length - tagLength, ciphertext.length);
   const ct = ciphertext.slice(0, ciphertext.length - tagLength);
   console.log('tag: ', tag.toString('hex'))
   // const pt = await mixed.gcmEncrypt('A128GCM', ciphertext, symmetricKey, iv, aad)
+  // only part that does not work with web crypto
   const pt = await mixed.gcmDecrypt(
     'A128GCM',
     new Uint8Array(cek),
@@ -276,6 +244,7 @@ export const decrypt = async (req: RequestDecryption) => {
     new Uint8Array(tag),
     new Uint8Array(aad),
   );
-  console.log(pt)
+
+  return pt
 
 }
