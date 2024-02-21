@@ -17,7 +17,6 @@ import { publicKeyFromJwk, privateKeyFromJwk } from "./keys";
 
 import * as mixed from './mixed'
 
-const HKDF = require('node-hkdf-sync');
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
@@ -174,6 +173,21 @@ async function createAAD(protectedHeader: BufferSource, context: any, externalAA
   return encodeAsync(encStructure);
 }
 
+// async function encryptGCM(string,key) {
+//   let encoded = new TextEncoder().encode(string);
+//   let iv = crypto.getRandomValues(new Uint8Array(12));
+//   let encrypted = await crypto.subtle.encrypt({"name":"AES-GCM","iv":iv}, key, encoded);
+//   return encrypted = {"encrypted":encrypted, "iv": iv};
+// }
+
+async function decryptGCM(encrypted: Uint8Array, iv: Uint8Array, key: Uint8Array, aad: Uint8Array) {
+  const api = (await subtle())
+  const cryptoKey = await api.importKey('raw', key, {
+    "name": "AES-GCM"
+  }, false, ['encrypt', 'decrypt']);
+  return api.decrypt({ "name": "AES-GCM", "iv": iv, additionalData: aad }, cryptoKey, encrypted);
+}
+
 export const decrypt = async (req: RequestDecryption) => {
   const decoded = await decodeFirst(req.ciphertext as any)
   if (decoded.tag !== 96) {
@@ -231,20 +245,11 @@ export const decrypt = async (req: RequestDecryption) => {
     128
   );
   const tagLength = authTagLength[alg];
+
   const tag = ciphertext.slice(ciphertext.length - tagLength, ciphertext.length);
   const ct = ciphertext.slice(0, ciphertext.length - tagLength);
   console.log('tag: ', tag.toString('hex'))
-  // const pt = await mixed.gcmEncrypt('A128GCM', ciphertext, symmetricKey, iv, aad)
-  // only part that does not work with web crypto
-  const pt = await mixed.gcmDecrypt(
-    'A128GCM',
-    new Uint8Array(cek),
-    new Uint8Array(ct),
-    new Uint8Array(iv),
-    new Uint8Array(tag),
-    new Uint8Array(aad),
-  );
-
-  return pt
+  const pt2 = await decryptGCM(ciphertext, new Uint8Array(iv), new Uint8Array(cek), new Uint8Array(aad))
+  return Buffer.from(pt2)
 
 }
