@@ -13,26 +13,11 @@ import { EMPTY_BUFFER } from "../../cbor"
 import { base64url } from "jose"
 
 
+import { publicKeyFromJwk, privateKeyFromJwk } from "./keys";
+
+import * as mixed from './mixed'
+
 const HKDF = require('node-hkdf-sync');
-
-export async function encryptMessage(message: Uint8Array, key: CryptoKey, iv: Uint8Array, aad: ArrayBuffer) {
-  const api = (await subtle())
-  return api.encrypt(
-    { name: "AES-GCM", iv: iv, additionalData: aad },
-    key,
-    message,
-  );
-}
-
-export async function decryptMessage(message: Uint8Array, key: CryptoKey, iv: Uint8Array, aad: ArrayBuffer) {
-  const api = (await subtle())
-  return api.decrypt(
-    { name: "AES-GCM", iv: iv, additionalData: aad },
-    key,
-    message,
-  );
-}
-
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
@@ -58,35 +43,6 @@ export type RequestEncryption = {
   recipients: JWKS
 }
 
-export const publicKeyFromJwk = async (publicKeyJwk: any) => {
-  const api = (await subtle())
-  const publicKey = await api.importKey(
-    'jwk',
-    publicKeyJwk,
-    {
-      name: 'ECDH',
-      namedCurve: publicKeyJwk.crv,
-    },
-    true,
-    [],
-  )
-  return publicKey;
-}
-
-export const privateKeyFromJwk = async (privateKeyJwk: any) => {
-  const api = (await subtle())
-  const privateKey = await api.importKey(
-    'jwk',
-    privateKeyJwk,
-    {
-      name: 'ECDH',
-      namedCurve: privateKeyJwk.crv,
-    },
-    true,
-    ['deriveBits', 'deriveKey'],
-  )
-  return privateKey
-}
 
 // probably not correct.... going to start by implementing decrypt
 export const encrypt = async (req: RequestEncryption) => {
@@ -125,31 +81,31 @@ export const encrypt = async (req: RequestEncryption) => {
   const protectedHeader = await encodeAsync(req.protectedHeader)
 
 
-  const ct = await encryptMessage(message, symmetricKey, iv, protectedHeader)
+  // const ct = await encryptMessage(message, symmetricKey, iv, protectedHeader)
 
-  const recipientProtectedHeader = await encodeAsync(new Map<number, any>([
-    [1, -25],// alg : ECDH-ES + HKDF-256
-  ]))
-  const recipientUnprotectedHeader = new Map<number, any>([
-    [4, recipientJWK.kid], //kid
-    [-1, new Map<number, any>([ // epk
-      [1, 2], // kty : EC2
-      [-1, 1], // crv P-256
-      [-2, Buffer.from(privateEpk.x, 'base64')], // x
-      [-3, Buffer.from(privateEpk.y, 'base64')] // x
-    ])]
-  ])
+  // const recipientProtectedHeader = await encodeAsync(new Map<number, any>([
+  //   [1, -25],// alg : ECDH-ES + HKDF-256
+  // ]))
+  // const recipientUnprotectedHeader = new Map<number, any>([
+  //   [4, recipientJWK.kid], //kid
+  //   [-1, new Map<number, any>([ // epk
+  //     [1, 2], // kty : EC2
+  //     [-1, 1], // crv P-256
+  //     [-2, Buffer.from(privateEpk.x, 'base64')], // x
+  //     [-3, Buffer.from(privateEpk.y, 'base64')] // x
+  //   ])]
+  // ])
 
-  const recipients = [[recipientProtectedHeader, recipientUnprotectedHeader, EMPTY_BUFFER]]
+  // const recipients = [[recipientProtectedHeader, recipientUnprotectedHeader, EMPTY_BUFFER]]
 
-  const COSE_Encrypt = [
-    protectedHeader,
-    req.unprotectedHeader,
-    ct,
-    recipients
-  ] as any
+  // const COSE_Encrypt = [
+  //   protectedHeader,
+  //   req.unprotectedHeader,
+  //   ct,
+  //   recipients
+  // ] as any
 
-  return encodeAsync(new Tagged(COSE_Encrypt_Tag, COSE_Encrypt), { canonical: true })
+  // return encodeAsync(new Tagged(COSE_Encrypt_Tag, COSE_Encrypt), { canonical: true })
 }
 
 export type RequestDecryption = {
@@ -173,6 +129,21 @@ const keyLength = {
   'P-521': 66,
   'P-256': 32
 } as Record<number | string, number>;
+
+const authTagLength = {
+  1: 16,
+  2: 16,
+  3: 16,
+  10: 8, // AES-CCM-16-64-128
+  11: 8, // AES-CCM-16-64-256
+  12: 8, // AES-CCM-64-64-128
+  13: 8, // AES-CCM-64-64-256
+  30: 16, // AES-CCM-16-128-128
+  31: 16, // AES-CCM-16-128-256
+  32: 16, // AES-CCM-64-128-128
+  33: 16 // AES-CCM-64-128-256
+} as Record<number, number>;
+
 
 function createContext(rp: any, alg: any, partyUNonce: any) {
   return encodeAsync([
@@ -226,21 +197,24 @@ export const decrypt = async (req: RequestDecryption) => {
   }
   const api = (await subtle())
   const receiverPrivateKey = req.recipients.keys[0]
-  const contentEncryptionKey = await api.deriveKey({
-    name: "ECDH",
-    public: await publicKeyFromJwk(epk),
-  },
-    await privateKeyFromJwk(receiverPrivateKey),
-    {
-      name: "AES-GCM",
-      length: 128,
-    },
-    true,
-    ["encrypt", "decrypt"],
-  )
 
-  const cek = Buffer.from(await api.exportKey('raw', contentEncryptionKey))
-  console.log('cek: ', cek.toString('hex'))
+
+  const sharedSecret = await api.deriveBits(
+    { name: "ECDH", namedCurve: "P-256", public: await publicKeyFromJwk(epk) } as any,
+    await privateKeyFromJwk(receiverPrivateKey),
+    256
+  );
+  const sharedSecretKey = await api.importKey(
+    "raw",
+    sharedSecret,
+    { name: "HKDF" },
+    false,
+    ["deriveKey", "deriveBits"]
+  );
+
+  // console.log('sharedSecretKey: ', Buffer.from(sharedSecret).toString('hex')) // correct
+
+  // console.log('cek: ', cek.toString('hex')) // ❌
   const partyUNonce = null
   const alg = decodedProtectedHeader.get(1) // top level protected algorithm
   const rp = recipientProtectedHeader;
@@ -249,19 +223,14 @@ export const decrypt = async (req: RequestDecryption) => {
   const aad = await createAAD(protectedHeader, 'Encrypt', EMPTY_BUFFER)
   console.log('aad: ', (await aad).toString('hex'))
 
-  const symmetricKey = await api.importKey('raw', cek, "AES-GCM", true, [
-    "encrypt",
-    "decrypt",
-  ])
-
   const iv = unprotectedHeader.get(5)
   console.log('iv: ', iv.toString('hex'))
 
-  const suite = new CipherSuite({
-    kem: KemId.DhkemP256HkdfSha256,
-    kdf: KdfId.HkdfSha256,
-    aead: AeadId.Aes128Gcm,
-  });
+  // const suite = new CipherSuite({
+  //   kem: KemId.DhkemP256HkdfSha256,
+  //   kdf: KdfId.HkdfSha256,
+  //   aead: AeadId.Aes128Gcm,
+  // });
 
   // const recipientPublicKey = Buffer.concat([
   //   Buffer.from('04', 'hex'),
@@ -273,17 +242,40 @@ export const decrypt = async (req: RequestDecryption) => {
 
   // console.log(Buffer.from(hkdf).toString('hex'))
 
-  const hkdf = new HKDF('sha256', undefined, cek);
-  const key = hkdf.derive(context, 16); // A128GCM
-  console.log(key.toString('hex'))
+  const ikm = Buffer.from(sharedSecret);
+  const hkdf = new HKDF('sha256', undefined, ikm);
+  const cek = hkdf.derive(context, 16); // A128GCM
+  console.log('key: ', cek.toString('hex'))
+
+
+  // const derived_key = await api.deriveBits(
+  //   { name: "HKDF", hash: "SHA-256", salt: new Uint8Array([]), info: new Uint8Array([]) },
+  //   sharedSecretKey,
+  //   256
+  // );
+
+  // // console.log({ derived_key })
+
+  // const cek = Buffer.from(derived_key)
 
   // const symmetricKey = await api.importKey('raw', cek, "AES-GCM", true, [
   //   "encrypt",
   //   "decrypt",
   // ])
   // TODO: make this work end to end in node, then replace node functions with webcrypto.
-
-  const pt = await decryptMessage(ciphertext, symmetricKey, iv, aad)
+  const tagLength = authTagLength[alg];
+  const tag = ciphertext.slice(ciphertext.length - tagLength, ciphertext.length);
+  const ct = ciphertext.slice(0, ciphertext.length - tagLength);
+  console.log('tag: ', tag.toString('hex'))
+  // const pt = await mixed.gcmEncrypt('A128GCM', ciphertext, symmetricKey, iv, aad)
+  const pt = await mixed.gcmDecrypt(
+    'A128GCM',
+    new Uint8Array(cek),
+    new Uint8Array(ct),
+    new Uint8Array(iv),
+    new Uint8Array(tag),
+    new Uint8Array(aad),
+  );
   console.log(pt)
 
 }
