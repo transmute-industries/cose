@@ -57,6 +57,14 @@ export type RequestWrapEncryption = {
   }
 }
 
+
+const getCoseAlgFromRecipientJwk = (jwk: any) => {
+  if (jwk.crv === 'P-256') {
+    return -29 // ECDH-ES-A128KW
+  }
+}
+
+
 export const encrypt = async (req: RequestWrapEncryption) => {
   if (req.recipients.keys.length !== 1) {
     throw new Error('Direct encryption requires a single recipient')
@@ -68,16 +76,20 @@ export const encrypt = async (req: RequestWrapEncryption) => {
   const alg = req.protectedHeader.get(1)
   const protectedHeader = await encodeAsync(req.protectedHeader)
   const unprotectedHeader = req.unprotectedHeader;
-
+  const keyAgreementWithKeyWrappingAlgorithm = getCoseAlgFromRecipientJwk(recipientPublicKeyJwk)
   const recipientProtectedHeader = await encodeAsync(new Map<number, any>([
-    [1, -29],  // ECDH-ES-A128KW
+    [1, keyAgreementWithKeyWrappingAlgorithm],
   ]))
   const senderPrivateKeyJwk = await generate<any>('ES256', "application/jwk+json")
   const kek = await ecdh.deriveKey(protectedHeader, recipientProtectedHeader, recipientPublicKeyJwk, senderPrivateKeyJwk)
   const cek = await aes.generateKey(alg);
   const iv = await aes.getIv(alg);
   unprotectedHeader.set(5, iv)
-  const encryptedKey = await aes.wrap(-3, cek, new Uint8Array(kek))
+  let kwAlg = -3
+  if (keyAgreementWithKeyWrappingAlgorithm === -29) { // ECDH-ES-A128KW
+    kwAlg = -3
+  }
+  const encryptedKey = await aes.wrap(kwAlg, cek, new Uint8Array(kek))
   const senderPublicKeyJwk = publicFromPrivate<any>(senderPrivateKeyJwk)
   const senderPublicCoseKey = await convertJsonWebKeyToCoseKey(senderPublicKeyJwk)
   const unprotectedParams = [[-1, senderPublicCoseKey]] as any[]
