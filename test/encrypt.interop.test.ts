@@ -119,7 +119,7 @@ it('p256-hkdf-256-01: ECDH-ES direct w/ hkdf-sha-256 for 128-bit key', async () 
 })
 
 
-it('p256-wrap-128-01: ECDH-ES direct w/ key wrap 128 for 128-bit key', async () => {
+it.only('p256-wrap-128-01: ECDH-ES direct w/ key wrap 128 for 128-bit key', async () => {
   const example = {
     "title": "p256-wrap-128-01: ECDH-ES direct w/ key wrap 128 for 128-bit key",
     "input": {
@@ -160,12 +160,12 @@ it('p256-wrap-128-01: ECDH-ES direct w/ key wrap 128 for 128-bit key', async () 
       ]
     },
     "intermediates": {
-      "AAD_hex": "8367456E637279707443A1010140",
+      "AAD_hex": "8367456E637279707443A1010140", // good
       "CEK_hex": "B2353161740AACF1F7163647984B522A",
       "recipients": [
         {
           "Context_hex": "842283F6F6F683F6F6F682188044A101381C",
-          "Secret_hex": "EE45F7C389FDB89923CA67C0E0CD29802DEC8F514EB818054BEEDD5DAFA78048",
+          "Secret_hex": "EE45F7C389FDB89923CA67C0E0CD29802DEC8F514EB818054BEEDD5DAFA78048", // good
           "KEK_hex": "7C60CB35A78B24DCF40A394395E9E8CD"
         }
       ]
@@ -177,7 +177,6 @@ it('p256-wrap-128-01: ECDH-ES direct w/ key wrap 128 for 128-bit key', async () 
   }
   const expected = transmute.cbor.decode(Buffer.from(example.output.cbor, 'hex'))
   const [protectedHeader, , ciphertext, recipients] = expected.value
-
   const decodedProtectedHeader = transmute.cbor.decodeFirstSync(protectedHeader);
   expect(decodedProtectedHeader.get(1)).toBe(1) // alg : A128GCM
   const [[recipientProtectedHeader, recipientUnprotectedHeader, recipientCipherText]] = recipients
@@ -190,6 +189,20 @@ it('p256-wrap-128-01: ECDH-ES direct w/ key wrap 128 for 128-bit key', async () 
   expect(crv).toBe(1) // crv : P-256
   const decodedRecipientProtectedHeader = transmute.cbor.decodeFirstSync(recipientProtectedHeader);
   expect(decodedRecipientProtectedHeader.get(1)).toBe(-29) // alg : ECDH-ES + A128KW
+  const decrypted = await transmute.decrypt.wrap({
+    ciphertext: Buffer.from(example.output.cbor, 'hex'),
+    recipients: {
+      keys: [{
+        "kty": "EC",
+        "kid": "meriadoc.brandybuck@buckland.example",
+        "crv": "P-256",
+        "x": "Ze2loSV3wrroKUN_4zhwGhCqo3Xhu1td4QjeQ5wIVR0",
+        "y": "HlLtdXARY_f55A3fnzQbPcm6hgr34Mp8p-nuzQCE0Zw",
+        "d": "r_kHyZ-a06rmxM3yESK84r1otSg-aQcVStkRhA-iCM8"
+      }]
+    }
+  })
+  expect(Buffer.from(decrypted).toString()).toBe('This is the content.')
 
 })
 

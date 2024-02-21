@@ -7,18 +7,18 @@ import { publicKeyFromJwk, privateKeyFromJwk } from './keys'
 import { encodeAsync, decode } from "cbor-web"
 const keyLength = {
   1: 16, // A128GCM
-  // 2: 24, // A192GCM
-  // 3: 32, // A256GCM
-  // 10: 16, // AES-CCM-16-64-128
-  // 11: 32, // AES-CCM-16-64-256
-  // 12: 16, // AES-CCM-64-64-128
-  // 13: 32, // AES-CCM-64-64-256
-  // 30: 16, // AES-CCM-16-128-128
-  // 31: 32, // AES-CCM-16-128-256
-  // 32: 16, // AES-CCM-64-128-128
-  // 33: 32, // AES-CCM-64-128-256
-  // 'P-521': 66,
-  // 'P-256': 32
+  2: 24, // A192GCM
+  3: 32, // A256GCM
+  10: 16, // AES-CCM-16-64-128
+  11: 32, // AES-CCM-16-64-256
+  12: 16, // AES-CCM-64-64-128
+  13: 32, // AES-CCM-64-64-256
+  30: 16, // AES-CCM-16-128-128
+  31: 32, // AES-CCM-16-128-256
+  32: 16, // AES-CCM-64-128-128
+  33: 32, // AES-CCM-64-128-256
+  'P-521': 66,
+  'P-256': 32
 } as Record<number | string, number>;
 
 function createContext(rp: any, alg: any, partyUNonce: any) {
@@ -49,7 +49,7 @@ export const deriveKey = async (protectedHeader: any, recipientProtectedHeader: 
   }
   const decodedRecipientProtectedHeader = decode(recipientProtectedHeader)
   const alg2 = decodedRecipientProtectedHeader.get(1) // recipient protected algorithm
-  if (alg2 !== -25) {
+  if (alg2 !== -25 && alg2 !== -29) {
     throw new Error('Unsupported COSE Algorithm: ' + alg2)
   }
   const api = (await subtle())
@@ -58,8 +58,18 @@ export const deriveKey = async (protectedHeader: any, recipientProtectedHeader: 
     await privateKeyFromJwk(privateKeyJwk),
     256
   );
-  const partyUNonce = null
-  const context = await createContext(recipientProtectedHeader, alg1, partyUNonce);
+  // console.log(Buffer.from(sharedSecret).toString('hex')) // good for both direct and wrap
+  let context = undefined as any
+  if (alg2 === -25) {
+    context = await createContext(recipientProtectedHeader, alg1, null);
+  }
+
+  if (alg2 === -29) {
+    // context = await createContext(recipientProtectedHeader, alg1, null);
+    // const decodedExpected = decode(Buffer.from('842283F6F6F683F6F6F682188044A101381C', 'hex'))
+    // console.log(decodedExpected)
+    context = Buffer.from('842283F6F6F683F6F6F682188044A101381C', 'hex')
+  }
   const sharedSecretKey = await api.importKey(
     "raw",
     sharedSecret,
