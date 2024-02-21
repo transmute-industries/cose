@@ -2,7 +2,7 @@ import cose from 'cose-js';
 
 import * as transmute from '../src'
 
-it.only('p256-hkdf-256-01: ECDH-ES direct w/ hkdf-sha-256 for 128-bit key', async () => {
+it('p256-hkdf-256-01: ECDH-ES direct w/ hkdf-sha-256 for 128-bit key', async () => {
   const example = {
     "title": "p256-hkdf-256-01: ECDH-ES direct w/ hkdf-sha-256 for 128-bit key",
     "input": {
@@ -115,7 +115,7 @@ it.only('p256-hkdf-256-01: ECDH-ES direct w/ hkdf-sha-256 for 128-bit key', asyn
       }]
     }
   })
-  expect(decrypted.toString()).toBe('This is the content.')
+  expect(Buffer.from(decrypted).toString()).toBe('This is the content.')
 })
 
 
@@ -197,27 +197,38 @@ it('direct', async () => {
   const protectedHeader = new Map<number, any>([
     [1, 1], // alg : A128GCM
   ])
-  const unprotectedHeader = new Map<number, any>([
-    [5, Buffer.from('C9CF4DF2FE6C632BF7886413', 'hex')], // iv
-  ])
-  const plaintext = new TextEncoder().encode("This is the content.")
-  const recipients = {
-    keys: [{
-      "kty": "EC",
-      "kid": "meriadoc.brandybuck@buckland.example",
-      "crv": "P-256",
-      "x": "Ze2loSV3wrroKUN_4zhwGhCqo3Xhu1td4QjeQ5wIVR0",
-      "y": "HlLtdXARY_f55A3fnzQbPcm6hgr34Mp8p-nuzQCE0Zw",
-      // encrypt to public keys only
-      // "d": "r_kHyZ-a06rmxM3yESK84r1otSg-aQcVStkRhA-iCM8"
-    }]
-  }
+  const unprotectedHeader = new Map<number, any>([])
+  const plaintext = new TextEncoder().encode("💀 My lungs taste the air of Time Blown past falling sands ⌛")
   const ct = await transmute.encrypt.direct({
     protectedHeader,
     unprotectedHeader,
     plaintext,
-    recipients
+    recipients: {
+      keys: [{
+        "kty": "EC",
+        "kid": "meriadoc.brandybuck@buckland.example",
+        "crv": "P-256",
+        "x": "Ze2loSV3wrroKUN_4zhwGhCqo3Xhu1td4QjeQ5wIVR0",
+        "y": "HlLtdXARY_f55A3fnzQbPcm6hgr34Mp8p-nuzQCE0Zw",
+        // encrypt to public keys only
+        // "d": "r_kHyZ-a06rmxM3yESK84r1otSg-aQcVStkRhA-iCM8"
+      }]
+    }
   })
   const decoded = transmute.cbor.decodeFirstSync(ct);
   expect(decoded.tag).toBe(96)
+  const decrypted = await transmute.decrypt.direct({
+    ciphertext: ct,
+    recipients: {
+      keys: [{
+        "kty": "EC",
+        "kid": "meriadoc.brandybuck@buckland.example",
+        "crv": "P-256",
+        "x": "Ze2loSV3wrroKUN_4zhwGhCqo3Xhu1td4QjeQ5wIVR0",
+        "y": "HlLtdXARY_f55A3fnzQbPcm6hgr34Mp8p-nuzQCE0Zw",
+        "d": "r_kHyZ-a06rmxM3yESK84r1otSg-aQcVStkRhA-iCM8"
+      }]
+    }
+  })
+  expect(new TextDecoder().decode(decrypted)).toBe("💀 My lungs taste the air of Time Blown past falling sands ⌛")
 })
