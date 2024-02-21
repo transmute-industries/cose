@@ -1,15 +1,13 @@
 
-import { decodeFirst } from "cbor-web"
+import { convertCoseKeyToJsonWebKey, convertJsonWebKeyToCoseKey, generate, publicFromPrivate } from "../key"
 
-import { convertCoseKeyToJsonWebKey } from "../key"
+import { Tagged, decodeFirst, encodeAsync } from "cbor-web"
 
 import * as aes from './aes'
 import * as ecdh from './ecdh'
-import { createAAD, getRandomBytes } from './utils'
+import { createAAD, COSE_Encrypt_Tag } from './utils'
 
 import { EMPTY_BUFFER } from "../../cbor"
-
-import * as mixed from './mixed'
 
 export type RequestWrapDecryption = {
   ciphertext: any,
@@ -60,5 +58,41 @@ export type RequestWrapEncryption = {
 }
 
 export const encrypt = async (req: RequestWrapEncryption) => {
-  //
+  if (req.recipients.keys.length !== 1) {
+    throw new Error('Direct encryption requires a single recipient')
+  }
+  const recipientPublicKeyJwk = req.recipients.keys[0]
+  if (recipientPublicKeyJwk.crv !== 'P-256') {
+    throw new Error('Only P-256 is supported currently')
+  }
+  const alg = req.protectedHeader.get(1)
+  const protectedHeader = await encodeAsync(req.protectedHeader)
+  const unprotectedHeader = req.unprotectedHeader;
+
+  const recipientProtectedHeader = await encodeAsync(new Map<number, any>([
+    [1, -29],  // ECDH-ES-A128KW
+  ]))
+  const senderPrivateKeyJwk = await generate<any>('ES256', "application/jwk+json")
+  const kek = await ecdh.deriveKey(protectedHeader, recipientProtectedHeader, recipientPublicKeyJwk, senderPrivateKeyJwk)
+  const cek = await aes.generateKey(alg);
+  const iv = await aes.getIv(alg);
+  unprotectedHeader.set(5, iv)
+  const encryptedKey = await aes.wrap(-3, cek, new Uint8Array(kek))
+  const senderPublicKeyJwk = publicFromPrivate<any>(senderPrivateKeyJwk)
+  const senderPublicCoseKey = await convertJsonWebKeyToCoseKey(senderPublicKeyJwk)
+  const unprotectedParams = [[-1, senderPublicCoseKey]] as any[]
+  if (recipientPublicKeyJwk.kid) {
+    unprotectedParams.push([4, recipientPublicKeyJwk.kid],)
+  }
+  const recipientUnprotectedHeader = new Map<number, any>(unprotectedParams)
+  const aad = await createAAD(protectedHeader, 'Encrypt', EMPTY_BUFFER)
+  const ciphertext = await aes.encrypt(alg, new Uint8Array(req.plaintext), new Uint8Array(iv), new Uint8Array(aad), new Uint8Array(cek))
+  const recipients = [[recipientProtectedHeader, recipientUnprotectedHeader, encryptedKey]]
+  const COSE_Encrypt = [
+    protectedHeader,
+    unprotectedHeader,
+    ciphertext,
+    recipients
+  ]
+  return encodeAsync(new Tagged(COSE_Encrypt_Tag, COSE_Encrypt), { canonical: true })
 }

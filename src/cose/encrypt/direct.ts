@@ -2,7 +2,6 @@
 import { convertCoseKeyToJsonWebKey, convertJsonWebKeyToCoseKey, generate, publicFromPrivate } from "../key"
 import { JsonWebKey } from "../key"
 import { Tagged, decode, decodeFirst, encodeAsync } from "cbor-web"
-export const COSE_Encrypt_Tag = 96
 
 import { EMPTY_BUFFER } from "../../cbor"
 
@@ -10,7 +9,7 @@ import * as aes from './aes'
 import * as ecdh from './ecdh'
 
 
-import { createAAD, getRandomBytes } from './utils'
+import { createAAD, COSE_Encrypt_Tag } from './utils'
 
 export type JWKS = {
   keys: JsonWebKey[]
@@ -23,13 +22,6 @@ export type RequestEncryption = {
   recipients: JWKS
 }
 
-const getIv = async (alg: number) => {
-  let ivLength = 16
-  if (alg === 1) {
-    ivLength = 16
-  }
-  return getRandomBytes(ivLength);
-}
 
 const getCoseAlgFromRecipientJwk = (jwk: any) => {
   if (jwk.crv === 'P-256') {
@@ -54,7 +46,7 @@ export const encrypt = async (req: RequestEncryption) => {
   ]))
   const senderPrivateKeyJwk = await generate<any>('ES256', "application/jwk+json")
   const cek = await ecdh.deriveKey(protectedHeader, recipientProtectedHeader, recipientPublicKeyJwk, senderPrivateKeyJwk)
-  const iv = await getIv(alg);
+  const iv = await aes.getIv(alg);
   unprotectedHeader.set(5, iv)
   const senderPublicKeyJwk = publicFromPrivate<any>(senderPrivateKeyJwk)
   const senderPublicCoseKey = await convertJsonWebKeyToCoseKey(senderPublicKeyJwk)
