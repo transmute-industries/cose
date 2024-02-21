@@ -39,10 +39,12 @@ export const decrypt = async (req: RequestWrapDecryption) => {
 
   const kek = await ecdh.deriveKey(protectedHeader, recipientProtectedHeader, senderPublicKeyJwk, receiverPrivateKeyJwk)
   const iv = unprotectedHeader.get(5)
-  // console.log('iv: ', iv.toString('hex'))
-  // console.log('kek: ', Buffer.from(kek).toString('hex')) // good modulor calculate context properly...
   const aad = await createAAD(protectedHeader, 'Encrypt', EMPTY_BUFFER) // good
-  const cek = await mixed.unwrap('A128KW', kek, recipientCipherText) // todo remove
+  let kwAlg = -3
+  if (recipientAlgorithm === -29) { // ECDH-ES-A128KW
+    kwAlg = -3
+  }
+  const cek = await aes.unwrap(kwAlg, recipientCipherText, new Uint8Array(kek))
   const decodedProtectedHeader = await decodeFirst(protectedHeader)
   const alg = decodedProtectedHeader.get(1)
   return aes.decrypt(alg, ciphertext, new Uint8Array(iv), new Uint8Array(aad), new Uint8Array(cek))

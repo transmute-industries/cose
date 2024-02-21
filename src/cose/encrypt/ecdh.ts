@@ -6,6 +6,7 @@ export type SUPPORTED_CEK_ALG = -25 // IANACOSEAlgorithms['-25']
 import { publicKeyFromJwk, privateKeyFromJwk } from './keys'
 import { encodeAsync, decode } from "cbor-web"
 const keyLength = {
+  '-3': 16, // A128KW
   1: 16, // A128GCM
   2: 24, // A192GCM
   3: 32, // A256GCM
@@ -35,7 +36,7 @@ function createContext(rp: any, alg: any, partyUNonce: any) {
       null // other
     ],
     [
-      keyLength[alg] * 8, // keyDataLength
+      keyLength[`${alg}`] * 8, // keyDataLength
       rp // protected
     ]
   ]);
@@ -58,17 +59,12 @@ export const deriveKey = async (protectedHeader: any, recipientProtectedHeader: 
     await privateKeyFromJwk(privateKeyJwk),
     256
   );
-  // console.log(Buffer.from(sharedSecret).toString('hex')) // good for both direct and wrap
   let context = undefined as any
   if (alg2 === -25) {
     context = await createContext(recipientProtectedHeader, alg1, null);
   }
-
   if (alg2 === -29) {
-    // context = await createContext(recipientProtectedHeader, alg1, null);
-    // const decodedExpected = decode(Buffer.from('842283F6F6F683F6F6F682188044A101381C', 'hex'))
-    // console.log(decodedExpected)
-    context = Buffer.from('842283F6F6F683F6F6F682188044A101381C', 'hex')
+    context = await createContext(recipientProtectedHeader, -3, null);
   }
   const sharedSecretKey = await api.importKey(
     "raw",

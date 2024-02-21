@@ -42,9 +42,22 @@ export async function encrypt(alg: COSE_AES_ALG, pt: Uint8Array, iv: Uint8Array,
 
 
 
-// async function encryptGCM(string,key) {
-//   let encoded = new TextEncoder().encode(string);
-//   let iv = crypto.getRandomValues(new Uint8Array(12));
-//   let encrypted = await crypto.subtle.encrypt({"name":"AES-GCM","iv":iv}, key, encoded);
-//   return encrypted = {"encrypted":encrypted, "iv": iv};
-// 
+export async function unwrap(alg: number, encryptedKey: Uint8Array, keyEncryptionKey: Uint8Array) {
+  if (alg !== -3) {
+    throw new Error('Unsupported cose algorithm: ' + alg)
+  }
+  const api = (await subtle())
+  const contentEncryptionKey = await api.unwrapKey(
+    "raw",
+    encryptedKey,
+    await api.importKey('raw', keyEncryptionKey, {
+      "name": "AES-KW"
+    }, false, ['unwrapKey']),
+    "AES-KW",
+    { name: "AES-GCM" },
+    true,
+    ["decrypt"]
+  );
+  return api.exportKey('raw', contentEncryptionKey)
+
+}

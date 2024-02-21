@@ -119,7 +119,7 @@ it('p256-hkdf-256-01: ECDH-ES direct w/ hkdf-sha-256 for 128-bit key', async () 
 })
 
 
-it.only('p256-wrap-128-01: ECDH-ES direct w/ key wrap 128 for 128-bit key', async () => {
+it('p256-wrap-128-01: ECDH-ES direct w/ key wrap 128 for 128-bit key', async () => {
   const example = {
     "title": "p256-wrap-128-01: ECDH-ES direct w/ key wrap 128 for 128-bit key",
     "input": {
