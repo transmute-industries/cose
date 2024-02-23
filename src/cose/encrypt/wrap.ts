@@ -13,9 +13,6 @@ import * as hpke from './hpke'
 
 export const decrypt = async (req: RequestWrapDecryption) => {
   const decoded = await decodeFirst(req.ciphertext)
-  if (decoded.tag !== 96) {
-    throw new Error('Only tag 96 cose encrypt are supported')
-  }
   const [protectedHeader, unprotectedHeader, ciphertext, recipients] = decoded.value
   const [recipient] = recipients
   const [recipientProtectedHeader, recipientUnprotectedHeader, recipientCipherText] = recipient
@@ -25,6 +22,9 @@ export const decrypt = async (req: RequestWrapDecryption) => {
   })
   if (receiverPrivateKeyJwk.alg === 'HPKE-Base-P256-SHA256-AES128GCM') {
     return hpke.decrypt.wrap(req)
+  }
+  if (decoded.tag !== 96) {
+    throw new Error('Only tag 96 cose encrypt are supported')
   }
   const decodedRecipientProtectedHeader = await decodeFirst(recipientProtectedHeader)
   const recipientAlgorithm = decodedRecipientProtectedHeader.get(1)

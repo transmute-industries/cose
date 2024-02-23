@@ -61,16 +61,14 @@ export const encrypt = async (req: RequestDirectEncryption) => {
   return encodeAsync(new Tagged(COSE_Encrypt_Tag, COSE_Encrypt), { canonical: true })
 }
 
-
-
 export const decrypt = async (req: RequestDirectDecryption) => {
-  const decoded = await decodeFirst(req.ciphertext)
-  if (decoded.tag !== 96) {
-    throw new Error('Only tag 96 cose encrypt are supported')
-  }
   const receiverPrivateKeyJwk = req.recipients.keys[0]
   if (receiverPrivateKeyJwk.alg === hpke.primaryAlgorithm.label) {
     return hpke.decrypt.direct(req)
+  }
+  const decoded = await decodeFirst(req.ciphertext)
+  if (decoded.tag !== 96) {
+    throw new Error('Only tag 96 cose encrypt are supported')
   }
   const [protectedHeader, unprotectedHeader, ciphertext, recipients] = decoded.value
   if (recipients.length !== 1) {

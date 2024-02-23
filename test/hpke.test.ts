@@ -70,7 +70,7 @@ it('direct', async () => {
     }
   })
   const decoded = transmute.cbor.decodeFirstSync(ct);
-  expect(decoded.tag).toBe(96)
+  expect(decoded.tag).toBe(16)
   const decrypted = await transmute.decrypt.direct({
     ciphertext: ct,
     recipients: {

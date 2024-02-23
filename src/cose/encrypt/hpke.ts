@@ -127,16 +127,12 @@ export const secondaryAlgorithm = {
   'value': 37
 }
 
-export const directAlgorithm = {
-  'label': `HPKE-Direct`,
-  'value': 36
-}
-
-const computeHPKEAad = (protectedHeader: any, protectedRecipientHeader: any, direct = false) => {
-  if (direct) {
-    return protectedHeader
+const computeHPKEAad = (protectedHeader: any, protectedRecipientHeader?: any) => {
+  if (protectedRecipientHeader) {
+    // not sure what to do when recipient protected header exists...
+    return encode([protectedHeader, protectedRecipientHeader])
   }
-  return encode([protectedHeader, protectedRecipientHeader])
+  return protectedHeader
 }
 
 const encryptWrap = async (req: RequestWrapEncryption) => {
@@ -193,6 +189,9 @@ const encryptWrap = async (req: RequestWrapEncryption) => {
 }
 
 export const encryptDirect = async (req: RequestDirectEncryption) => {
+  if (req.protectedHeader.get(1) !== 35) {
+    throw new Error('Only alg 35 is supported')
+  }
   const protectedHeader = await encodeAsync(req.protectedHeader)
   const unprotectedHeader = req.unprotectedHeader;
   const [recipientPublicKeyJwk] = req.recipients.keys
@@ -200,35 +199,26 @@ export const encryptDirect = async (req: RequestDirectEncryption) => {
   const sender = await suite.createSenderContext({
     recipientPublicKey: await publicKeyFromJwk(recipientPublicKeyJwk),
   });
-  const recipientProtectedHeader = await encodeAsync(new Map<number, any>([
-    [1, primaryAlgorithm.value],
-  ]))
-  const hpkeSealAad = computeHPKEAad(protectedHeader, recipientProtectedHeader, true)
+  const hpkeSealAad = computeHPKEAad(protectedHeader)
   const ciphertext = await sender.seal(req.plaintext, hpkeSealAad)
   const recipientCoseKey = new Map<any, any>([
     [1, 5], // kty: EK
     [- 1, sender.enc]
   ])
-  const recipientUnprotectedHeader = new Map([
-    [4, recipientPublicKeyJwk.kid], // kid
-    [-1, recipientCoseKey], // epk
-  ])
-  const recipients = [[recipientProtectedHeader, recipientUnprotectedHeader, EMPTY_BUFFER]]
-  const COSE_Encrypt = [
+  unprotectedHeader.set(4, recipientPublicKeyJwk.kid)
+  unprotectedHeader.set(-1, recipientCoseKey)
+  const COSE_Encrypt0 = [
     protectedHeader,
     unprotectedHeader,
     ciphertext,
-    recipients
   ]
-  return encodeAsync(new Tagged(COSE_Encrypt_Tag, COSE_Encrypt), { canonical: true })
+  return encodeAsync(new Tagged(16, COSE_Encrypt0), { canonical: true })
 }
-
 
 export const encrypt = {
   direct: encryptDirect,
   wrap: encryptWrap
 }
-
 
 export const decryptWrap = async (req: RequestWrapDecryption) => {
   const decoded = await decodeFirst(req.ciphertext)
@@ -264,20 +254,17 @@ export const decryptWrap = async (req: RequestWrapDecryption) => {
 
 export const decryptDirect = async (req: RequestDirectDecryption) => {
   const decoded = await decodeFirst(req.ciphertext)
-  if (decoded.tag !== 96) {
-    throw new Error('Only tag 96 cose encrypt are supported')
+  if (decoded.tag !== 16) {
+    throw new Error('Only tag 16 cose encrypt are supported')
   }
-  const [protectedHeader, unprotectedHeader, ciphertext, recipients] = decoded.value
-  const [recipient] = recipients
-
-  const [recipientProtectedHeader, recipientUnprotectedHeader, recipientCipherText] = recipient
-  const kid = recipientUnprotectedHeader.get(4).toString();
+  const [protectedHeader, unprotectedHeader, ciphertext] = decoded.value
+  const kid = unprotectedHeader.get(4).toString();
   const receiverPrivateKeyJwk = req.recipients.keys.find((k) => {
     return k.kid === kid
   })
-  const decodedRecipientProtectedHeader = await decodeFirst(recipientProtectedHeader)
-  const recipientAlgorithm = decodedRecipientProtectedHeader.get(1)
-  const epk = recipientUnprotectedHeader.get(-1)
+
+  const recipientAlgorithm = unprotectedHeader.get(1)
+  const epk = unprotectedHeader.get(-1)
   // ensure the epk has the algorithm that is set in the protected header
   epk.set(3, recipientAlgorithm) // EPK is allowed to have an alg
   const suite = suites[receiverPrivateKeyJwk.alg as JOSE_HPKE_ALG]
@@ -285,7 +272,7 @@ export const decryptDirect = async (req: RequestDirectDecryption) => {
     recipientKey: await privateKeyFromJwk(receiverPrivateKeyJwk),
     enc: epk.get(-1) // ek
   })
-  const hpkeSealAad = computeHPKEAad(protectedHeader, recipientProtectedHeader, true)
+  const hpkeSealAad = computeHPKEAad(protectedHeader)
   const plaintext = await hpkeRecipient.open(ciphertext, hpkeSealAad)
   return plaintext
 }
