@@ -1,4 +1,6 @@
 import * as transmute from '../src'
+import fs from 'fs'
+import { cbor } from '@transmute/cose'
 
 it('wrap', async () => {
   const protectedHeader = new Map<number, any>([
@@ -40,6 +42,7 @@ it('wrap', async () => {
     }
   })
   expect(new TextDecoder().decode(decrypted)).toBe("💀 My lungs taste the air of Time Blown past falling sands ⌛")
+  fs.writeFileSync('./examples/hpke.wrap.diag', await cbor.diagnose(ct))
 })
 
 
@@ -83,4 +86,5 @@ it('direct', async () => {
     }
   })
   expect(new TextDecoder().decode(decrypted)).toBe("💀 My lungs taste the air of Time Blown past falling sands ⌛")
+  fs.writeFileSync('./examples/hpke.direct.diag', await cbor.diagnose(ct))
 })
