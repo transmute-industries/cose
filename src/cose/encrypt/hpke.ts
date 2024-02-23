@@ -127,6 +127,45 @@ export const secondaryAlgorithm = {
   'value': 37
 }
 
+
+const keyLength = {
+  '35': 16, // ...AES128GCM
+} as Record<number | string, number>;
+
+
+type PartyInfo = [Buffer | null, Buffer | number | null, Buffer | null]
+
+const compute_PartyInfo = (identity: Buffer | null, nonce: Buffer | number | null, other: Buffer | null) => {
+  return [
+    identity || null, // identity
+    nonce || null, // nonce
+    other || null // other
+  ] as PartyInfo
+}
+
+// https://datatracker.ietf.org/doc/html/draft-ietf-cose-hpke-07#section-3.2
+const compute_COSE_KDF_Context = (
+  AlgorithmID: number,
+  PartyUInfo: PartyInfo,
+  PartyVInfo: PartyInfo,
+  Protected: Buffer,
+  SuppPrivInfo?: Buffer
+) => {
+  const info = [
+    AlgorithmID, // AlgorithmID
+    PartyUInfo,
+    PartyVInfo,
+    [ // SuppPubInfo
+      keyLength[`${AlgorithmID}`] * 8, // keyDataLength
+      Protected
+    ]
+  ]
+  if (SuppPrivInfo) {
+    (info as any).push(SuppPrivInfo)
+  }
+  return encodeAsync(info);
+}
+
 const computeHPKEAad = (protectedHeader: any, protectedRecipientHeader?: any) => {
   if (protectedRecipientHeader) {
     // not sure what to do when recipient protected header exists...
@@ -148,13 +187,16 @@ const encryptWrap = async (req: RequestWrapEncryption) => {
   const senderRecipients = []
   for (const recipient of req.recipients.keys) {
     const suite = suites[recipient.alg as JOSE_HPKE_ALG]
+    const recipientProtectedHeader = new Map([[
+      1, 35
+    ]])
+    const encodedRecipientProtectedHeader = encode(recipientProtectedHeader)
+    const info = await computeInfo(recipientProtectedHeader)
     const sender = await suite.createSenderContext({
+      info,
       recipientPublicKey: await publicKeyFromJwk(recipient),
     });
-    const recipientProtectedHeader = encode(new Map([[
-      1, 35
-    ]]))
-    const hpkeSealAad = computeHPKEAad(encodedProtectedHeader, recipientProtectedHeader)
+    const hpkeSealAad = computeHPKEAad(encodedProtectedHeader, encodedRecipientProtectedHeader)
     const encryptedKey = await sender.seal(cek, hpkeSealAad)
     const encapsulatedKey = Buffer.from(sender.enc);
     const recipientCoseKey = new Map<any, any>([
@@ -166,7 +208,7 @@ const encryptWrap = async (req: RequestWrapEncryption) => {
       [-1, recipientCoseKey], // epk
     ])
     senderRecipients.push([
-      recipientProtectedHeader,
+      encodedRecipientProtectedHeader,
       recipientUnprotectedHeader,
       encryptedKey
     ])
@@ -188,15 +230,38 @@ const encryptWrap = async (req: RequestWrapEncryption) => {
   return encodeAsync(new Tagged(COSE_Encrypt_Tag, COSE_Encrypt), { canonical: true })
 }
 
+const computeInfo = async (protectedHeader: Map<any, any>) => {
+  let info = undefined;
+  const algorithmId = protectedHeader.get(1)
+  const partyUIdentity = protectedHeader.get(-21) || null
+  const partyUNonce = protectedHeader.get(-22) || null
+  const partyUOther = protectedHeader.get(-23) || null
+  const partyVIdentity = protectedHeader.get(-24) || null
+  const partyVNonce = protectedHeader.get(-25) || null
+  const partyVOther = protectedHeader.get(-26) || null
+  if (partyUNonce || partyVNonce) {
+    info = await compute_COSE_KDF_Context(
+      algorithmId,
+      compute_PartyInfo(partyUIdentity, partyUNonce, partyUOther),
+      compute_PartyInfo(partyVIdentity, partyVNonce, partyVOther),
+      await encodeAsync(protectedHeader),
+    )
+  }
+  return info
+}
+
 export const encryptDirect = async (req: RequestDirectEncryption) => {
-  if (req.protectedHeader.get(1) !== 35) {
+  const alg = req.protectedHeader.get(1)
+  if (alg !== 35) {
     throw new Error('Only alg 35 is supported')
   }
   const protectedHeader = await encodeAsync(req.protectedHeader)
   const unprotectedHeader = req.unprotectedHeader;
   const [recipientPublicKeyJwk] = req.recipients.keys
   const suite = suites[recipientPublicKeyJwk.alg as JOSE_HPKE_ALG]
+  const info = await computeInfo(req.protectedHeader)
   const sender = await suite.createSenderContext({
+    info,
     recipientPublicKey: await publicKeyFromJwk(recipientPublicKeyJwk),
   });
   const hpkeSealAad = computeHPKEAad(protectedHeader)
@@ -239,7 +304,9 @@ export const decryptWrap = async (req: RequestWrapDecryption) => {
   // ensure the epk has the algorithm that is set in the protected header
   epk.set(3, recipientAlgorithm) // EPK is allowed to have an alg
   const suite = suites[receiverPrivateKeyJwk.alg as JOSE_HPKE_ALG]
+  const info = await computeInfo(decodedRecipientProtectedHeader)
   const hpkeRecipient = await suite.createRecipientContext({
+    info,
     recipientKey: await privateKeyFromJwk(receiverPrivateKeyJwk),
     enc: epk.get(-1) // ek
   })
@@ -262,13 +329,15 @@ export const decryptDirect = async (req: RequestDirectDecryption) => {
   const receiverPrivateKeyJwk = req.recipients.keys.find((k) => {
     return k.kid === kid
   })
-
+  const decodedProtectedHeader = await decodeFirst(protectedHeader)
   const recipientAlgorithm = unprotectedHeader.get(1)
   const epk = unprotectedHeader.get(-1)
   // ensure the epk has the algorithm that is set in the protected header
   epk.set(3, recipientAlgorithm) // EPK is allowed to have an alg
   const suite = suites[receiverPrivateKeyJwk.alg as JOSE_HPKE_ALG]
+  const info = await computeInfo(decodedProtectedHeader)
   const hpkeRecipient = await suite.createRecipientContext({
+    info,
     recipientKey: await privateKeyFromJwk(receiverPrivateKeyJwk),
     enc: epk.get(-1) // ek
   })
