@@ -25,3 +25,20 @@ export async function createAAD(protectedHeader: BufferSource, context: any, ext
   ];
   return encodeAsync(encStructure);
 }
+
+export type RequestWrapEncryption = {
+  protectedHeader: Map<any, any>
+  unprotectedHeader: Map<any, any>
+  plaintext: Uint8Array,
+  recipients: {
+    keys: any[]
+  }
+}
+
+
+export type RequestWrapDecryption = {
+  ciphertext: any,
+  recipients: {
+    keys: any[]
+  }
+}

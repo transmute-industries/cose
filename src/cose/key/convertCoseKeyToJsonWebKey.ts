@@ -15,7 +15,8 @@ export const convertCoseKeyToJsonWebKey = async <T>(coseKey: CoseKey): Promise<T
   const kid = coseKey.get(2)
   const alg = coseKey.get(3)
   const crv = coseKey.get(-1)
-  if (![2].includes(kty)) {
+  // kty EC, kty: EK
+  if (![2, 5].includes(kty)) {
     throw new Error('This library requires does not support the given key type')
   }
   const foundAlgorithm = algorithms.find((param) => {

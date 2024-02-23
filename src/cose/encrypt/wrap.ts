@@ -5,16 +5,11 @@ import { Tagged, decodeFirst, encodeAsync } from "cbor-web"
 
 import * as aes from './aes'
 import * as ecdh from './ecdh'
-import { createAAD, COSE_Encrypt_Tag } from './utils'
+import { createAAD, COSE_Encrypt_Tag, RequestWrapDecryption, RequestWrapEncryption } from './utils'
 
 import { EMPTY_BUFFER } from "../../cbor"
 
-export type RequestWrapDecryption = {
-  ciphertext: any,
-  recipients: {
-    keys: any[]
-  }
-}
+import * as hpke from './hpke'
 
 export const decrypt = async (req: RequestWrapDecryption) => {
   const decoded = await decodeFirst(req.ciphertext)
@@ -28,6 +23,9 @@ export const decrypt = async (req: RequestWrapDecryption) => {
   const receiverPrivateKeyJwk = req.recipients.keys.find((k) => {
     return k.kid === kid
   })
+  if (receiverPrivateKeyJwk.alg === 'HPKE-Base-P256-SHA256-AES128GCM') {
+    return hpke.decrypt.wrap(req)
+  }
   const decodedRecipientProtectedHeader = await decodeFirst(recipientProtectedHeader)
   const recipientAlgorithm = decodedRecipientProtectedHeader.get(1)
   const epk = recipientUnprotectedHeader.get(-1)
@@ -40,7 +38,7 @@ export const decrypt = async (req: RequestWrapDecryption) => {
   const aad = await createAAD(protectedHeader, 'Encrypt', EMPTY_BUFFER) // good
   let kwAlg = -3
   if (recipientAlgorithm === -29) { // ECDH-ES-A128KW
-    kwAlg = -3
+    kwAlg = -3 // A128KW
   }
   const cek = await aes.unwrap(kwAlg, recipientCipherText, new Uint8Array(kek))
   const decodedProtectedHeader = await decodeFirst(protectedHeader)
@@ -48,14 +46,6 @@ export const decrypt = async (req: RequestWrapDecryption) => {
   return aes.decrypt(alg, ciphertext, new Uint8Array(iv), new Uint8Array(aad), new Uint8Array(cek))
 }
 
-export type RequestWrapEncryption = {
-  protectedHeader: Map<any, any>
-  unprotectedHeader: Map<any, any>
-  plaintext: Uint8Array,
-  recipients: {
-    keys: any[]
-  }
-}
 
 
 const getCoseAlgFromRecipientJwk = (jwk: any) => {
@@ -73,7 +63,15 @@ export const encrypt = async (req: RequestWrapEncryption) => {
   if (recipientPublicKeyJwk.crv !== 'P-256') {
     throw new Error('Only P-256 is supported currently')
   }
+
+  if (recipientPublicKeyJwk.alg === 'HPKE-Base-P256-SHA256-AES128GCM') {
+    return hpke.encrypt.wrap(req)
+  }
+
   const alg = req.protectedHeader.get(1)
+  if (alg !== 1) {
+    throw new Error('Only A128GCM is supported currently')
+  }
   const protectedHeader = await encodeAsync(req.protectedHeader)
   const unprotectedHeader = req.unprotectedHeader;
   const keyAgreementWithKeyWrappingAlgorithm = getCoseAlgFromRecipientJwk(recipientPublicKeyJwk)
@@ -87,7 +85,7 @@ export const encrypt = async (req: RequestWrapEncryption) => {
   unprotectedHeader.set(5, iv)
   let kwAlg = -3
   if (keyAgreementWithKeyWrappingAlgorithm === -29) { // ECDH-ES-A128KW
-    kwAlg = -3
+    kwAlg = -3 // A128KW
   }
   const encryptedKey = await aes.wrap(kwAlg, cek, new Uint8Array(kek))
   const senderPublicKeyJwk = publicFromPrivate<any>(senderPrivateKeyJwk)
