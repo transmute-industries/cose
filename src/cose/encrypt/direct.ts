@@ -1,6 +1,6 @@
 
 import { convertCoseKeyToJsonWebKey, convertJsonWebKeyToCoseKey, generate, publicFromPrivate } from "../key"
-import { JsonWebKey } from "../key"
+
 import { Tagged, decode, decodeFirst, encodeAsync } from "cbor-web"
 
 import { EMPTY_BUFFER } from "../../cbor"
@@ -9,19 +9,10 @@ import * as aes from './aes'
 import * as ecdh from './ecdh'
 
 
-import { createAAD, COSE_Encrypt_Tag } from './utils'
+import { createAAD, COSE_Encrypt_Tag, RequestDirectEncryption, RequestDirectDecryption } from './utils'
 
-export type JWKS = {
-  keys: JsonWebKey[]
-}
 
-export type RequestEncryption = {
-  protectedHeader: Map<any, any>
-  unprotectedHeader: Map<any, any>
-  plaintext: Uint8Array,
-  recipients: JWKS
-}
-
+import * as hpke from './hpke'
 
 const getCoseAlgFromRecipientJwk = (jwk: any) => {
   if (jwk.crv === 'P-256') {
@@ -29,13 +20,16 @@ const getCoseAlgFromRecipientJwk = (jwk: any) => {
   }
 }
 
-export const encrypt = async (req: RequestEncryption) => {
+export const encrypt = async (req: RequestDirectEncryption) => {
   if (req.recipients.keys.length !== 1) {
     throw new Error('Direct encryption requires a single recipient')
   }
   const recipientPublicKeyJwk = req.recipients.keys[0]
   if (recipientPublicKeyJwk.crv !== 'P-256') {
     throw new Error('Only P-256 is supported currently')
+  }
+  if (recipientPublicKeyJwk.alg === hpke.primaryAlgorithm.label) {
+    return hpke.encrypt.direct(req)
   }
   const alg = req.protectedHeader.get(1)
   const protectedHeader = await encodeAsync(req.protectedHeader)
@@ -67,16 +61,16 @@ export const encrypt = async (req: RequestEncryption) => {
   return encodeAsync(new Tagged(COSE_Encrypt_Tag, COSE_Encrypt), { canonical: true })
 }
 
-export type RequestDecryption = {
-  ciphertext: any,
-  recipients: JWKS
-}
 
 
-export const decrypt = async (req: RequestDecryption) => {
+export const decrypt = async (req: RequestDirectDecryption) => {
   const decoded = await decodeFirst(req.ciphertext)
   if (decoded.tag !== 96) {
     throw new Error('Only tag 96 cose encrypt are supported')
+  }
+  const receiverPrivateKeyJwk = req.recipients.keys[0]
+  if (receiverPrivateKeyJwk.alg === hpke.primaryAlgorithm.label) {
+    return hpke.decrypt.direct(req)
   }
   const [protectedHeader, unprotectedHeader, ciphertext, recipients] = decoded.value
   if (recipients.length !== 1) {
@@ -93,7 +87,7 @@ export const decrypt = async (req: RequestDecryption) => {
   // ensure the epk has the algorithm that is set in the protected header
   epk.set(3, recipientAlgorithm)
   const senderPublicKeyJwk = await convertCoseKeyToJsonWebKey(epk)
-  const receiverPrivateKeyJwk = req.recipients.keys[0]
+
   const cek = await ecdh.deriveKey(protectedHeader, recipientProtectedHeader, senderPublicKeyJwk, receiverPrivateKeyJwk)
   const aad = await createAAD(protectedHeader, 'Encrypt', EMPTY_BUFFER)
   const iv = unprotectedHeader.get(5)
