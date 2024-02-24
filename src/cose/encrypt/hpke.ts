@@ -199,13 +199,15 @@ const encryptWrap = async (req: RequestWrapEncryption) => {
     const hpkeSealAad = computeHPKEAad(encodedProtectedHeader, encodedRecipientProtectedHeader)
     const encryptedKey = await sender.seal(cek, hpkeSealAad)
     const encapsulatedKey = Buffer.from(sender.enc);
-    const recipientCoseKey = new Map<any, any>([
-      [1, 5], // kty: EK
-      [- 1, encapsulatedKey]
-    ])
+    // commented out the approach in JOSE HPKE
+    // const recipientCoseKey = new Map<any, any>([
+    //   [1, 5], // kty: EK
+    //   [- 1, encapsulatedKey]
+    // ])
     const recipientUnprotectedHeader = new Map([
       [4, recipient.kid], // kid
-      [-1, recipientCoseKey], // epk
+      // [-1, recipientCoseKey], // epk
+      [-4, encapsulatedKey]
     ])
     senderRecipients.push([
       encodedRecipientProtectedHeader,
@@ -266,12 +268,14 @@ export const encryptDirect = async (req: RequestDirectEncryption) => {
   });
   const hpkeSealAad = computeHPKEAad(protectedHeader)
   const ciphertext = await sender.seal(req.plaintext, hpkeSealAad)
-  const recipientCoseKey = new Map<any, any>([
-    [1, 5], // kty: EK
-    [- 1, sender.enc]
-  ])
+  // comments out the approach used in jose hpke
+  // const recipientCoseKey = new Map<any, any>([
+  //   [1, 5], // kty: EK
+  //   [- 1, sender.enc]
+  // ])
   unprotectedHeader.set(4, recipientPublicKeyJwk.kid)
-  unprotectedHeader.set(-1, recipientCoseKey)
+  // unprotectedHeader.set(-1, recipientCoseKey)
+  unprotectedHeader.set(-4, sender.enc)
   const COSE_Encrypt0 = [
     protectedHeader,
     unprotectedHeader,
@@ -299,16 +303,20 @@ export const decryptWrap = async (req: RequestWrapDecryption) => {
     return k.kid === kid
   })
   const decodedRecipientProtectedHeader = await decodeFirst(recipientProtectedHeader)
-  const recipientAlgorithm = decodedRecipientProtectedHeader.get(1)
-  const epk = recipientUnprotectedHeader.get(-1)
-  // ensure the epk has the algorithm that is set in the protected header
-  epk.set(3, recipientAlgorithm) // EPK is allowed to have an alg
+
+  // comment out approach in jose hpke
+  // const epk = recipientUnprotectedHeader.get(-1)
+  // // ensure the epk has the algorithm that is set in the protected header
+  // const recipientAlgorithm = decodedRecipientProtectedHeader.get(1)
+  // epk.set(3, recipientAlgorithm) // EPK is allowed to have an alg
+  const ek = recipientUnprotectedHeader.get(-4)
   const suite = suites[receiverPrivateKeyJwk.alg as JOSE_HPKE_ALG]
   const info = await computeInfo(decodedRecipientProtectedHeader)
   const hpkeRecipient = await suite.createRecipientContext({
     info,
     recipientKey: await privateKeyFromJwk(receiverPrivateKeyJwk),
-    enc: epk.get(-1) // ek
+    // enc: epk.get(-1) // ek
+    enc: ek
   })
   const hpkeSealAad = computeHPKEAad(protectedHeader, recipientProtectedHeader)
   const contentEncryptionKey = await hpkeRecipient.open(recipientCipherText, hpkeSealAad)
@@ -330,16 +338,18 @@ export const decryptDirect = async (req: RequestDirectDecryption) => {
     return k.kid === kid
   })
   const decodedProtectedHeader = await decodeFirst(protectedHeader)
-  const recipientAlgorithm = unprotectedHeader.get(1)
-  const epk = unprotectedHeader.get(-1)
-  // ensure the epk has the algorithm that is set in the protected header
-  epk.set(3, recipientAlgorithm) // EPK is allowed to have an alg
+  const ek = unprotectedHeader.get(-4)
+  // const epk = unprotectedHeader.get(-1)
+  // // ensure the epk has the algorithm that is set in the protected header
+  // const recipientAlgorithm = unprotectedHeader.get(1)
+  // epk.set(3, recipientAlgorithm) // EPK is allowed to have an alg
   const suite = suites[receiverPrivateKeyJwk.alg as JOSE_HPKE_ALG]
   const info = await computeInfo(decodedProtectedHeader)
   const hpkeRecipient = await suite.createRecipientContext({
     info,
     recipientKey: await privateKeyFromJwk(receiverPrivateKeyJwk),
-    enc: epk.get(-1) // ek
+    // enc: epk.get(-1) // ek
+    enc: ek
   })
   const hpkeSealAad = computeHPKEAad(protectedHeader)
   const plaintext = await hpkeRecipient.open(ciphertext, hpkeSealAad)
