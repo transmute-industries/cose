@@ -1,12 +1,12 @@
 import fs from 'fs'
-import * as transmute from '../src'
+import * as cose from '../src'
 
 it('sign and verify', async () => {
-  const secretKeyJwk = await transmute.key.generate<transmute.SecretKeyJwk>('ES256', 'application/jwk+json')
+  const secretKeyJwk = await cose.key.generate<cose.SecretKeyJwk>('ES256', 'application/jwk+json')
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { d, ...publicKeyJwk } = secretKeyJwk
-  const signer = transmute.detached.signer({
-    remote: transmute.crypto.signer({
+  const signer = cose.detached.signer({
+    remote: cose.crypto.signer({
       secretKeyJwk
     })
   })
@@ -17,12 +17,12 @@ it('sign and verify', async () => {
     unprotectedHeader: new Map(),
     payload
   })
-  const { tag, value } = await transmute.cbor.decode(coseSign1)
+  const { tag, value } = await cose.cbor.decode(coseSign1)
   expect(tag).toBe(18) // cose sign 1
   expect(value[2]).toBe(null) // detached payload
 
   // ... the network ...
-  const verifier = transmute.detached.verifier({
+  const verifier = cose.detached.verifier({
     resolver: {
       resolve: async () => {
         return publicKeyJwk
@@ -36,11 +36,11 @@ it('sign and verify', async () => {
 })
 
 it('sign and verify large image from file system', async () => {
-  const secretKeyJwk = await transmute.key.generate<transmute.SecretKeyJwk>('ES256', 'application/jwk+json')
+  const secretKeyJwk = await cose.key.generate<cose.SecretKeyJwk>('ES256', 'application/jwk+json')
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { d, ...publicKeyJwk } = secretKeyJwk
-  const signer = transmute.detached.signer({
-    remote: transmute.crypto.signer({
+  const signer = cose.detached.signer({
+    remote: cose.crypto.signer({
       secretKeyJwk
     })
   })
@@ -55,7 +55,7 @@ it('sign and verify large image from file system', async () => {
   })
 
   // ... the network ...
-  const verifier = transmute.detached.verifier({
+  const verifier = cose.detached.verifier({
     resolver: {
       resolve: async () => {
         return publicKeyJwk

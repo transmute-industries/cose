@@ -1,12 +1,12 @@
 import fs from 'fs'
-import * as transmute from '../src'
+import * as cose from '../src'
 
 it('sign and verify', async () => {
-  const secretKeyJwk = await transmute.key.generate<transmute.SecretKeyJwk>('ES256', 'application/jwk+json')
+  const secretKeyJwk = await cose.key.generate<cose.SecretKeyJwk>('ES256', 'application/jwk+json')
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { d, ...publicKeyJwk } = secretKeyJwk
-  const signer = transmute.attached.signer({
-    remote: transmute.crypto.signer({
+  const signer = cose.attached.signer({
+    remote: cose.crypto.signer({
       secretKeyJwk
     })
   })
@@ -18,7 +18,7 @@ it('sign and verify', async () => {
   })
   // ... the network ...
 
-  const verifier = transmute.attached.verifier({
+  const verifier = cose.attached.verifier({
     resolver: {
       resolve: async () => {
         return publicKeyJwk
@@ -32,11 +32,11 @@ it('sign and verify', async () => {
 })
 
 it('sign and verify large image from file system', async () => {
-  const secretKeyJwk = await transmute.key.generate<transmute.SecretKeyJwk>('ES256', 'application/jwk+json')
+  const secretKeyJwk = await cose.key.generate<cose.SecretKeyJwk>('ES256', 'application/jwk+json')
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { d, ...publicKeyJwk } = secretKeyJwk
-  const signer = transmute.attached.signer({
-    remote: transmute.crypto.signer({
+  const signer = cose.attached.signer({
+    remote: cose.crypto.signer({
       secretKeyJwk
     })
   })
@@ -53,7 +53,7 @@ it('sign and verify large image from file system', async () => {
   })
 
   // ... the network ...
-  const verifier = transmute.attached.verifier({
+  const verifier = cose.attached.verifier({
     resolver: {
       resolve: async () => {
         return publicKeyJwk
