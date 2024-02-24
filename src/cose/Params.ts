@@ -27,6 +27,10 @@ export const PartyVIdentity = -24
 export const PartyVNonce = -25
 export const PartyVOther = -26
 
+export const ContentType = 3
+
+export const ProofType = -111
+
 
 export const Protected = {
   ...HeaderParameters,
@@ -35,7 +39,9 @@ export const Protected = {
   PartyUOther,
   PartyVIdentity,
   PartyVNonce,
-  PartyVOther
+  PartyVOther,
+  ContentType,
+  ProofType // new from COSE Merkle Tree Proofs
 }
 
 export const Unprotected = {
@@ -49,6 +55,15 @@ export const A128GCM = 1
 export const Aead = {
   A128GCM
 }
+
+export const Signature = {
+  'ES256': -7
+}
+
+export const Receipt = {
+  Inclusion: 1
+}
+
 
 export const KeyAgreement = {
   'ECDH-ES+HKDF-256': -25
@@ -82,6 +97,6 @@ export const Curve = {
 }
 
 
-
 export const COSE_Encrypt0 = 16
+export const COSE_Sign1 = 18
 export const COSE_Encrypt = 96

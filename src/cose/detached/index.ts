@@ -1,11 +1,15 @@
 import * as sign1 from "../sign1"
 
 import { decodeFirstSync, encodeAsync, Sign1Tag, Tagged, toArrayBuffer } from '../../cbor'
+import { UnprotectedHeader } from "../Params"
 
 export const signer = ({ remote }: sign1.RequestCoseSign1Signer) => {
   const coseSign1Signer = sign1.signer({ remote })
   return {
     sign: async (req: sign1.RequestCoseSign1) => {
+      if (req.unprotectedHeader === undefined) {
+        req.unprotectedHeader = UnprotectedHeader([])
+      }
       const coseSign1 = await coseSign1Signer.sign(req)
       const decoded = decodeFirstSync(coseSign1)
       decoded.value[2] = null

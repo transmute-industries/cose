@@ -18,25 +18,23 @@ it('readme', async () => {
       secretKeyJwk: notarySecretKeyJwk
     })
   })
-
   const content = fs.readFileSync('./examples/image.png')
   const signatureForImage = await issuer.sign({
-    protectedHeader: new Map<number, any>([
-      [1, -7], // signing algorithm ES256
-      [3, "image/png"], // content type image/png
-      [4, issuerPublicKeyJwk.kid] // issuer key identifier
+    protectedHeader: cose.ProtectedHeader([
+      [cose.Protected.Alg, cose.Signature.ES256], // signing algorithm ES256
+      [cose.Protected.ContentType, "image/png"], // content type image/png
+      [cose.Protected.Kid, issuerPublicKeyJwk.kid] // issuer key identifier
     ]),
-    unprotectedHeader: new Map(),
     payload: content
   })
   const transparencyLogContainingImageSignatures = [
     await cose.receipt.leaf(signatureForImage)
   ]
   const receiptForImageSignature = await cose.receipt.inclusion.issue({
-    protectedHeader: new Map<number, any>([
-      [1, -7],  // signing algorithm ES256
-      [-111, 1], // inclusion proof from RFC9162
-      [4, notaryPublicKeyJwk.kid] // notary key identifier
+    protectedHeader: cose.ProtectedHeader([
+      [cose.Protected.Alg, cose.Signature.ES256],
+      [cose.Protected.ProofType, cose.Receipt.Inclusion],
+      [cose.Protected.Kid, notaryPublicKeyJwk.kid]
     ]),
     entry: 0,
     entries: transparencyLogContainingImageSignatures,
@@ -45,12 +43,12 @@ it('readme', async () => {
   const transparentSignature = await cose.receipt.add(signatureForImage, receiptForImageSignature)
   const resolve = async (coseSign1: cose.CoseSign1Bytes): Promise<cose.PublicKeyJwk> => {
     const { tag, value } = cose.cbor.decodeFirstSync(coseSign1)
-    if (tag !== 18) {
+    if (tag !== cose.COSE_Sign1) {
       throw new Error('Only tagged cose sign 1 are supported')
     }
     const [protectedHeaderBytes] = value;
     const protectedHeaderMap = cose.cbor.decodeFirstSync(protectedHeaderBytes)
-    const kid = protectedHeaderMap.get(4);
+    const kid = protectedHeaderMap.get(cose.Protected.Kid);
     if (kid === issuerPublicKeyJwk.kid) {
       return issuerPublicKeyJwk
     }

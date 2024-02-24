@@ -19,7 +19,7 @@ export type RequestCoseSign1Signer = {
 
 export type RequestCoseSign1 = {
   protectedHeader: ProtectedHeaderMap,
-  unprotectedHeader: UnprotectedHeaderMap,
+  unprotectedHeader?: UnprotectedHeaderMap,
   payload: ArrayBuffer,
   externalAAD?: ArrayBuffer
 }
