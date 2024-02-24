@@ -18,6 +18,7 @@
   "homepage": "https://github.com/transmute-industries/cose#readme",
   "dependencies": {
     "@transmute/cose": "file:../..",
+    "hpke-js": "^1.2.7",
     "jose": "^5.2.0"
   },
   "devDependencies": {

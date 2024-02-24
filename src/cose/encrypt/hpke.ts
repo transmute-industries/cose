@@ -4,14 +4,12 @@ import { EMPTY_BUFFER } from "../../cbor"
 
 import { Tagged, decodeFirst, encodeAsync } from "cbor-web"
 
-import crypto from 'crypto';
-
 import { generateKeyPair, exportJWK, calculateJwkThumbprintUri } from "jose"
 
 import { AeadId, CipherSuite, KdfId, KemId } from "hpke-js";
 
 export type JOSE_HPKE_ALG = `HPKE-Base-P256-SHA256-AES128GCM` | `HPKE-Base-P384-SHA256-AES128GCM`
-
+import subtle from '../../crypto/subtleCryptoProvider'
 
 import * as aes from './aes'
 import { encode } from 'cbor-web';
@@ -37,7 +35,6 @@ export type HPKERecipient = {
     encapsulated_key: string,
   }
 }
-
 
 export const suites = {
   ['HPKE-Base-P256-SHA256-AES128GCM']: new CipherSuite({
@@ -72,7 +69,8 @@ export const publicFromPrivate = (privateKeyJwk: any) => {
 }
 
 export const publicKeyFromJwk = async (publicKeyJwk: any) => {
-  const publicKey = await crypto.subtle.importKey(
+  const api = (await subtle())
+  const publicKey = await api.importKey(
     'jwk',
     publicKeyJwk,
     {
@@ -86,7 +84,8 @@ export const publicKeyFromJwk = async (publicKeyJwk: any) => {
 }
 
 export const privateKeyFromJwk = async (privateKeyJwk: any) => {
-  const privateKey = await crypto.subtle.importKey(
+  const api = (await subtle())
+  const privateKey = await api.importKey(
     'jwk',
     privateKeyJwk,
     {
