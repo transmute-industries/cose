@@ -1,5 +1,9 @@
 
-import { createAAD, COSE_Encrypt_Tag, RequestWrapDecryption, RequestWrapEncryption, RequestDirectEncryption, RequestDirectDecryption } from './utils'
+import { createAAD } from './utils'
+
+import { COSE_Encrypt, COSE_Encrypt0, Direct, Protected, Unprotected, UnprotectedHeader } from '../Params'
+
+import { RequestWrapDecryption, RequestWrapEncryption, RequestDirectEncryption, RequestDirectDecryption } from './types'
 import { EMPTY_BUFFER } from "../../cbor"
 
 import { Tagged, decodeFirst, encodeAsync } from "cbor-web"
@@ -174,6 +178,9 @@ const computeHPKEAad = (protectedHeader: any, protectedRecipientHeader?: any) =>
 }
 
 const encryptWrap = async (req: RequestWrapEncryption) => {
+  if (req.unprotectedHeader === undefined) {
+    req.unprotectedHeader = UnprotectedHeader([])
+  }
   const alg = req.protectedHeader.get(1)
   if (alg !== 1) {
     throw new Error('Only A128GCM is supported at this time')
@@ -222,13 +229,12 @@ const encryptWrap = async (req: RequestWrapEncryption) => {
     new Uint8Array(aad),
     new Uint8Array(cek)
   )
-  const COSE_Encrypt = [
+  return encodeAsync(new Tagged(COSE_Encrypt, [
     encodedProtectedHeader,
     unprotectedHeader,
     ciphertext,
     senderRecipients
-  ]
-  return encodeAsync(new Tagged(COSE_Encrypt_Tag, COSE_Encrypt), { canonical: true })
+  ]), { canonical: true })
 }
 
 const computeInfo = async (protectedHeader: Map<any, any>) => {
@@ -252,8 +258,11 @@ const computeInfo = async (protectedHeader: Map<any, any>) => {
 }
 
 export const encryptDirect = async (req: RequestDirectEncryption) => {
-  const alg = req.protectedHeader.get(1)
-  if (alg !== 35) {
+  if (req.unprotectedHeader === undefined) {
+    req.unprotectedHeader = UnprotectedHeader([])
+  }
+  const alg = req.protectedHeader.get(Protected.Alg)
+  if (alg !== Direct['HPKE-Base-P256-SHA256-AES128GCM']) {
     throw new Error('Only alg 35 is supported')
   }
   const protectedHeader = await encodeAsync(req.protectedHeader)
@@ -272,15 +281,14 @@ export const encryptDirect = async (req: RequestDirectEncryption) => {
   //   [1, 5], // kty: EK
   //   [- 1, sender.enc]
   // ])
-  unprotectedHeader.set(4, recipientPublicKeyJwk.kid)
+  unprotectedHeader.set(Unprotected.Kid, recipientPublicKeyJwk.kid)
   // unprotectedHeader.set(-1, recipientCoseKey)
-  unprotectedHeader.set(-4, sender.enc)
-  const COSE_Encrypt0 = [
+  unprotectedHeader.set(Unprotected.Ek, sender.enc)
+  return encodeAsync(new Tagged(COSE_Encrypt0, [
     protectedHeader,
     unprotectedHeader,
     ciphertext,
-  ]
-  return encodeAsync(new Tagged(16, COSE_Encrypt0), { canonical: true })
+  ]), { canonical: true })
 }
 
 export const encrypt = {
@@ -290,14 +298,14 @@ export const encrypt = {
 
 export const decryptWrap = async (req: RequestWrapDecryption) => {
   const decoded = await decodeFirst(req.ciphertext)
-  if (decoded.tag !== 96) {
+  if (decoded.tag !== COSE_Encrypt) {
     throw new Error('Only tag 96 cose encrypt are supported')
   }
   const [protectedHeader, unprotectedHeader, ciphertext, recipients] = decoded.value
   const [recipient] = recipients
 
   const [recipientProtectedHeader, recipientUnprotectedHeader, recipientCipherText] = recipient
-  const kid = recipientUnprotectedHeader.get(4).toString();
+  const kid = recipientUnprotectedHeader.get(Unprotected.Kid).toString();
   const receiverPrivateKeyJwk = req.recipients.keys.find((k) => {
     return k.kid === kid
   })
@@ -308,7 +316,7 @@ export const decryptWrap = async (req: RequestWrapDecryption) => {
   // // ensure the epk has the algorithm that is set in the protected header
   // const recipientAlgorithm = decodedRecipientProtectedHeader.get(1)
   // epk.set(3, recipientAlgorithm) // EPK is allowed to have an alg
-  const ek = recipientUnprotectedHeader.get(-4)
+  const ek = recipientUnprotectedHeader.get(Unprotected.Ek)
   const suite = suites[receiverPrivateKeyJwk.alg as JOSE_HPKE_ALG]
   const info = await computeInfo(decodedRecipientProtectedHeader)
   const hpkeRecipient = await suite.createRecipientContext({
@@ -319,25 +327,25 @@ export const decryptWrap = async (req: RequestWrapDecryption) => {
   })
   const hpkeSealAad = computeHPKEAad(protectedHeader, recipientProtectedHeader)
   const contentEncryptionKey = await hpkeRecipient.open(recipientCipherText, hpkeSealAad)
-  const iv = unprotectedHeader.get(5)
+  const iv = unprotectedHeader.get(Unprotected.Iv)
   const aad = await createAAD(protectedHeader, 'Encrypt', EMPTY_BUFFER) // good
   const decodedProtectedHeader = await decodeFirst(protectedHeader)
-  const alg = decodedProtectedHeader.get(1)
+  const alg = decodedProtectedHeader.get(Protected.Alg)
   return aes.decrypt(alg, ciphertext, new Uint8Array(iv), new Uint8Array(aad), new Uint8Array(contentEncryptionKey))
 }
 
 export const decryptDirect = async (req: RequestDirectDecryption) => {
   const decoded = await decodeFirst(req.ciphertext)
-  if (decoded.tag !== 16) {
+  if (decoded.tag !== COSE_Encrypt0) {
     throw new Error('Only tag 16 cose encrypt are supported')
   }
   const [protectedHeader, unprotectedHeader, ciphertext] = decoded.value
-  const kid = unprotectedHeader.get(4).toString();
+  const kid = unprotectedHeader.get(Unprotected.Kid).toString();
   const receiverPrivateKeyJwk = req.recipients.keys.find((k) => {
     return k.kid === kid
   })
   const decodedProtectedHeader = await decodeFirst(protectedHeader)
-  const ek = unprotectedHeader.get(-4)
+  const ek = unprotectedHeader.get(Unprotected.Ek)
   // const epk = unprotectedHeader.get(-1)
   // // ensure the epk has the algorithm that is set in the protected header
   // const recipientAlgorithm = unprotectedHeader.get(1)

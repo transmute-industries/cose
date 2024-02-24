@@ -5,44 +5,46 @@ import { Tagged, decodeFirst, encodeAsync } from "cbor-web"
 
 import * as aes from './aes'
 import * as ecdh from './ecdh'
-import { createAAD, COSE_Encrypt_Tag, RequestWrapDecryption, RequestWrapEncryption } from './utils'
+import { createAAD, } from './utils'
+
+import { RequestWrapDecryption, RequestWrapEncryption } from './types'
 
 import { EMPTY_BUFFER } from "../../cbor"
 
 import * as hpke from './hpke'
+import { UnprotectedHeader, COSE_Encrypt, Unprotected, KeyWrap, KeyAgreementWithKeyWrap, Aead, ProtectedHeader, Protected, Epk } from "../Params"
 
 export const decrypt = async (req: RequestWrapDecryption) => {
   const decoded = await decodeFirst(req.ciphertext)
   const [protectedHeader, unprotectedHeader, ciphertext, recipients] = decoded.value
   const [recipient] = recipients
   const [recipientProtectedHeader, recipientUnprotectedHeader, recipientCipherText] = recipient
-  const kid = recipientUnprotectedHeader.get(4).toString();
+  const kid = recipientUnprotectedHeader.get(Unprotected.Kid).toString();
   const receiverPrivateKeyJwk = req.recipients.keys.find((k) => {
     return k.kid === kid
   })
   if (receiverPrivateKeyJwk.alg === 'HPKE-Base-P256-SHA256-AES128GCM') {
     return hpke.decrypt.wrap(req)
   }
-  if (decoded.tag !== 96) {
+  if (decoded.tag !== COSE_Encrypt) {
     throw new Error('Only tag 96 cose encrypt are supported')
   }
   const decodedRecipientProtectedHeader = await decodeFirst(recipientProtectedHeader)
-  const recipientAlgorithm = decodedRecipientProtectedHeader.get(1)
-  const epk = recipientUnprotectedHeader.get(-1)
+  const recipientAlgorithm = decodedRecipientProtectedHeader.get(Protected.Alg)
+  const epk = recipientUnprotectedHeader.get(Unprotected.Epk)
   // ensure the epk has the algorithm that is set in the protected header
-  epk.set(3, recipientAlgorithm)
+  epk.set(Epk.Alg, recipientAlgorithm)
   const senderPublicKeyJwk = await convertCoseKeyToJsonWebKey(epk)
-
   const kek = await ecdh.deriveKey(protectedHeader, recipientProtectedHeader, senderPublicKeyJwk, receiverPrivateKeyJwk)
-  const iv = unprotectedHeader.get(5)
-  const aad = await createAAD(protectedHeader, 'Encrypt', EMPTY_BUFFER) // good
-  let kwAlg = -3
-  if (recipientAlgorithm === -29) { // ECDH-ES-A128KW
-    kwAlg = -3 // A128KW
+  const iv = unprotectedHeader.get(Unprotected.Iv)
+  const aad = await createAAD(protectedHeader, 'Encrypt', EMPTY_BUFFER)
+  let kwAlg = KeyWrap.A128KW
+  if (recipientAlgorithm === KeyAgreementWithKeyWrap["ECDH-ES+A128KW"]) {
+    kwAlg = KeyWrap.A128KW
   }
   const cek = await aes.unwrap(kwAlg, recipientCipherText, new Uint8Array(kek))
   const decodedProtectedHeader = await decodeFirst(protectedHeader)
-  const alg = decodedProtectedHeader.get(1)
+  const alg = decodedProtectedHeader.get(Protected.Alg)
   return aes.decrypt(alg, ciphertext, new Uint8Array(iv), new Uint8Array(aad), new Uint8Array(cek))
 }
 
@@ -50,12 +52,15 @@ export const decrypt = async (req: RequestWrapDecryption) => {
 
 const getCoseAlgFromRecipientJwk = (jwk: any) => {
   if (jwk.crv === 'P-256') {
-    return -29 // ECDH-ES-A128KW
+    return KeyAgreementWithKeyWrap["ECDH-ES+A128KW"]
   }
 }
 
 
 export const encrypt = async (req: RequestWrapEncryption) => {
+  if (req.unprotectedHeader === undefined) {
+    req.unprotectedHeader = UnprotectedHeader([])
+  }
   if (req.recipients.keys.length !== 1) {
     throw new Error('Direct encryption requires a single recipient')
   }
@@ -67,42 +72,41 @@ export const encrypt = async (req: RequestWrapEncryption) => {
   if (recipientPublicKeyJwk.alg === 'HPKE-Base-P256-SHA256-AES128GCM') {
     return hpke.encrypt.wrap(req)
   }
-
-  const alg = req.protectedHeader.get(1)
-  if (alg !== 1) {
+  const alg = req.protectedHeader.get(Protected.Alg)
+  if (alg !== Aead.A128GCM) {
     throw new Error('Only A128GCM is supported currently')
   }
   const protectedHeader = await encodeAsync(req.protectedHeader)
   const unprotectedHeader = req.unprotectedHeader;
   const keyAgreementWithKeyWrappingAlgorithm = getCoseAlgFromRecipientJwk(recipientPublicKeyJwk)
-  const recipientProtectedHeader = await encodeAsync(new Map<number, any>([
-    [1, keyAgreementWithKeyWrappingAlgorithm],
+  const recipientProtectedHeader = await encodeAsync(ProtectedHeader([
+    [Protected.Alg, KeyAgreementWithKeyWrap["ECDH-ES+A128KW"]],
   ]))
   const senderPrivateKeyJwk = await generate<any>('ES256', "application/jwk+json")
   const kek = await ecdh.deriveKey(protectedHeader, recipientProtectedHeader, recipientPublicKeyJwk, senderPrivateKeyJwk)
   const cek = await aes.generateKey(alg);
   const iv = await aes.getIv(alg);
-  unprotectedHeader.set(5, iv)
-  let kwAlg = -3
-  if (keyAgreementWithKeyWrappingAlgorithm === -29) { // ECDH-ES-A128KW
-    kwAlg = -3 // A128KW
+  unprotectedHeader.set(Unprotected.Iv, iv)
+  let kwAlg = KeyWrap.A128KW
+  if (keyAgreementWithKeyWrappingAlgorithm === KeyAgreementWithKeyWrap["ECDH-ES+A128KW"]) {
+    kwAlg = KeyWrap.A128KW
   }
   const encryptedKey = await aes.wrap(kwAlg, cek, new Uint8Array(kek))
   const senderPublicKeyJwk = publicFromPrivate<any>(senderPrivateKeyJwk)
   const senderPublicCoseKey = await convertJsonWebKeyToCoseKey(senderPublicKeyJwk)
-  const unprotectedParams = [[-1, senderPublicCoseKey]] as any[]
+  const unprotectedParams = [[Unprotected.Epk, senderPublicCoseKey]] as any[]
   if (recipientPublicKeyJwk.kid) {
-    unprotectedParams.push([4, recipientPublicKeyJwk.kid],)
+    unprotectedParams.push([Unprotected.Kid, recipientPublicKeyJwk.kid],)
   }
-  const recipientUnprotectedHeader = new Map<number, any>(unprotectedParams)
+  const recipientUnprotectedHeader = UnprotectedHeader(unprotectedParams)
   const aad = await createAAD(protectedHeader, 'Encrypt', EMPTY_BUFFER)
   const ciphertext = await aes.encrypt(alg, new Uint8Array(req.plaintext), new Uint8Array(iv), new Uint8Array(aad), new Uint8Array(cek))
   const recipients = [[recipientProtectedHeader, recipientUnprotectedHeader, encryptedKey]]
-  const COSE_Encrypt = [
+
+  return encodeAsync(new Tagged(COSE_Encrypt, [
     protectedHeader,
     unprotectedHeader,
     ciphertext,
     recipients
-  ]
-  return encodeAsync(new Tagged(COSE_Encrypt_Tag, COSE_Encrypt), { canonical: true })
+  ]), { canonical: true })
 }

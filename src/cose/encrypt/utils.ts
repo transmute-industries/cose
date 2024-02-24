@@ -4,10 +4,6 @@ import { encodeAsync } from "cbor-web"
 // @ts-ignore
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 const nodeCrypto = import('crypto').catch(() => { }) as any
-import { JsonWebKey } from "../key"
-
-export const COSE_Encrypt_Tag = 96
-
 
 export const getRandomBytes = async (byteLength = 16) => {
   try {
@@ -24,44 +20,5 @@ export async function createAAD(protectedHeader: BufferSource, context: any, ext
     externalAAD
   ];
   return encodeAsync(encStructure);
-}
-
-
-export type JWKS = {
-  keys: JsonWebKey[]
-}
-
-export type RequestWrapEncryption = {
-  protectedHeader: Map<any, any>
-  unprotectedHeader: Map<any, any>
-  plaintext: Uint8Array,
-  recipients: {
-    keys: any[]
-  }
-}
-
-
-export type RequestWrapDecryption = {
-  ciphertext: any,
-  recipients: {
-    keys: any[]
-  }
-}
-
-
-export type RequestDirectEncryption = {
-  protectedHeader: Map<any, any>
-  unprotectedHeader: Map<any, any>
-  plaintext: Uint8Array,
-  recipients: {
-    keys: any[]
-  }
-}
-
-export type RequestDirectDecryption = {
-  ciphertext: any,
-  recipients: {
-    keys: any[]
-  }
 }
 

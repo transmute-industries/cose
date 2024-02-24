@@ -1,137 +1,97 @@
 import * as transmute from '../src'
 import fs from 'fs'
-import { cbor } from '@transmute/cose'
+
+const {
+  cbor,
+  encrypt,
+  decrypt,
+  ProtectedHeader,
+  UnprotectedHeader,
+  Protected,
+  Aead,
+  COSE_Encrypt,
+  COSE_Encrypt0,
+  Direct
+} = transmute
+
+const message = "💀 My lungs taste the air of Time Blown past falling sands ⌛"
+const plaintext = new TextEncoder().encode(message)
+const encryptionKeys = {
+  keys: [{
+    "kid": "meriadoc.brandybuck@buckland.example",
+    "alg": "HPKE-Base-P256-SHA256-AES128GCM",
+    "kty": "EC",
+    "crv": "P-256",
+    "x": "Ze2loSV3wrroKUN_4zhwGhCqo3Xhu1td4QjeQ5wIVR0",
+    "y": "HlLtdXARY_f55A3fnzQbPcm6hgr34Mp8p-nuzQCE0Zw",
+  }]
+}
+const decryptionKeys = {
+  keys: [{
+    "kid": "meriadoc.brandybuck@buckland.example",
+    "alg": "HPKE-Base-P256-SHA256-AES128GCM",
+    "kty": "EC",
+    "crv": "P-256",
+    "x": "Ze2loSV3wrroKUN_4zhwGhCqo3Xhu1td4QjeQ5wIVR0",
+    "y": "HlLtdXARY_f55A3fnzQbPcm6hgr34Mp8p-nuzQCE0Zw",
+    "d": "r_kHyZ-a06rmxM3yESK84r1otSg-aQcVStkRhA-iCM8"
+  }]
+}
 
 it('wrap', async () => {
-  const protectedHeader = new Map<number, any>([
-    [1, 1], // alg : A128GCM
-  ])
-  const unprotectedHeader = new Map<number, any>([])
-  const plaintext = new TextEncoder().encode("💀 My lungs taste the air of Time Blown past falling sands ⌛")
-  const ct = await transmute.encrypt.wrap({
-    protectedHeader,
-    unprotectedHeader,
+  const ciphertext = await encrypt.wrap({
+    protectedHeader: ProtectedHeader([
+      [Protected.Alg, Aead.A128GCM],
+    ]),
+    unprotectedHeader: UnprotectedHeader([]),
     plaintext,
-    recipients: {
-      keys: [{
-        "kid": "meriadoc.brandybuck@buckland.example",
-        "alg": "HPKE-Base-P256-SHA256-AES128GCM",
-        "kty": "EC",
-        "crv": "P-256",
-        "x": "Ze2loSV3wrroKUN_4zhwGhCqo3Xhu1td4QjeQ5wIVR0",
-        "y": "HlLtdXARY_f55A3fnzQbPcm6hgr34Mp8p-nuzQCE0Zw",
-        // encrypt to public keys only
-        // "d": "r_kHyZ-a06rmxM3yESK84r1otSg-aQcVStkRhA-iCM8"
-      }]
-    }
+    recipients: encryptionKeys
   })
-  const decoded = transmute.cbor.decodeFirstSync(ct);
-  expect(decoded.tag).toBe(96)
-  const decrypted = await transmute.decrypt.wrap({
-    ciphertext: ct,
-    recipients: {
-      keys: [{
-        "kid": "meriadoc.brandybuck@buckland.example",
-        "alg": "HPKE-Base-P256-SHA256-AES128GCM",
-        "kty": "EC",
-        "crv": "P-256",
-        "x": "Ze2loSV3wrroKUN_4zhwGhCqo3Xhu1td4QjeQ5wIVR0",
-        "y": "HlLtdXARY_f55A3fnzQbPcm6hgr34Mp8p-nuzQCE0Zw",
-        "d": "r_kHyZ-a06rmxM3yESK84r1otSg-aQcVStkRhA-iCM8"
-      }]
-    }
+  const decoded = cbor.decodeFirstSync(ciphertext);
+  expect(decoded.tag).toBe(COSE_Encrypt)
+  const decrypted = await decrypt.wrap({
+    ciphertext,
+    recipients: decryptionKeys
   })
-  expect(new TextDecoder().decode(decrypted)).toBe("💀 My lungs taste the air of Time Blown past falling sands ⌛")
-  fs.writeFileSync('./examples/hpke.wrap.diag', await cbor.diagnose(ct))
+  expect(new TextDecoder().decode(decrypted)).toBe(message)
+  fs.writeFileSync('./examples/hpke.wrap.diag', await cbor.diagnose(ciphertext))
 })
-
 
 it('direct', async () => {
-  const protectedHeader = new Map<number, any>([
-    [1, 35], // alg : Direct || HPKE-Base-P256-SHA256-AES128GCM
-  ])
-  const unprotectedHeader = new Map<number, any>([])
-  const plaintext = new TextEncoder().encode("💀 My lungs taste the air of Time Blown past falling sands ⌛")
-  const ct = await transmute.encrypt.direct({
-    protectedHeader,
-    unprotectedHeader,
+  const ciphertext = await encrypt.direct({
+    protectedHeader: ProtectedHeader([
+      [Protected.Alg, Direct['HPKE-Base-P256-SHA256-AES128GCM']],
+    ]),
+    unprotectedHeader: UnprotectedHeader([]),
     plaintext,
-    recipients: {
-      keys: [{
-        "kid": "meriadoc.brandybuck@buckland.example",
-        "alg": "HPKE-Base-P256-SHA256-AES128GCM",
-        "kty": "EC",
-        "crv": "P-256",
-        "x": "Ze2loSV3wrroKUN_4zhwGhCqo3Xhu1td4QjeQ5wIVR0",
-        "y": "HlLtdXARY_f55A3fnzQbPcm6hgr34Mp8p-nuzQCE0Zw",
-        // encrypt to public keys only
-        // "d": "r_kHyZ-a06rmxM3yESK84r1otSg-aQcVStkRhA-iCM8"
-      }]
-    }
+    recipients: encryptionKeys
   })
-  const decoded = transmute.cbor.decodeFirstSync(ct);
-  expect(decoded.tag).toBe(16)
-  const decrypted = await transmute.decrypt.direct({
-    ciphertext: ct,
-    recipients: {
-      keys: [{
-        "kid": "meriadoc.brandybuck@buckland.example",
-        "alg": "HPKE-Base-P256-SHA256-AES128GCM",
-        "kty": "EC",
-        "crv": "P-256",
-        "x": "Ze2loSV3wrroKUN_4zhwGhCqo3Xhu1td4QjeQ5wIVR0",
-        "y": "HlLtdXARY_f55A3fnzQbPcm6hgr34Mp8p-nuzQCE0Zw",
-        "d": "r_kHyZ-a06rmxM3yESK84r1otSg-aQcVStkRhA-iCM8"
-      }]
-    }
+  const decoded = cbor.decodeFirstSync(ciphertext);
+  expect(decoded.tag).toBe(COSE_Encrypt0)
+  const decrypted = await decrypt.direct({
+    ciphertext,
+    recipients: decryptionKeys
   })
-  expect(new TextDecoder().decode(decrypted)).toBe("💀 My lungs taste the air of Time Blown past falling sands ⌛")
-  fs.writeFileSync('./examples/hpke.direct.diag', await cbor.diagnose(ct))
+  expect(new TextDecoder().decode(decrypted)).toBe(message)
+  fs.writeFileSync('./examples/hpke.direct.diag', await cbor.diagnose(ciphertext))
 })
 
-
-
 it('direct with party info', async () => {
-  const protectedHeader = new Map<number, any>([
-    [1, 35], // alg :  HPKE-Base-P256-SHA256-AES128GCM
-    [-21, Buffer.from(new TextEncoder().encode('did:example:party-u'))],
-    [-24, Buffer.from(new TextEncoder().encode('did:example:party-v'))]
-  ])
-  const unprotectedHeader = new Map<number, any>([])
-  const plaintext = new TextEncoder().encode("💀 My lungs taste the air of Time Blown past falling sands ⌛")
-  const ct = await transmute.encrypt.direct({
-    protectedHeader,
-    unprotectedHeader,
+  const ciphertext = await encrypt.direct({
+    protectedHeader: ProtectedHeader([
+      [Protected.Alg, Direct['HPKE-Base-P256-SHA256-AES128GCM']],
+      [Protected.PartyUIdentity, Buffer.from(new TextEncoder().encode('did:example:party-u'))],
+      [Protected.PartyVIdentity, Buffer.from(new TextEncoder().encode('did:example:party-v'))]
+    ]),
     plaintext,
-    recipients: {
-      keys: [{
-        "kid": "meriadoc.brandybuck@buckland.example",
-        "alg": "HPKE-Base-P256-SHA256-AES128GCM",
-        "kty": "EC",
-        "crv": "P-256",
-        "x": "Ze2loSV3wrroKUN_4zhwGhCqo3Xhu1td4QjeQ5wIVR0",
-        "y": "HlLtdXARY_f55A3fnzQbPcm6hgr34Mp8p-nuzQCE0Zw",
-        // encrypt to public keys only
-        // "d": "r_kHyZ-a06rmxM3yESK84r1otSg-aQcVStkRhA-iCM8"
-      }]
-    }
+    recipients: encryptionKeys
   })
-  const decoded = transmute.cbor.decodeFirstSync(ct);
-  expect(decoded.tag).toBe(16)
-  const decrypted = await transmute.decrypt.direct({
-    ciphertext: ct,
-    recipients: {
-      keys: [{
-        "kid": "meriadoc.brandybuck@buckland.example",
-        "alg": "HPKE-Base-P256-SHA256-AES128GCM",
-        "kty": "EC",
-        "crv": "P-256",
-        "x": "Ze2loSV3wrroKUN_4zhwGhCqo3Xhu1td4QjeQ5wIVR0",
-        "y": "HlLtdXARY_f55A3fnzQbPcm6hgr34Mp8p-nuzQCE0Zw",
-        "d": "r_kHyZ-a06rmxM3yESK84r1otSg-aQcVStkRhA-iCM8"
-      }]
-    }
+  const decoded = cbor.decodeFirstSync(ciphertext);
+  expect(decoded.tag).toBe(COSE_Encrypt0)
+  const decrypted = await decrypt.direct({
+    ciphertext,
+    recipients: decryptionKeys
   })
-  expect(new TextDecoder().decode(decrypted)).toBe("💀 My lungs taste the air of Time Blown past falling sands ⌛")
-  fs.writeFileSync('./examples/hpke.direct.party-id.diag', await cbor.diagnose(ct))
+  expect(new TextDecoder().decode(decrypted)).toBe(message)
+  fs.writeFileSync('./examples/hpke.direct.party-id.diag', await cbor.diagnose(ciphertext))
 })
