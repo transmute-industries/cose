@@ -1,13 +1,16 @@
 
-// const NodePolyfillPlugin = require("node-polyfill-webpack-plugin")
-
+const path = require('path');
 module.exports = [{
   mode: 'development',
   entry: './index.js',
   watch: true,
   plugins: [],
-  // target: 'node'
-  // plugins: [
-  //   new NodePolyfillPlugin()
-  // ]
+  resolve: {
+    alias: {
+      'hpke-js': path.resolve('./node_modules/hpke-js')
+    },
+    fallback: {
+      "crypto": false
+    }
+  }
 }];

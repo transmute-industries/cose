@@ -29,6 +29,8 @@ import * as cose from "@transmute/cose";
 const cose = require("@transmute/cose");
 ```
 
+### SCITT Receipts
+
 ```ts
 const issuerSecretKeyJwk = await cose.key.generate<cose.SecretKeyJwk>(
   "ES256",
@@ -56,25 +58,23 @@ const notary = cose.detached.signer({
     secretKeyJwk: notarySecretKeyJwk,
   }),
 });
-
 const content = fs.readFileSync("./examples/image.png");
 const signatureForImage = await issuer.sign({
-  protectedHeader: new Map<number, any>([
-    [1, -7], // signing algorithm ES256
-    [3, "image/png"], // content type image/png
-    [4, issuerPublicKeyJwk.kid], // issuer key identifier
+  protectedHeader: cose.ProtectedHeader([
+    [cose.Protected.Alg, cose.Signature.ES256], // signing algorithm ES256
+    [cose.Protected.ContentType, "image/png"], // content type image/png
+    [cose.Protected.Kid, issuerPublicKeyJwk.kid], // issuer key identifier
   ]),
-  unprotectedHeader: new Map(),
   payload: content,
 });
 const transparencyLogContainingImageSignatures = [
   await cose.receipt.leaf(signatureForImage),
 ];
 const receiptForImageSignature = await cose.receipt.inclusion.issue({
-  protectedHeader: new Map<number, any>([
-    [1, -7], // signing algorithm ES256
-    [-111, 1], // inclusion proof from RFC9162
-    [4, notaryPublicKeyJwk.kid], // notary key identifier
+  protectedHeader: cose.ProtectedHeader([
+    [cose.Protected.Alg, cose.Signature.ES256],
+    [cose.Protected.ProofType, cose.Receipt.Inclusion],
+    [cose.Protected.Kid, notaryPublicKeyJwk.kid],
   ]),
   entry: 0,
   entries: transparencyLogContainingImageSignatures,
@@ -88,12 +88,12 @@ const resolve = async (
   coseSign1: cose.CoseSign1Bytes
 ): Promise<cose.PublicKeyJwk> => {
   const { tag, value } = cose.cbor.decodeFirstSync(coseSign1);
-  if (tag !== 18) {
+  if (tag !== cose.COSE_Sign1) {
     throw new Error("Only tagged cose sign 1 are supported");
   }
   const [protectedHeaderBytes] = value;
   const protectedHeaderMap = cose.cbor.decodeFirstSync(protectedHeaderBytes);
-  const kid = protectedHeaderMap.get(4);
+  const kid = protectedHeaderMap.get(cose.Protected.Kid);
   if (kid === issuerPublicKeyJwk.kid) {
     return issuerPublicKeyJwk;
   }
@@ -111,6 +111,49 @@ const verified = await verifier.verify({
 });
 ```
 
+### HPKE
+
+```ts
+const message = "💀 My lungs taste the air of Time Blown past falling sands ⌛";
+const plaintext = new TextEncoder().encode(message);
+const encryptionKeys = {
+  keys: [
+    {
+      kid: "meriadoc.brandybuck@buckland.example",
+      alg: "HPKE-Base-P256-SHA256-AES128GCM",
+      kty: "EC",
+      crv: "P-256",
+      x: "Ze2loSV3wrroKUN_4zhwGhCqo3Xhu1td4QjeQ5wIVR0",
+      y: "HlLtdXARY_f55A3fnzQbPcm6hgr34Mp8p-nuzQCE0Zw",
+    },
+  ],
+};
+const decryptionKeys = {
+  keys: [
+    {
+      kid: "meriadoc.brandybuck@buckland.example",
+      alg: "HPKE-Base-P256-SHA256-AES128GCM",
+      kty: "EC",
+      crv: "P-256",
+      x: "Ze2loSV3wrroKUN_4zhwGhCqo3Xhu1td4QjeQ5wIVR0",
+      y: "HlLtdXARY_f55A3fnzQbPcm6hgr34Mp8p-nuzQCE0Zw",
+      d: "r_kHyZ-a06rmxM3yESK84r1otSg-aQcVStkRhA-iCM8",
+    },
+  ],
+};
+const ciphertext = await cose.encrypt.direct({
+  protectedHeader: ProtectedHeader([
+    [Protected.Alg, Direct["HPKE-Base-P256-SHA256-AES128GCM"]],
+  ]),
+  plaintext,
+  recipients: encryptionKeys,
+});
+const decrypted = await cose.decrypt.direct({
+  ciphertext,
+  recipients: decryptionKeys,
+});
+```
+
 ### COSE RFCs
 
 - [RFC9360 - Header Parameters for Carrying and Referencing X.509 Certificates](https://datatracker.ietf.org/doc/rfc9360/)
@@ -119,7 +162,8 @@ const verified = await verifier.verify({
 
 ### COSE Drafts
 
-- [Concise Encoding of Signed Merkle Tree Proofs](https://datatracker.ietf.org/doc/draft-ietf-cose-merkle-tree-proofs/)
+- [COSE Receipts](https://datatracker.ietf.org/doc/draft-ietf-cose-merkle-tree-proofs/)
+- [COSE HPKE](https://datatracker.ietf.org/doc/draft-ietf-cose-hpke/)
 
 ### SCITT Drafts
 
