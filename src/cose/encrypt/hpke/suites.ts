@@ -1,6 +1,8 @@
 
 import { AeadId, CipherSuite, KdfId, KemId } from "hpke-js";
 
+export type JOSE_HPKE_ALG = `HPKE-Base-P256-SHA256-AES128GCM` | `HPKE-Base-P384-SHA256-AES128GCM`
+
 export const primaryAlgorithm = {
   'label': `HPKE-Base-P256-SHA256-AES128GCM`,
   'value': 35
