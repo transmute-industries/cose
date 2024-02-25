@@ -49,12 +49,10 @@ it('verify multiple receipts', async () => {
     signer: notary1Signer
   })
   const receiptForImageSignature2 = await cose.receipt.inclusion.issue({
-
-    //keep cleaning from here on out..
     protectedHeader: cose.ProtectedHeader([
-      [4, notary2Ckt], // kid urn:ietf:params:oauth:ckt:sha-256:T6ixLT_utMNJ...
-      [1, -7],  // alg ES256
-      [-111, 1] // vds RFC9162
+      [cose.Protected.Kid, notary2Ckt], // kid urn:ietf:params:oauth:ckt:sha-256:T6ixLT_utMNJ...
+      [cose.Protected.Alg, cose.Signature.ES256],  // alg ES256
+      [cose.Protected.ProofType, cose.Receipt.Inclusion] // vds RFC9162
     ]),
     entry: 0,
     entries: transparencyLogContainingImageSignatures,
@@ -64,12 +62,12 @@ it('verify multiple receipts', async () => {
   const transparentSignature = await cose.receipt.add(transparentSignature1, receiptForImageSignature2)
   const resolve = async (coseSign1: cose.CoseSign1Bytes): Promise<cose.PublicKeyJwk> => {
     const { tag, value } = cose.cbor.decodeFirstSync(coseSign1)
-    if (tag !== 18) {
+    if (tag !== cose.COSE_Sign1) {
       throw new Error('Only tagged cose sign 1 are supported')
     }
     const [protectedHeaderBytes] = value;
     const protectedHeaderMap = cose.cbor.decodeFirstSync(protectedHeaderBytes)
-    const kid = protectedHeaderMap.get(4);
+    const kid = protectedHeaderMap.get(cose.Protected.Kid);
     if (kid === issuerCkt) {
       return cose.key.convertCoseKeyToJsonWebKey(
         await cose.key.publicFromPrivate(issuerSecretKey)

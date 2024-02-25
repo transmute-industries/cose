@@ -1,10 +1,10 @@
 import fs from 'fs'
 import moment from 'moment'
 import * as jose from 'jose'
-import * as transmute from '../src'
+import * as cose from '../src'
 
 it('sign and verify with x5t and key resolver', async () => {
-  const cert = await transmute.certificate.root({
+  const cert = await cose.certificate.root({
     alg: 'ES256',
     iss: 'vendor.example',
     sub: 'vendor.example',
@@ -15,27 +15,29 @@ it('sign and verify with x5t and key resolver', async () => {
   //   "public": "-----BEGIN CERTIFICATE-----\nMIIBSDC...t4fdL0yLEskA7M=\n-----END CERTIFICATE-----",
   //   "private": "-----BEGIN PRIVATE KEY-----\nMIGHAg...n0DRu9rnbKW\n-----END PRIVATE KEY-----\n"
   // }
-  const rootCertificateThumbprint = await transmute.certificate.thumbprint(cert.public)
-  const signer = await transmute.certificate.pkcs8Signer({ alg: -7, privateKeyPKCS8: cert.private })
+  const rootCertificateThumbprint = await cose.certificate.thumbprint(cert.public)
+  const signer = await cose.certificate.pkcs8Signer({
+    alg: cose.Signature.ES256,
+    privateKeyPKCS8: cert.private
+  })
   const content = fs.readFileSync('./examples/image.png')
   const coseSign1 = await signer.sign({
-    protectedHeader: new Map<number, any>([
-      [1, -7],  // alg ES256
-      [34, rootCertificateThumbprint], // xt5 thumbprint
-      [3, "image/png"], // content_type image/png
+    protectedHeader: cose.ProtectedHeader([
+      [cose.Protected.Alg, cose.Signature.ES256],  // alg ES256
+      [cose.Protected.X5t, rootCertificateThumbprint], // xt5 thumbprint
+      [cose.Protected.ContentType, "image/png"], // content_type image/png
     ]),
-    unprotectedHeader: new Map(),
     payload: content
   })
-  const certificateFromThumbprint = async (coseSign1: transmute.CoseSign1Bytes): Promise<transmute.PublicKeyJwk> => {
-    const { tag, value } = transmute.cbor.decodeFirstSync(coseSign1)
-    if (tag !== 18) {
+  const certificateFromThumbprint = async (coseSign1: cose.CoseSign1Bytes): Promise<cose.PublicKeyJwk> => {
+    const { tag, value } = cose.cbor.decodeFirstSync(coseSign1)
+    if (tag !== cose.COSE_Sign1) {
       throw new Error('Only tagged cose sign 1 are supported')
     }
     const [protectedHeaderBytes] = value;
-    const protectedHeaderMap = transmute.cbor.decodeFirstSync(protectedHeaderBytes)
-    const alg = protectedHeaderMap.get(1)
-    const x5t = protectedHeaderMap.get(34) // get x5t
+    const protectedHeaderMap = cose.cbor.decodeFirstSync(protectedHeaderBytes)
+    const alg = protectedHeaderMap.get(cose.Protected.Alg)
+    const x5t = protectedHeaderMap.get(cose.Protected.X5t) // get x5t
     if (!x5t) {
       throw new Error('x5t is required in protected header to use the certificate verifer exposed by this library')
     }
@@ -43,7 +45,7 @@ it('sign and verify with x5t and key resolver', async () => {
     // normally this would be a trust store lookup
     if (hashAlgorith === rootCertificateThumbprint[0]) {
       if (Buffer.from(hash).toString('hex') === Buffer.from(rootCertificateThumbprint[1]).toString('hex')) {
-        const foundAlgorithm = Object.values(transmute.IANACOSEAlgorithms).find((entry) => {
+        const foundAlgorithm = Object.values(cose.IANACOSEAlgorithms).find((entry) => {
           return entry.Value === `${alg}`
         })
         if (!foundAlgorithm) {
@@ -57,7 +59,7 @@ it('sign and verify with x5t and key resolver', async () => {
     }
     throw new Error('Certificate is not trusted.')
   }
-  const verifier = transmute.certificate.verifier({
+  const verifier = cose.certificate.verifier({
     resolver: {
       resolve: certificateFromThumbprint
     }

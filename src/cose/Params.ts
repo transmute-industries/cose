@@ -16,7 +16,8 @@ export const UnprotectedHeader = (entries: HeaderMapEntry[]) => {
 export const HeaderParameters = {
   Alg: 1,
   Epk: -1,
-  Kid: 4
+  Kid: 4,
+  X5t: 34
 }
 
 export const PartyUIdentity = -21
