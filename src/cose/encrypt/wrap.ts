@@ -14,6 +14,8 @@ import { EMPTY_BUFFER } from "../../cbor"
 import * as hpke from './hpke'
 import { UnprotectedHeader, COSE_Encrypt, Unprotected, KeyWrap, KeyAgreementWithKeyWrap, Aead, ProtectedHeader, Protected, Epk } from "../Params"
 
+import { toArrayBuffer } from "../../cbor"
+
 export const decrypt = async (req: RequestWrapDecryption) => {
   const decoded = await decodeFirst(req.ciphertext)
   const [protectedHeader, unprotectedHeader, ciphertext, recipients] = decoded.value
@@ -37,7 +39,8 @@ export const decrypt = async (req: RequestWrapDecryption) => {
   const senderPublicKeyJwk = await convertCoseKeyToJsonWebKey(epk)
   const kek = await ecdh.deriveKey(protectedHeader, recipientProtectedHeader, senderPublicKeyJwk, receiverPrivateKeyJwk)
   const iv = unprotectedHeader.get(Unprotected.Iv)
-  const aad = await createAAD(protectedHeader, 'Encrypt', EMPTY_BUFFER)
+  const externalAad = req.aad ? toArrayBuffer(req.aad) : EMPTY_BUFFER
+  const aad = await createAAD(protectedHeader, 'Encrypt', externalAad)
   let kwAlg = KeyWrap.A128KW
   if (recipientAlgorithm === KeyAgreementWithKeyWrap["ECDH-ES+A128KW"]) {
     kwAlg = KeyWrap.A128KW
@@ -99,7 +102,8 @@ export const encrypt = async (req: RequestWrapEncryption) => {
     unprotectedParams.push([Unprotected.Kid, recipientPublicKeyJwk.kid],)
   }
   const recipientUnprotectedHeader = UnprotectedHeader(unprotectedParams)
-  const aad = await createAAD(protectedHeader, 'Encrypt', EMPTY_BUFFER)
+  const externalAad = req.aad ? toArrayBuffer(req.aad) : EMPTY_BUFFER
+  const aad = await createAAD(protectedHeader, 'Encrypt', externalAad)
   const ciphertext = await aes.encrypt(alg, new Uint8Array(req.plaintext), new Uint8Array(iv), new Uint8Array(aad), new Uint8Array(cek))
   const recipients = [[recipientProtectedHeader, recipientUnprotectedHeader, encryptedKey]]
 

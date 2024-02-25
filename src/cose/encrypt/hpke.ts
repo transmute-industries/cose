@@ -18,6 +18,8 @@ import subtle from '../../crypto/subtleCryptoProvider'
 import * as aes from './aes'
 import { encode } from 'cbor-web';
 
+import { toArrayBuffer } from '../../cbor'
+
 
 export type JWK = {
   kid?: string
@@ -221,7 +223,8 @@ const encryptWrap = async (req: RequestWrapEncryption) => {
       encryptedKey
     ])
   }
-  const aad = await createAAD(encodedProtectedHeader, 'Encrypt', EMPTY_BUFFER)
+  const externalAad = req.aad ? toArrayBuffer(req.aad) : EMPTY_BUFFER
+  const aad = await createAAD(encodedProtectedHeader, 'Encrypt', externalAad)
   const ciphertext = await aes.encrypt(
     alg,
     new Uint8Array(req.plaintext),
@@ -274,6 +277,7 @@ export const encryptDirect = async (req: RequestDirectEncryption) => {
     info,
     recipientPublicKey: await publicKeyFromJwk(recipientPublicKeyJwk),
   });
+  // No way to use external aad here?
   const hpkeSealAad = computeHPKEAad(protectedHeader)
   const ciphertext = await sender.seal(req.plaintext, hpkeSealAad)
   // comments out the approach used in jose hpke
@@ -328,7 +332,8 @@ export const decryptWrap = async (req: RequestWrapDecryption) => {
   const hpkeSealAad = computeHPKEAad(protectedHeader, recipientProtectedHeader)
   const contentEncryptionKey = await hpkeRecipient.open(recipientCipherText, hpkeSealAad)
   const iv = unprotectedHeader.get(Unprotected.Iv)
-  const aad = await createAAD(protectedHeader, 'Encrypt', EMPTY_BUFFER) // good
+  const externalAad = req.aad ? toArrayBuffer(req.aad) : EMPTY_BUFFER
+  const aad = await createAAD(protectedHeader, 'Encrypt', externalAad)
   const decodedProtectedHeader = await decodeFirst(protectedHeader)
   const alg = decodedProtectedHeader.get(Protected.Alg)
   return aes.decrypt(alg, ciphertext, new Uint8Array(iv), new Uint8Array(aad), new Uint8Array(contentEncryptionKey))
@@ -358,6 +363,7 @@ export const decryptDirect = async (req: RequestDirectDecryption) => {
     // enc: epk.get(-1) // ek
     enc: ek
   })
+  // No way to user external aad here?
   const hpkeSealAad = computeHPKEAad(protectedHeader)
   const plaintext = await hpkeRecipient.open(ciphertext, hpkeSealAad)
   return plaintext

@@ -5,6 +5,7 @@ export type JWKS = {
 }
 
 export type RequestWrapEncryption = {
+  aad?: Uint8Array,
   protectedHeader: Map<any, any>
   unprotectedHeader?: Map<any, any>
   plaintext: Uint8Array,
@@ -15,6 +16,7 @@ export type RequestWrapEncryption = {
 
 
 export type RequestWrapDecryption = {
+  aad?: Uint8Array,
   ciphertext: any,
   recipients: {
     keys: any[]
@@ -23,6 +25,7 @@ export type RequestWrapDecryption = {
 
 
 export type RequestDirectEncryption = {
+  aad?: Uint8Array,
   protectedHeader: Map<any, any>
   unprotectedHeader?: Map<any, any>
   plaintext: Uint8Array,
@@ -32,6 +35,7 @@ export type RequestDirectEncryption = {
 }
 
 export type RequestDirectDecryption = {
+  aad?: Uint8Array,
   ciphertext: any,
   recipients: {
     keys: any[]

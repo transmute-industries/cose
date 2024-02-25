@@ -17,6 +17,8 @@ import { RequestDirectEncryption, RequestDirectDecryption } from './types'
 import * as hpke from './hpke'
 import { UnprotectedHeader } from "../Params"
 
+import { toArrayBuffer } from "../../cbor"
+
 const getCoseAlgFromRecipientJwk = (jwk: any) => {
   if (jwk.crv === 'P-256') {
     return KeyAgreement["ECDH-ES+HKDF-256"]
@@ -55,7 +57,8 @@ export const encrypt = async (req: RequestDirectEncryption) => {
     unprotectedParams.push([Unprotected.Kid, recipientPublicKeyJwk.kid],)
   }
   const recipientUnprotectedHeader = UnprotectedHeader(unprotectedParams)
-  const aad = await createAAD(protectedHeader, 'Encrypt', EMPTY_BUFFER)
+  const externalAad = req.aad ? toArrayBuffer(req.aad) : EMPTY_BUFFER
+  const aad = await createAAD(protectedHeader, 'Encrypt', externalAad)
   const ciphertext = await aes.encrypt(alg, new Uint8Array(req.plaintext), new Uint8Array(iv), new Uint8Array(aad), new Uint8Array(cek))
   const recipients = [[recipientProtectedHeader, recipientUnprotectedHeader, EMPTY_BUFFER]]
   return encodeAsync(new Tagged(COSE_Encrypt, [
@@ -91,7 +94,8 @@ export const decrypt = async (req: RequestDirectDecryption) => {
   epk.set(Epk.Alg, recipientAlgorithm)
   const senderPublicKeyJwk = await convertCoseKeyToJsonWebKey(epk)
   const cek = await ecdh.deriveKey(protectedHeader, recipientProtectedHeader, senderPublicKeyJwk, receiverPrivateKeyJwk)
-  const aad = await createAAD(protectedHeader, 'Encrypt', EMPTY_BUFFER)
+  const externalAad = req.aad ? toArrayBuffer(req.aad) : EMPTY_BUFFER
+  const aad = await createAAD(protectedHeader, 'Encrypt', externalAad)
   const iv = unprotectedHeader.get(Unprotected.Iv)
   const decodedProtectedHeader = decode(protectedHeader)
   const alg = decodedProtectedHeader.get(Protected.Alg)
