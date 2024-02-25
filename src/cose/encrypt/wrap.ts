@@ -87,6 +87,7 @@ export const encrypt = async (req: RequestWrapEncryption) => {
   ]))
   const senderPrivateKeyJwk = await generate<any>('ES256', "application/jwk+json")
   const kek = await ecdh.deriveKey(protectedHeader, recipientProtectedHeader, recipientPublicKeyJwk, senderPrivateKeyJwk)
+
   const cek = await aes.generateKey(alg);
   const iv = await aes.getIv(alg);
   unprotectedHeader.set(Unprotected.Iv, iv)
@@ -104,7 +105,13 @@ export const encrypt = async (req: RequestWrapEncryption) => {
   const recipientUnprotectedHeader = UnprotectedHeader(unprotectedParams)
   const externalAad = req.aad ? toArrayBuffer(req.aad) : EMPTY_BUFFER
   const aad = await createAAD(protectedHeader, 'Encrypt', externalAad)
-  const ciphertext = await aes.encrypt(alg, new Uint8Array(req.plaintext), new Uint8Array(iv), new Uint8Array(aad), new Uint8Array(cek))
+  const ciphertext = await aes.encrypt(
+    alg,
+    new Uint8Array(req.plaintext),
+    new Uint8Array(iv),
+    new Uint8Array(aad),
+    new Uint8Array(cek)
+  )
   const recipients = [[recipientProtectedHeader, recipientUnprotectedHeader, encryptedKey]]
 
   return encodeAsync(new Tagged(COSE_Encrypt, [

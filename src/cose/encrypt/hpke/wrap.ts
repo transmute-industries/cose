@@ -1,10 +1,10 @@
 
-import { createAAD } from './utils'
+import { createAAD } from '../utils'
 
-import { COSE_Encrypt, COSE_Encrypt0, Direct, Protected, Unprotected, UnprotectedHeader } from '../Params'
+import { COSE_Encrypt, COSE_Encrypt0, Direct, Protected, Unprotected, UnprotectedHeader } from '../../Params'
 
-import { RequestWrapDecryption, RequestWrapEncryption, RequestDirectEncryption, RequestDirectDecryption } from './types'
-import { EMPTY_BUFFER } from "../../cbor"
+import { RequestWrapDecryption, RequestWrapEncryption, RequestDirectEncryption, RequestDirectDecryption } from '../types'
+import { EMPTY_BUFFER } from "../../../cbor"
 
 import { Tagged, decodeFirst, encodeAsync } from "cbor-web"
 
@@ -12,14 +12,15 @@ import { generateKeyPair, exportJWK, calculateJwkThumbprintUri } from "jose"
 
 import { AeadId, CipherSuite, KdfId, KemId } from "hpke-js";
 
-export type JOSE_HPKE_ALG = `HPKE-Base-P256-SHA256-AES128GCM` | `HPKE-Base-P384-SHA256-AES128GCM`
-import subtle from '../../crypto/subtleCryptoProvider'
+import { computeInfo } from './computeInfo'
 
-import * as aes from './aes'
+export type JOSE_HPKE_ALG = `HPKE-Base-P256-SHA256-AES128GCM` | `HPKE-Base-P384-SHA256-AES128GCM`
+import subtle from '../../../crypto/subtleCryptoProvider'
+
+import * as aes from '../aes'
 import { encode } from 'cbor-web';
 
-import { toArrayBuffer } from '../../cbor'
-
+import { toArrayBuffer } from '../../../cbor'
 
 export type JWK = {
   kid?: string
@@ -133,43 +134,6 @@ export const secondaryAlgorithm = {
 }
 
 
-const keyLength = {
-  '35': 16, // ...AES128GCM
-} as Record<number | string, number>;
-
-
-type PartyInfo = [Buffer | null, Buffer | number | null, Buffer | null]
-
-const compute_PartyInfo = (identity: Buffer | null, nonce: Buffer | number | null, other: Buffer | null) => {
-  return [
-    identity || null, // identity
-    nonce || null, // nonce
-    other || null // other
-  ] as PartyInfo
-}
-
-// https://datatracker.ietf.org/doc/html/draft-ietf-cose-hpke-07#section-3.2
-const compute_COSE_KDF_Context = (
-  AlgorithmID: number,
-  PartyUInfo: PartyInfo,
-  PartyVInfo: PartyInfo,
-  Protected: Buffer,
-  SuppPrivInfo?: Buffer
-) => {
-  const info = [
-    AlgorithmID, // AlgorithmID
-    PartyUInfo,
-    PartyVInfo,
-    [ // SuppPubInfo
-      keyLength[`${AlgorithmID}`] * 8, // keyDataLength
-      Protected
-    ]
-  ]
-  if (SuppPrivInfo) {
-    (info as any).push(SuppPrivInfo)
-  }
-  return encodeAsync(info);
-}
 
 const computeHPKEAad = (protectedHeader: any, protectedRecipientHeader?: any) => {
   if (protectedRecipientHeader) {
@@ -179,7 +143,7 @@ const computeHPKEAad = (protectedHeader: any, protectedRecipientHeader?: any) =>
   return protectedHeader
 }
 
-const encryptWrap = async (req: RequestWrapEncryption) => {
+export const encryptWrap = async (req: RequestWrapEncryption) => {
   if (req.unprotectedHeader === undefined) {
     req.unprotectedHeader = UnprotectedHeader([])
   }
@@ -240,66 +204,6 @@ const encryptWrap = async (req: RequestWrapEncryption) => {
   ]), { canonical: true })
 }
 
-const computeInfo = async (protectedHeader: Map<any, any>) => {
-  let info = undefined;
-  const algorithmId = protectedHeader.get(1)
-  const partyUIdentity = protectedHeader.get(-21) || null
-  const partyUNonce = protectedHeader.get(-22) || null
-  const partyUOther = protectedHeader.get(-23) || null
-  const partyVIdentity = protectedHeader.get(-24) || null
-  const partyVNonce = protectedHeader.get(-25) || null
-  const partyVOther = protectedHeader.get(-26) || null
-  if (partyUNonce || partyVNonce) {
-    info = await compute_COSE_KDF_Context(
-      algorithmId,
-      compute_PartyInfo(partyUIdentity, partyUNonce, partyUOther),
-      compute_PartyInfo(partyVIdentity, partyVNonce, partyVOther),
-      await encodeAsync(protectedHeader),
-    )
-  }
-  return info
-}
-
-export const encryptDirect = async (req: RequestDirectEncryption) => {
-  if (req.unprotectedHeader === undefined) {
-    req.unprotectedHeader = UnprotectedHeader([])
-  }
-  const alg = req.protectedHeader.get(Protected.Alg)
-  if (alg !== Direct['HPKE-Base-P256-SHA256-AES128GCM']) {
-    throw new Error('Only alg 35 is supported')
-  }
-  const protectedHeader = await encodeAsync(req.protectedHeader)
-  const unprotectedHeader = req.unprotectedHeader;
-  const [recipientPublicKeyJwk] = req.recipients.keys
-  const suite = suites[recipientPublicKeyJwk.alg as JOSE_HPKE_ALG]
-  const info = await computeInfo(req.protectedHeader)
-  const sender = await suite.createSenderContext({
-    info,
-    recipientPublicKey: await publicKeyFromJwk(recipientPublicKeyJwk),
-  });
-  // No way to use external aad here?
-  const hpkeSealAad = computeHPKEAad(protectedHeader)
-  const ciphertext = await sender.seal(req.plaintext, hpkeSealAad)
-  // comments out the approach used in jose hpke
-  // const recipientCoseKey = new Map<any, any>([
-  //   [1, 5], // kty: EK
-  //   [- 1, sender.enc]
-  // ])
-  unprotectedHeader.set(Unprotected.Kid, recipientPublicKeyJwk.kid)
-  // unprotectedHeader.set(-1, recipientCoseKey)
-  unprotectedHeader.set(Unprotected.Ek, sender.enc)
-  return encodeAsync(new Tagged(COSE_Encrypt0, [
-    protectedHeader,
-    unprotectedHeader,
-    ciphertext,
-  ]), { canonical: true })
-}
-
-export const encrypt = {
-  direct: encryptDirect,
-  wrap: encryptWrap
-}
-
 export const decryptWrap = async (req: RequestWrapDecryption) => {
   const decoded = await decodeFirst(req.ciphertext)
   if (decoded.tag !== COSE_Encrypt) {
@@ -314,7 +218,6 @@ export const decryptWrap = async (req: RequestWrapDecryption) => {
     return k.kid === kid
   })
   const decodedRecipientProtectedHeader = await decodeFirst(recipientProtectedHeader)
-
   // comment out approach in jose hpke
   // const epk = recipientUnprotectedHeader.get(-1)
   // // ensure the epk has the algorithm that is set in the protected header
@@ -337,39 +240,4 @@ export const decryptWrap = async (req: RequestWrapDecryption) => {
   const decodedProtectedHeader = await decodeFirst(protectedHeader)
   const alg = decodedProtectedHeader.get(Protected.Alg)
   return aes.decrypt(alg, ciphertext, new Uint8Array(iv), new Uint8Array(aad), new Uint8Array(contentEncryptionKey))
-}
-
-export const decryptDirect = async (req: RequestDirectDecryption) => {
-  const decoded = await decodeFirst(req.ciphertext)
-  if (decoded.tag !== COSE_Encrypt0) {
-    throw new Error('Only tag 16 cose encrypt are supported')
-  }
-  const [protectedHeader, unprotectedHeader, ciphertext] = decoded.value
-  const kid = unprotectedHeader.get(Unprotected.Kid).toString();
-  const receiverPrivateKeyJwk = req.recipients.keys.find((k) => {
-    return k.kid === kid
-  })
-  const decodedProtectedHeader = await decodeFirst(protectedHeader)
-  const ek = unprotectedHeader.get(Unprotected.Ek)
-  // const epk = unprotectedHeader.get(-1)
-  // // ensure the epk has the algorithm that is set in the protected header
-  // const recipientAlgorithm = unprotectedHeader.get(1)
-  // epk.set(3, recipientAlgorithm) // EPK is allowed to have an alg
-  const suite = suites[receiverPrivateKeyJwk.alg as JOSE_HPKE_ALG]
-  const info = await computeInfo(decodedProtectedHeader)
-  const hpkeRecipient = await suite.createRecipientContext({
-    info,
-    recipientKey: await privateKeyFromJwk(receiverPrivateKeyJwk),
-    // enc: epk.get(-1) // ek
-    enc: ek
-  })
-  // No way to user external aad here?
-  const hpkeSealAad = computeHPKEAad(protectedHeader)
-  const plaintext = await hpkeRecipient.open(ciphertext, hpkeSealAad)
-  return plaintext
-}
-
-export const decrypt = {
-  wrap: decryptWrap,
-  direct: decryptDirect
 }
