@@ -54,7 +54,7 @@ it('wrap', async () => {
     recipients: decryptionKeys
   })
   expect(new TextDecoder().decode(decrypted)).toBe(message)
-  fs.writeFileSync('./examples/hpke.wrap.diag', await cbor.diagnose(ciphertext))
+  // fs.writeFileSync('./examples/hpke.wrap.diag', await cbor.diagnose(ciphertext))
 })
 
 it('direct', async () => {
@@ -73,5 +73,5 @@ it('direct', async () => {
     recipients: decryptionKeys
   })
   expect(new TextDecoder().decode(decrypted)).toBe(message)
-  fs.writeFileSync('./examples/hpke.direct.diag', await cbor.diagnose(ciphertext))
+  // fs.writeFileSync('./examples/hpke.direct.diag', await cbor.diagnose(ciphertext))
 })

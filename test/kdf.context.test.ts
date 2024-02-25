@@ -55,5 +55,5 @@ it('direct with party info', async () => {
     recipients: decryptionKeys
   })
   expect(new TextDecoder().decode(decrypted)).toBe(message)
-  fs.writeFileSync('./examples/hpke.direct.party-id.diag', await cbor.diagnose(ciphertext))
+  // fs.writeFileSync('./examples/hpke.direct.party-id.diag', await cbor.diagnose(ciphertext))
 })
