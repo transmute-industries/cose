@@ -38,31 +38,13 @@ const decryptionKeys = {
   }]
 }
 
-it('wrap', async () => {
-  const ciphertext = await encrypt.wrap({
-    protectedHeader: ProtectedHeader([
-      [Protected.Alg, Aead.A128GCM],
-    ]),
-    unprotectedHeader: UnprotectedHeader([]),
-    plaintext,
-    recipients: encryptionKeys
-  })
-  const decoded = cbor.decodeFirstSync(ciphertext);
-  expect(decoded.tag).toBe(COSE_Encrypt)
-  const decrypted = await decrypt.wrap({
-    ciphertext,
-    recipients: decryptionKeys
-  })
-  expect(new TextDecoder().decode(decrypted)).toBe(message)
-  fs.writeFileSync('./examples/hpke.wrap.diag', await cbor.diagnose(ciphertext))
-})
-
-it('direct', async () => {
+it('direct with party info', async () => {
   const ciphertext = await encrypt.direct({
     protectedHeader: ProtectedHeader([
       [Protected.Alg, Direct['HPKE-Base-P256-SHA256-AES128GCM']],
+      [Protected.PartyUIdentity, Buffer.from(new TextEncoder().encode('did:example:party-u'))],
+      [Protected.PartyVIdentity, Buffer.from(new TextEncoder().encode('did:example:party-v'))]
     ]),
-    unprotectedHeader: UnprotectedHeader([]),
     plaintext,
     recipients: encryptionKeys
   })
@@ -73,5 +55,5 @@ it('direct', async () => {
     recipients: decryptionKeys
   })
   expect(new TextDecoder().decode(decrypted)).toBe(message)
-  fs.writeFileSync('./examples/hpke.direct.diag', await cbor.diagnose(ciphertext))
+  fs.writeFileSync('./examples/hpke.direct.party-id.diag', await cbor.diagnose(ciphertext))
 })
