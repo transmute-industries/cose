@@ -7,6 +7,7 @@ import { IANACOSEAlgorithms } from "../algorithms"
 
 import { CoseKey } from '.'
 export type CoseKeyAgreementAlgorithms = 'ECDH-ES+A128KW'
+export type CoseDirectEncryptionAlgorithms = 'HPKE-Base-P256-SHA256-AES128GCM'
 export type CoseSignatureAlgorithms = 'ES256' | 'ES384' | 'ES512'
 export type ContentTypeOfJsonWebKey = 'application/jwk+json'
 export type ContentTypeOfCoseKey = 'application/cose-key'
@@ -19,16 +20,22 @@ import { thumbprint } from "./thumbprint"
 import { formatJwk } from './formatJwk'
 
 
-export const generate = async <T>(alg: CoseSignatureAlgorithms, contentType: PrivateKeyContentType = 'application/jwk+json'): Promise<T> => {
-  const knownAlgorithm = Object.values(IANACOSEAlgorithms).find((
+export const generate = async <T>(alg: CoseSignatureAlgorithms | CoseDirectEncryptionAlgorithms, contentType: PrivateKeyContentType = 'application/jwk+json'): Promise<T> => {
+  let knownAlgorithm = Object.values(IANACOSEAlgorithms).find((
     entry
   ) => {
     return entry.Name === alg
-  })
+  }) as any
+  if (alg === 'HPKE-Base-P256-SHA256-AES128GCM') {
+    knownAlgorithm = {
+      Name: 'ECDH-ES+A128KW',
+      Curve: 'P-256'
+    }
+  }
   if (!knownAlgorithm) {
     throw new Error('Algorithm is not supported.')
   }
-  const cryptoKeyPair = await generateKeyPair(knownAlgorithm.Name, { extractable: true });
+  const cryptoKeyPair = await generateKeyPair(knownAlgorithm.Name, { extractable: true, crv: knownAlgorithm.Curve });
   const secretKeyJwk = await exportJWK(cryptoKeyPair.privateKey)
   const jwkThumbprint = await calculateJwkThumbprint(secretKeyJwk)
   secretKeyJwk.kid = jwkThumbprint
