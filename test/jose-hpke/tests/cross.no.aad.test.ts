@@ -31,7 +31,7 @@ it('encrypt (theirs) / decrypt (ours)', async () => {
 
   // simulate having only one of the recipient private keys
   const recipientPrivateKeys = { "keys": [privateKeyJwk] }
-  const decryption = await hpke.KeyEncryption.decrypt({ jwe, privateKeys: recipientPrivateKeys })
+  const decryption = await hpke.KeyEncryption.decrypt({ jwe, recipients: recipientPrivateKeys })
   expect(new TextDecoder().decode(decryption.plaintext)).toBe(`✨ It’s a dangerous business, Frodo, going out your door. ✨`);
   expect(new TextDecoder().decode(decryption.aad)).toBe('');
 })

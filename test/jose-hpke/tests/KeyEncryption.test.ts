@@ -31,11 +31,11 @@ describe('KeyEncryption', () => {
     }, { serialization: 'GeneralJson' });
     const privateKey = resolvePrivateKey(publicKey1.kid)
     const recipientPrivateKeys = { "keys": [privateKey] }
-    const decryption = await hpke.KeyEncryption.decrypt({ jwe, privateKeys: recipientPrivateKeys }, { serialization: 'GeneralJson' })
+    const decryption = await hpke.KeyEncryption.decrypt({ jwe, recipients: recipientPrivateKeys }, { serialization: 'GeneralJson' })
     expect(decryption.protectedHeader.epk.kty).toBe('EK')
     expect(decryption.protectedHeader.enc).toBe('A128GCM')
     expect(new TextDecoder().decode(decryption.plaintext)).toBe(`It’s a 💀 dangerous business 💀, Frodo, going out your door.`);
-    expect(new TextDecoder().decode(decryption.aad)).toBe('💀 aad');
+    expect(new TextDecoder().decode(decryption.additionalAuthenticatedData)).toBe('💀 aad');
   })
 
   it('Single Recipient JSON (without aad)', async () => {
@@ -63,11 +63,11 @@ describe('KeyEncryption', () => {
     }, { serialization: 'GeneralJson' });
     const privateKey = resolvePrivateKey(publicKey1.kid)
     const recipientPrivateKeys = { "keys": [privateKey] }
-    const decryption = await hpke.KeyEncryption.decrypt({ jwe, privateKeys: recipientPrivateKeys }, { serialization: 'GeneralJson' })
+    const decryption = await hpke.KeyEncryption.decrypt({ jwe, recipients: recipientPrivateKeys }, { serialization: 'GeneralJson' })
     expect(decryption.protectedHeader.epk.kty).toBe('EK')
     expect(decryption.protectedHeader.enc).toBe('A128GCM')
     expect(new TextDecoder().decode(decryption.plaintext)).toBe(`It’s a 💀 dangerous business 💀, Frodo, going out your door.`);
-    expect(decryption.aad).toBeUndefined()
+    expect(decryption.additionalAuthenticatedData).toBeUndefined()
   })
 
   // expect alg to be in protected header
@@ -119,10 +119,10 @@ describe('KeyEncryption', () => {
       const privateKey = resolvePrivateKey(recipient.kid)
       // simulate having only one of the recipient private keys
       const recipientPrivateKeys = { "keys": [privateKey] }
-      const decryption = await hpke.KeyEncryption.decrypt({ jwe: ciphertext, privateKeys: recipientPrivateKeys })
+      const decryption = await hpke.KeyEncryption.decrypt({ jwe: ciphertext, recipients: recipientPrivateKeys })
       expect(new TextDecoder().decode(decryption.plaintext)).toBe(`It’s a 💀 dangerous business 💀, Frodo, going out your door.`);
-      expect(decryption.aad).toBeDefined()
-      expect(new TextDecoder().decode(decryption.aad)).toBe('💀 aad');
+      expect(decryption.additionalAuthenticatedData).toBeDefined()
+      expect(new TextDecoder().decode(decryption.additionalAuthenticatedData)).toBe('💀 aad');
     }
 
 
@@ -159,9 +159,9 @@ describe('KeyEncryption', () => {
     const privateKey = resolvePrivateKey(publicKey1.kid)
     // simulate having only one of the recipient private keys
     const recipientPrivateKeys = { "keys": [privateKey] }
-    const decryption = await hpke.KeyEncryption.decrypt({ jwe, privateKeys: recipientPrivateKeys }, { serialization: 'Compact' })
+    const decryption = await hpke.KeyEncryption.decrypt({ jwe, recipients: recipientPrivateKeys }, { serialization: 'Compact' })
     expect(new TextDecoder().decode(decryption.plaintext)).toBe(`It’s a 💀 dangerous business 💀, Frodo, going out your door.`);
-    expect(decryption.aad).toBeUndefined()
+    expect(decryption.additionalAuthenticatedData).toBeUndefined()
 
 
 

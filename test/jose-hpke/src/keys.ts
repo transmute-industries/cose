@@ -8,7 +8,7 @@ import { AeadId, CipherSuite, KdfId, KemId } from "hpke-js";
 export type JOSE_HPKE_ALG = `HPKE-Base-P256-SHA256-AES128GCM` | `HPKE-Base-P384-SHA256-AES128GCM`
 
 export type JWK = {
-  kid?:string
+  kid?: string
   alg?: string
   kty: string
   crv: string
@@ -43,7 +43,7 @@ export const suites = {
 }
 
 export const isKeyAlgorithmSupported = (recipient: JWK) => {
-  const supported_alg = Object.keys(suites) as string []
+  const supported_alg = Object.keys(suites) as string[]
   return supported_alg.includes(`${recipient.alg}`)
 }
 
@@ -54,7 +54,7 @@ export const formatJWK = (jwk: any) => {
   }))
 }
 
-export const publicFromPrivate = (privateKeyJwk: any) => { 
+export const publicFromPrivate = (privateKeyJwk: any) => {
   const { kid, alg, kty, crv, x, y, ...rest } = privateKeyJwk
   return {
     kid, alg, kty, crv, x, y
@@ -75,7 +75,9 @@ export const publicKeyFromJwk = async (publicKeyJwk: any) => {
   return publicKey;
 }
 
-export const privateKeyFromJwk = async (privateKeyJwk: any)=>{
+export const privateKeyFromJwk = async (privateKeyJwk: any) => {
+
+
   const privateKey = await crypto.subtle.importKey(
     'jwk',
     privateKeyJwk,
@@ -89,14 +91,15 @@ export const privateKeyFromJwk = async (privateKeyJwk: any)=>{
   return privateKey
 }
 
-export const generate = async (alg: JOSE_HPKE_ALG) => {
-  if (!suites[alg]){
+export const generate = async (alg: JOSE_HPKE_ALG, contentType?: string) => {
+
+  if (!suites[alg]) {
     throw new Error('Algorithm not supported')
   }
   let kp;
-  if (alg.includes('P256')){
+  if (alg.includes('P256')) {
     kp = await generateKeyPair('ECDH-ES+A256KW', { crv: 'P-256', extractable: true })
-  } else if (alg.includes('P384')){
+  } else if (alg.includes('P384')) {
     kp = await generateKeyPair('ECDH-ES+A256KW', { crv: 'P-384', extractable: true })
   } else {
     throw new Error('Could not generate private key for ' + alg)
@@ -104,5 +107,10 @@ export const generate = async (alg: JOSE_HPKE_ALG) => {
   const privateKeyJwk = await exportJWK(kp.privateKey);
   privateKeyJwk.kid = await calculateJwkThumbprintUri(privateKeyJwk)
   privateKeyJwk.alg = alg;
+  if (contentType === 'application/jwk+json') {
+    return new TextEncoder().encode(JSON.stringify(privateKeyJwk))
+  }
   return formatJWK(privateKeyJwk)
+
+
 }

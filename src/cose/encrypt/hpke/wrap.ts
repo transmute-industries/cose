@@ -22,7 +22,7 @@ export const encryptWrap = async (req: RequestWrapEncryption) => {
   const unprotectedHeader = req.unprotectedHeader;
   const encodedProtectedHeader = encode(req.protectedHeader)
   const cek = await aes.generateKey(alg);
-  const iv = await aes.getIv(alg);
+  const iv = toArrayBuffer(await aes.getIv(alg));
   unprotectedHeader.set(5, iv); // set IV
   const senderRecipients = []
   for (const recipient of req.recipients.keys) {

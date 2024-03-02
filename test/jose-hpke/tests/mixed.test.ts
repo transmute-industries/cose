@@ -41,9 +41,9 @@ it('encrypt / decrypt', async () => {
     const privateKey = resolvePrivateKey(recipient.kid)
     // simulate having only one of the recipient private keys
     const recipientPrivateKeys = { "keys": [privateKey] }
-    const decryption = await hpke.KeyEncryption.decrypt({ jwe, privateKeys: recipientPrivateKeys })
+    const decryption = await hpke.KeyEncryption.decrypt({ jwe, recipients: recipientPrivateKeys })
     expect(new TextDecoder().decode(decryption.plaintext)).toBe(`It’s a 💀 dangerous business 💀, Frodo, going out your door.`);
-    expect(new TextDecoder().decode(decryption.aad)).toBe('💀 aad');
+    expect(new TextDecoder().decode(decryption.additionalAuthenticatedData)).toBe('💀 aad');
   }
 
 })

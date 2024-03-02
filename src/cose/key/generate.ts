@@ -18,6 +18,7 @@ import { convertJsonWebKeyToCoseKey } from './convertJsonWebKeyToCoseKey'
 import { thumbprint } from "./thumbprint"
 
 import { formatJwk } from './formatJwk'
+import { cbor } from "../.."
 
 
 export const generate = async <T>(alg: CoseSignatureAlgorithms | CoseDirectEncryptionAlgorithms, contentType: PrivateKeyContentType = 'application/jwk+json'): Promise<T> => {
@@ -48,6 +49,9 @@ export const generate = async <T>(alg: CoseSignatureAlgorithms | CoseDirectEncry
     const secretKeyCoseKey = await convertJsonWebKeyToCoseKey<CoseKey>(secretKeyJwk)
     const coseKeyThumbprint = await thumbprint.calculateCoseKeyThumbprint(secretKeyCoseKey)
     secretKeyCoseKey.set(2, coseKeyThumbprint)
+    if (alg === 'HPKE-Base-P256-SHA256-AES128GCM') {
+      return new Uint8Array(cbor.encode(secretKeyCoseKey)) as T
+    }
     return secretKeyCoseKey as T
   }
   throw new Error('Unsupported content type.')
