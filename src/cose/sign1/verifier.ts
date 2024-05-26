@@ -4,13 +4,24 @@ import { RequestCoseSign1Verifier, RequestCoseSign1Verify } from './types'
 import getAlgFromVerificationKey from './getAlgFromVerificationKey'
 import { DecodedToBeSigned, ProtectedHeaderMap } from './types'
 import rawVerifier from '../../crypto/verifier'
+import { base64url } from 'jose'
+import { ml_dsa65 } from '@noble/post-quantum/ml-dsa';
+
+const ecdsaPublicKeyJwkVerify = async (publicKeyJwk: any, encodedToBeSigned: any, signature: any) => {
+  const ecdsa = rawVerifier({ publicKeyJwk })
+  return ecdsa.verify(encodedToBeSigned, signature)
+}
+
+const mldsaPublicKeyJwkVerifier = async (publicKeyJwk: any, encodedToBeSigned: any, signature: any) => {
+  const publicKey = base64url.decode(publicKeyJwk.x)
+  return ml_dsa65.verify(publicKey, encodedToBeSigned, signature)
+}
 
 const verifier = ({ resolver }: RequestCoseSign1Verifier) => {
   return {
     verify: async ({ coseSign1, externalAAD }: RequestCoseSign1Verify): Promise<ArrayBuffer> => {
       const publicKeyJwk = await resolver.resolve(coseSign1)
       const algInPublicKey = getAlgFromVerificationKey(`${publicKeyJwk.alg}`)
-      const ecdsa = rawVerifier({ publicKeyJwk })
       const obj = await decodeFirst(coseSign1);
       const signatureStructure = obj.value;
       if (!Array.isArray(signatureStructure)) {
@@ -35,7 +46,11 @@ const verifier = ({ resolver }: RequestCoseSign1Verifier) => {
         payload
       ] as DecodedToBeSigned
       const encodedToBeSigned = encode(decodedToBeSigned);
-      await ecdsa.verify(encodedToBeSigned, signature)
+      if (algInPublicKey === -49) {
+        mldsaPublicKeyJwkVerifier(publicKeyJwk, encodedToBeSigned, signature)
+      } else {
+        await ecdsaPublicKeyJwkVerify(publicKeyJwk, encodedToBeSigned, signature)
+      }
       return payload;
     }
   }

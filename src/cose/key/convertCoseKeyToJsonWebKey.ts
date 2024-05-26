@@ -15,6 +15,16 @@ export const convertCoseKeyToJsonWebKey = async <T>(coseKey: CoseKey): Promise<T
   const kid = coseKey.get(2)
   const alg = coseKey.get(3)
   const crv = coseKey.get(-1)
+
+  if (alg === -49) {
+    return formatJwk({
+      kid: '',
+      kty: 'ML-DSA',
+      alg: 'ML-DSA-65',
+      x: base64url.encode(coseKey.get(-1) as any),
+      d: coseKey.get(-2) ? base64url.encode(coseKey.get(-2) as any) : undefined
+    }) as T
+  }
   // kty EC, kty: EK
   if (![2, 5].includes(kty)) {
     throw new Error('This library requires does not support the given key type')

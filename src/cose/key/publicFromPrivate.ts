@@ -13,6 +13,12 @@ export const extracePublicKeyJwk = (secretKeyJwk: SecretKeyJwk) => {
 
 export const extractPublicCoseKey = (secretKey: CoseKey) => {
   const publicCoseKeyMap = new Map(secretKey)
+
+  if (publicCoseKeyMap.get(1) === 7) {
+    publicCoseKeyMap.delete(-2);
+    return publicCoseKeyMap
+  }
+
   if (publicCoseKeyMap.get(1) !== 2) {
     throw new Error('Only EC2 keys are supported')
   }
