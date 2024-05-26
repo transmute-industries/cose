@@ -81,6 +81,10 @@ export const convertJsonWebKeyToCoseKey = async <T>(jwk: PublicKeyJwk | SecretKe
         break
       }
       case 'alg': {
+        if (value === 'HPKE-Base-P256-SHA256-AES128GCM') {
+          coseKey.set(label, 35)
+          break
+        }
         if (foundCommonParam) {
           const foundAlgorithm = algorithms.find((param) => {
             return param.Name === value

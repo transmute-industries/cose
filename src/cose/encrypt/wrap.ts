@@ -25,6 +25,7 @@ export const decrypt = async (req: RequestWrapDecryption) => {
   const receiverPrivateKeyJwk = req.recipients.keys.find((k) => {
     return k.kid === kid
   })
+
   if (receiverPrivateKeyJwk.alg === 'HPKE-Base-P256-SHA256-AES128GCM') {
     return hpke.decrypt.wrap(req)
   }
@@ -33,6 +34,7 @@ export const decrypt = async (req: RequestWrapDecryption) => {
   }
   const decodedRecipientProtectedHeader = await decodeFirst(recipientProtectedHeader)
   const recipientAlgorithm = decodedRecipientProtectedHeader.get(Protected.Alg)
+
   const epk = recipientUnprotectedHeader.get(Unprotected.Epk)
   // ensure the epk has the algorithm that is set in the protected header
   epk.set(Epk.Alg, recipientAlgorithm)
@@ -89,7 +91,7 @@ export const encrypt = async (req: RequestWrapEncryption) => {
   const kek = await ecdh.deriveKey(protectedHeader, recipientProtectedHeader, recipientPublicKeyJwk, senderPrivateKeyJwk)
 
   const cek = await aes.generateKey(alg);
-  const iv = await aes.getIv(alg);
+  const iv = toArrayBuffer(await aes.getIv(alg));
   unprotectedHeader.set(Unprotected.Iv, iv)
   let kwAlg = KeyWrap.A128KW
   if (keyAgreementWithKeyWrappingAlgorithm === KeyAgreementWithKeyWrap["ECDH-ES+A128KW"]) {
