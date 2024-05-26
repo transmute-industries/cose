@@ -20,6 +20,25 @@ import { EMPTY_BUFFER, toArrayBuffer } from '../../../cbor';
 
 import { createAAD } from '../utils';
 
+// from hpke-js
+/**
+ * Converts integer to octet string. I2OSP implementation.
+ */
+export function i2Osp(n: number, w: number): Uint8Array {
+  if (w <= 0) {
+    throw new Error("i2Osp: too small size");
+  }
+  if (n >= 256 ** w) {
+    throw new Error("i2Osp: too large integer");
+  }
+  const ret = new Uint8Array(w);
+  for (let i = 0; i < w && n; i++) {
+    ret[w - (i + 1)] = n % 256;
+    n = n >> 8;
+  }
+  return ret;
+}
+
 const dhkemsuite = new CipherSuite({
   kem: KemId.DhkemP256HkdfSha256,
   kdf: KdfId.HkdfSha256,
@@ -58,29 +77,67 @@ const handleDHKemEncrypt = async (req: RequestDirectEncryption) => {
 }
 
 
-const sharedSecretToContentEncryptionKey = async (sharedSecret: Uint8Array) => {
-  const ikm = sharedSecret;
-  // https://datatracker.ietf.org/doc/html/rfc9180#section-4-10
-  // labeled_ikm = concat("HPKE-v1", suite_id, label, ikm)
-  // 🔥 this is ALL WRONG.... 🔥
-  // need to follow https://datatracker.ietf.org/doc/html/draft-connolly-cfrg-hpke-mlkem-00#name-encap-and-decap
-  // 🔥 this is ALL WRONG.... 🔥
-  const suite_id = Buffer.from('0xFFFF', 'hex') // unassigned kem id https://www.iana.org/assignments/hpke/hpke.xhtml
-  // should be:
-  // suite_id = concat(
-  //   "HPKE",
-  //   I2OSP(kem_id, 2),
-  //   I2OSP(kdf_id, 2),
-  //   I2OSP(aead_id, 2)
-  // )
+
+const Expand = async (prk: Uint8Array, info: Uint8Array, length: number) => {
+  // 🔥 possibly incorrect.
+  return dhkemsuite.kdf.expand(prk, info, length)
+}
+
+const Extract = async (salt: Uint8Array, ikm: Uint8Array) => {
+  // 🔥 possibly incorrect.
+  return dhkemsuite.kdf.extract(salt, ikm)
+}
+
+const suite_id = Buffer.concat([
+  Buffer.from('HPKE'),
+  Buffer.from(i2Osp(0xFFFF, 2)), // 🔥 Not a real kem id  🔥
+  Buffer.from(i2Osp(0x0001, 2)), // HKDF-SHA256, 32
+  Buffer.from(i2Osp(0x0001, 2))  // AES-128-GCM
+])
+
+// def LabeledExtract(salt, label, ikm):
+// labeled_ikm = concat("HPKE-v1", suite_id, label, ikm)
+// return Extract(salt, labeled_ikm)
+const LabeledExtract = async (salt: Uint8Array, label: Uint8Array, ikm: Uint8Array) => {
   const labeled_ikm = Buffer.concat([
     new TextEncoder().encode('HPKE-v1'),
     suite_id,
     Buffer.from(''),
     ikm
   ])
-  const salt = new TextEncoder().encode('') // empty string?
-  return dhkemsuite.kdf.extract(salt, labeled_ikm)
+  return Extract(salt, labeled_ikm)
+}
+
+// def LabeledExpand(prk, label, info, L):
+//      labeled_info = concat(I2OSP(L, 2), "HPKE-v1", suite_id,
+//                            label, info)
+//      return Expand(prk, labeled_info, L)
+const LabeledExpand = async (prk: Uint8Array, label: Uint8Array, info: Uint8Array, length: number) => {
+  const labeled_info = Buffer.concat([
+    Buffer.from(i2Osp(length, 2)),
+    Buffer.from("HPKE-v1"),
+    suite_id,
+    label,
+    info
+  ])
+  return Expand(prk, labeled_info, 32)
+}
+
+// def ExtractAndExpand(dh, kem_context):
+//    eae_prk = LabeledExtract("", "eae_prk", dh)
+//    shared_secret = LabeledExpand(eae_prk, "shared_secret",
+//                                  kem_context, Nsecret)
+//    return shared_secret
+const ExtractAndExpand = async (ss: Uint8Array, ct: Uint8Array) => {
+  const eae_prk = await LabeledExtract(new TextEncoder().encode(''), new TextEncoder().encode('eae_prk'), ss)
+  const shared_secret = LabeledExpand(new Uint8Array(eae_prk), new TextEncoder().encode('shared_secret'), ct, 32)
+  return shared_secret
+}
+
+// 🔥 This is wrong.
+// need to follow https://datatracker.ietf.org/doc/html/draft-connolly-cfrg-hpke-mlkem-00#name-encap-and-decap
+const sharedSecretToContentEncryptionKey = async (ss: Uint8Array, ct: Uint8Array) => {
+  return ExtractAndExpand(ss, ct)
 }
 
 const handleMLKemEncrypt = async (req: RequestDirectEncryption) => {
@@ -90,7 +147,7 @@ const handleMLKemEncrypt = async (req: RequestDirectEncryption) => {
   const publicKey = base64url.decode(recipientPublicKeyJwk.x)
   const { cipherText, sharedSecret } = ml_kem768.encapsulate(publicKey);
   const kemCt = cipherText;
-  const aeadContentEncryptionKey = await sharedSecretToContentEncryptionKey(sharedSecret)
+  const aeadContentEncryptionKey = await sharedSecretToContentEncryptionKey(sharedSecret, cipherText)
   const aeadAlg = 1; // AES 128 GCM
   const iv = await aes.getIv(aeadAlg) // random for each direct encryption
   const externalAad = EMPTY_BUFFER
@@ -166,12 +223,12 @@ const handleMLKemDecrypt = async (req: RequestDirectDecryption) => {
   const receiverPrivateKeyJwk = req.recipients.keys.find((k) => {
     return k.kid === kid
   })
-  const ek = unprotectedHeader.get(Unprotected.Ek)
+  const ek = unprotectedHeader.get(Unprotected.Ek) // kem-ct
   const iv = ctWithIv.slice(0, 16) // AES-128-GCM iv length
   const encryptedContent = ctWithIv.slice(16, ctWithIv.length)
   const secretKey = base64url.decode(receiverPrivateKeyJwk.d)
   const sharedSecret = ml_kem768.decapsulate(ek, secretKey);
-  const aeadContentEncryptionKey = await sharedSecretToContentEncryptionKey(sharedSecret)
+  const aeadContentEncryptionKey = await sharedSecretToContentEncryptionKey(sharedSecret, ek)
   const aeadAlg = 1; // AES 128 GCM
   const externalAad = EMPTY_BUFFER
   // const hpkeSealAad = computeHPKEAad(protectedHeader) // confused why I don't need this...
