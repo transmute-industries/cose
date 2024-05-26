@@ -63,7 +63,8 @@ const sharedSecretToContentEncryptionKey = async (sharedSecret: Uint8Array) => {
   // https://datatracker.ietf.org/doc/html/rfc9180#section-4-10
   // labeled_ikm = concat("HPKE-v1", suite_id, label, ikm)
   // 🔥 this is ALL WRONG.... 🔥
-  // fake
+  // need to follow https://datatracker.ietf.org/doc/html/draft-connolly-cfrg-hpke-mlkem-00#name-encap-and-decap
+  // 🔥 this is ALL WRONG.... 🔥
   const suite_id = Buffer.from('0xFFFF', 'hex') // unassigned kem id https://www.iana.org/assignments/hpke/hpke.xhtml
   // should be:
   // suite_id = concat(
