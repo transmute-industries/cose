@@ -43,7 +43,8 @@ const algTowebCryptoParams: Record<CoseSignatureAlgorithms, { name: string, hash
     name: "ECDSA",
     hash: "SHA-512",
     namedCurve: "P-521",
-  }
+  },
+  'ML-DSA-65': null as any
 }
 
 export type RequestRootCertificate = {
