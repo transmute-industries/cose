@@ -209,5 +209,5 @@ ${(await cose.cbor.diagnose(ct)).trim()}
 
 
 afterAll(() => {
-  // fs.writeFileSync('./test/draft-jose-cose-hpke-cookbook/examples.md', examples)
+  fs.writeFileSync('./test/draft-jose-cose-hpke-cookbook/examples.md', examples)
 })
