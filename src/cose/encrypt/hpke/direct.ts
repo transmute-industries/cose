@@ -135,6 +135,7 @@ const ExtractAndExpand = async (ss: Uint8Array, ct: Uint8Array) => {
 }
 
 // 🔥 This relies on unregistered code points.
+// Its likely this is not implemented correctly.
 // need to follow https://datatracker.ietf.org/doc/html/draft-connolly-cfrg-hpke-mlkem-00#name-encap-and-decap
 const sharedSecretToContentEncryptionKey = async (ss: Uint8Array, ct: Uint8Array) => {
   return ExtractAndExpand(ss, ct)
