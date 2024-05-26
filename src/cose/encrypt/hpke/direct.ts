@@ -90,7 +90,7 @@ const Extract = async (salt: Uint8Array, ikm: Uint8Array) => {
 
 const suite_id = Buffer.concat([
   Buffer.from('HPKE'),
-  Buffer.from(i2Osp(0xFFFF, 2)), // 🔥 Not a real kem id  🔥
+  Buffer.from(i2Osp(0x0070, 2)), // 🔥 not registered, but requested in https://datatracker.ietf.org/doc/html/draft-connolly-cfrg-hpke-mlkem-00#name-encap-and-decap
   Buffer.from(i2Osp(0x0001, 2)), // HKDF-SHA256, 32
   Buffer.from(i2Osp(0x0001, 2))  // AES-128-GCM
 ])
@@ -134,7 +134,7 @@ const ExtractAndExpand = async (ss: Uint8Array, ct: Uint8Array) => {
   return shared_secret
 }
 
-// 🔥 This is wrong.
+// 🔥 This relies on unregistered code points.
 // need to follow https://datatracker.ietf.org/doc/html/draft-connolly-cfrg-hpke-mlkem-00#name-encap-and-decap
 const sharedSecretToContentEncryptionKey = async (ss: Uint8Array, ct: Uint8Array) => {
   return ExtractAndExpand(ss, ct)
