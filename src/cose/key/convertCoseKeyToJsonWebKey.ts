@@ -1,5 +1,5 @@
 import { base64url, calculateJwkThumbprint } from "jose";
-import { CoseKey } from ".";
+import { CoseKey, thumbprint } from ".";
 
 
 import { IANACOSEAlgorithms } from '../algorithms';
@@ -9,12 +9,24 @@ const algorithms = Object.values(IANACOSEAlgorithms)
 const curves = Object.values(IANACOSEEllipticCurves)
 
 import { formatJwk } from "./formatJwk";
+import { KeyType, KeyTypeParameters } from "../Params";
 
 export const convertCoseKeyToJsonWebKey = async <T>(coseKey: CoseKey): Promise<T> => {
   const kty = coseKey.get(1) as number
   const kid = coseKey.get(2)
   const alg = coseKey.get(3)
   const crv = coseKey.get(-1)
+
+  if (kty === KeyType["ML-KEM"]) {
+    //short circuit.
+    return formatJwk({
+      "kid": await thumbprint.calculateCoseKeyThumbprintUri(coseKey),
+      "alg": "HPKE-Base-ML-KEM-768-SHA256-AES128GCM",
+      "kty": "ML-KEM",
+      "x": base64url.encode(coseKey.get(KeyTypeParameters['ML-KEM'].Public) as Uint8Array),
+      "d": coseKey.get(KeyTypeParameters['ML-KEM'].Secret) ? base64url.encode(coseKey.get(KeyTypeParameters['ML-KEM'].Secret) as Uint8Array) : undefined,
+    }) as T
+  }
   // kty EC, kty: EK
   if (![2, 5].includes(kty)) {
     throw new Error('This library requires does not support the given key type')

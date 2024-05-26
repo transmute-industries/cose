@@ -4,10 +4,20 @@ import { encodeCanonical } from "../../cbor";
 
 import subtleCryptoProvider from "../../crypto/subtleCryptoProvider";
 
+import { Key, KeyType, KeyTypeParameters } from '../Params'
+
 // https://www.ietf.org/archive/id/draft-ietf-cose-key-thumbprint-01.html#section-6
 const calculateCoseKeyThumbprint = async (coseKey: Map<any, any>): Promise<ArrayBuffer> => {
   const onlyRequiredMap = new Map()
-  const requriedKeys = [1, -1, -2, -3]
+  const requriedKeys = [Key.Type]
+  if (coseKey.get(Key.Type) === KeyType.EC2) {
+    requriedKeys.push(KeyTypeParameters['EC2'].Curve)
+    requriedKeys.push(KeyTypeParameters['EC2'].PublicX)
+    requriedKeys.push(KeyTypeParameters['EC2'].PublicY)
+  }
+  if (coseKey.get(Key.Type) === KeyType["ML-KEM"]) {
+    requriedKeys.push(KeyTypeParameters['ML-KEM'].Public)
+  }
   for (const [key, value] of coseKey.entries()) {
     if (requriedKeys.includes(key as number)) {
       onlyRequiredMap.set(key, value)

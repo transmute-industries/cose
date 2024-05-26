@@ -8,7 +8,7 @@ import { EMPTY_BUFFER } from "../../cbor"
 import * as aes from './aes'
 import * as ecdh from './ecdh'
 
-import { COSE_Encrypt, Epk, KeyAgreement, Protected, ProtectedHeader, Unprotected } from "../Params"
+import { COSE_Encrypt, Direct, Epk, KeyAgreement, Protected, ProtectedHeader, Unprotected } from "../Params"
 
 import { createAAD } from './utils'
 
@@ -33,10 +33,10 @@ export const encrypt = async (req: RequestDirectEncryption) => {
     throw new Error('Direct encryption requires a single recipient')
   }
   const recipientPublicKeyJwk = req.recipients.keys[0]
-  if (recipientPublicKeyJwk.crv !== 'P-256') {
-    throw new Error('Only P-256 is supported currently')
+  if (recipientPublicKeyJwk.crv !== 'P-256' && recipientPublicKeyJwk.kty !== 'ML-KEM') {
+    throw new Error('Only P-256 DHKEM and ML-KEM-768 are currently supported')
   }
-  if (recipientPublicKeyJwk.alg === hpke.primaryAlgorithm.label) {
+  if (Object.keys(Direct).includes(recipientPublicKeyJwk.alg)) {
     return hpke.encrypt.direct(req)
   }
   const alg = req.protectedHeader.get(Protected.Alg)
@@ -71,7 +71,7 @@ export const encrypt = async (req: RequestDirectEncryption) => {
 
 export const decrypt = async (req: RequestDirectDecryption) => {
   const receiverPrivateKeyJwk = req.recipients.keys[0]
-  if (receiverPrivateKeyJwk.alg === hpke.primaryAlgorithm.label) {
+  if (Object.keys(Direct).includes(receiverPrivateKeyJwk.alg)) {
     return hpke.decrypt.direct(req)
   }
   const decoded = await decodeFirst(req.ciphertext)

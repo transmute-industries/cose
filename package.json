@@ -47,6 +47,7 @@
     "typescript": "^4.9.4"
   },
   "dependencies": {
+    "@noble/post-quantum": "^0.1.0",
     "@peculiar/x509": "^1.9.7",
     "@transmute/cose": "^0.1.0",
     "@transmute/rfc9162": "^0.0.5",
