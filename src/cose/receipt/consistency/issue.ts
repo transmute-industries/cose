@@ -15,7 +15,7 @@ export type RequestIssueConsistencyReceipt = {
 
 export const issue = async (req: RequestIssueConsistencyReceipt) => {
   const { protectedHeader, receipt, entries, signer } = req;
-  const consistencyVds = protectedHeader.get(-111)
+  const consistencyVds = protectedHeader.get(395)
   if (consistencyVds !== 1) {
     throw new Error('Unsupported verifiable data structure. See https://datatracker.ietf.org/doc/draft-ietf-cose-merkle-tree-proofs')
   }
@@ -27,12 +27,12 @@ export const issue = async (req: RequestIssueConsistencyReceipt) => {
 
   const [protectedHeaderBytes, unprotectedHeaderMap, payload] = value
   const receiptProtectedHeader = cbor.decode(protectedHeaderBytes)
-  const inclusionVds = receiptProtectedHeader.get(-111);
+  const inclusionVds = receiptProtectedHeader.get(395);
   if (inclusionVds !== 1) {
     throw new Error('Unsupported verifiable data structure. See https://datatracker.ietf.org/doc/draft-ietf-cose-merkle-tree-proofs')
   }
 
-  const [inclusion] = unprotectedHeaderMap.get(-222).get(-1) // get first inclusion proof
+  const [inclusion] = unprotectedHeaderMap.get(396).get(-1) // get first inclusion proof
   if (payload !== null) {
     throw new Error('payload must be null for this type of proof')
   }
@@ -51,7 +51,7 @@ export const issue = async (req: RequestIssueConsistencyReceipt) => {
   const root = await CoMETRE.RFC9162_SHA256.root(entries)
 
   const proofs = new Map();
-  proofs.set(-2, [ // -2 is consistency proof for -111 (vds), 1 (RFC9162)
+  proofs.set(-2, [ // -2 is consistency proof for 395 (vds), 1 (RFC9162)
     cbor.encode([
       consistency_proof.tree_size_1,
       consistency_proof.tree_size_2,
@@ -60,7 +60,7 @@ export const issue = async (req: RequestIssueConsistencyReceipt) => {
   ])
 
   const unprotectedHeader = new Map();
-  unprotectedHeader.set(-222, proofs)
+  unprotectedHeader.set(396, proofs)
 
   const consistency = await signer.sign({
     protectedHeader,

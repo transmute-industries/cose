@@ -14,7 +14,7 @@ export type RequestIssueInclusionReceipt = {
 
 export const issue = async (req: RequestIssueInclusionReceipt) => {
   const { protectedHeader, entry, entries, signer } = req;
-  const vds = protectedHeader.get(-111)
+  const vds = protectedHeader.get(395)
   if (vds !== 1) {
     throw new Error('Unsupported verifiable data structure. See https://datatracker.ietf.org/doc/draft-ietf-cose-merkle-tree-proofs')
   }
@@ -24,7 +24,7 @@ export const issue = async (req: RequestIssueInclusionReceipt) => {
     entries,
   )
   const proofs = new Map();
-  proofs.set(-1, [ // -1 is inclusion proof for -111 (vds), 1 (RFC9162)
+  proofs.set(-1, [ // -1 is inclusion proof for 395 (vds), 1 (RFC9162)
     cbor.encode([ // encoded proof
       proof.tree_size,
       proof.leaf_index,
@@ -32,7 +32,7 @@ export const issue = async (req: RequestIssueInclusionReceipt) => {
     ])
   ])
   const unprotectedHeader = new Map();
-  unprotectedHeader.set(-222, proofs)
+  unprotectedHeader.set(396, proofs)
   return signer.sign({
     protectedHeader,
     unprotectedHeader,

@@ -30,8 +30,11 @@ export const PartyVOther = -26
 
 export const ContentType = 3
 
-export const ProofType = -111
+export const ProofType = 395
 
+export const PayloadLocation = -6801;
+export const PayloadPreImageContentType = -6802;
+export const PayloadHashAlgorithm = -6800;
 
 export const Protected = {
   ...HeaderParameters,
@@ -42,7 +45,11 @@ export const Protected = {
   PartyVNonce,
   PartyVOther,
   ContentType,
-  ProofType // new from COSE Merkle Tree Proofs
+  ProofType, // new from COSE Merkle Tree Proofs
+
+  PayloadHashAlgorithm, // new COSE Hash Envelop
+  PayloadPreImageContentType,
+  PayloadLocation,
 }
 
 export const Unprotected = {
@@ -55,6 +62,11 @@ export const A128GCM = 1
 
 export const Aead = {
   A128GCM
+}
+
+
+export const Hash = {
+  'SHA256': -16
 }
 
 export const Signature = {
