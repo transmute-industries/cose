@@ -33,7 +33,6 @@
   "homepage": "https://github.com/transmute-industries/cose#readme",
   "devDependencies": {
     "@types/jest": "^29.2.4",
-    "@types/uuid": "^9.0.8",
     "@typescript-eslint/eslint-plugin": "^5.47.1",
     "@typescript-eslint/parser": "^5.47.1",
     "axios": "^1.6.7",
@@ -49,7 +48,6 @@
     "@transmute/rfc9162": "^0.0.5",
     "cbor-web": "^9.0.2",
     "hpke-js": "^1.2.9",
-    "jose": "^4.14.4",
-    "uuid": "^9.0.1"
+    "jose": "^4.14.4"
   }
 }

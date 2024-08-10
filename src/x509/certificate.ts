@@ -2,7 +2,7 @@ import { exportJWK, exportPKCS8, importPKCS8 } from 'jose';
 import { ProtectedHeaderMap, PublicKeyJwk } from "../cose/sign1"
 
 import * as x509 from "@peculiar/x509";
-import { v4 } from 'uuid';
+
 import { CoseSignatureAlgorithms } from '../cose/key';
 
 import { IANACOSEAlgorithms, SecretKeyJwk, detached, RequestCoseSign1VerifyDetached } from '..';
@@ -66,9 +66,9 @@ const root = async (req: RequestRootCertificate): Promise<RootCertificateRespons
   const crypto = await provide()
   x509.cryptoProvider.set(crypto);
   const extensions: x509.JsonGeneralNames = [
-    {
-      type: 'url', value: `urn:uuid:${v4()}`
-    }
+    // {
+    //   type: 'url', value: `https://vendor.example`
+    // }
   ]
   const webCryptoAlgorithm = algTowebCryptoParams[req.alg]
   const caKeys = await crypto.subtle.generateKey(webCryptoAlgorithm, extractable, ["sign", "verify"]);
