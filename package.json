@@ -1,6 +1,6 @@
 {
   "name": "@transmute/cose",
-  "version": "0.2.2",
+  "version": "0.2.4",
   "description": "COSE and related work.",
   "main": "./dist/index.js",
   "typings": "dist/index.d.ts",
@@ -37,7 +37,6 @@
     "@typescript-eslint/eslint-plugin": "^5.47.1",
     "@typescript-eslint/parser": "^5.47.1",
     "axios": "^1.6.7",
-    "cose-js": "^0.8.4",
     "csv-parser": "^3.0.0",
     "eslint": "^8.30.0",
     "hpke-js": "^1.2.7",
@@ -48,7 +47,6 @@
   },
   "dependencies": {
     "@peculiar/x509": "^1.9.7",
-    "@transmute/cose": "^0.1.0",
     "@transmute/rfc9162": "^0.0.5",
     "cbor-web": "^9.0.2",
     "jose": "^4.14.4",
