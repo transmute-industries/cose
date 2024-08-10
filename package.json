@@ -47,7 +47,6 @@
   },
   "dependencies": {
     "@peculiar/x509": "^1.9.7",
-    "@transmute/cose": "^0.1.0",
     "@transmute/rfc9162": "^0.0.5",
     "cbor-web": "^9.0.2",
     "jose": "^4.14.4",
