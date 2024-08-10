@@ -6,17 +6,17 @@ import subtleCryptoProvider from './subtleCryptoProvider'
 
 import getDigestFromVerificationKey from '../cose/sign1/getDigestFromVerificationKey'
 
-const signer = ({ secretKeyJwk }: { secretKeyJwk: SecretKeyJwk }) => {
-  const digest = getDigestFromVerificationKey(`${secretKeyJwk.alg}`)
+const signer = ({ privateKeyJwk }: { privateKeyJwk: SecretKeyJwk }) => {
+  const digest = getDigestFromVerificationKey(`${privateKeyJwk.alg}`)
   return {
     sign: async (toBeSigned: ArrayBuffer): Promise<ArrayBuffer> => {
       const subtle = await subtleCryptoProvider()
       const signingKey = await subtle.importKey(
         "jwk",
-        secretKeyJwk,
+        privateKeyJwk,
         {
           name: "ECDSA",
-          namedCurve: secretKeyJwk.crv,
+          namedCurve: privateKeyJwk.crv,
         },
         true,
         ["sign"],

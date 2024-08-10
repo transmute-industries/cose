@@ -50,12 +50,12 @@ const notaryPublicKeyJwk = await cose.key.publicFromPrivate<cose.PublicKeyJwk>(
 
 const issuer = cose.detached.signer({
   remote: cose.crypto.signer({
-    secretKeyJwk: issuerSecretKeyJwk,
+    privateKeyJwk: issuerSecretKeyJwk,
   }),
 });
 const notary = cose.detached.signer({
   remote: cose.crypto.signer({
-    secretKeyJwk: notarySecretKeyJwk,
+    privateKeyJwk: notarySecretKeyJwk,
   }),
 });
 const content = fs.readFileSync("./examples/image.png");

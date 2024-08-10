@@ -2,12 +2,12 @@ import { CoseKey } from ".";
 import { SecretKeyJwk } from "../sign1";
 
 
-export const extracePublicKeyJwk = (secretKeyJwk: SecretKeyJwk) => {
-  if (secretKeyJwk.kty !== 'EC') {
+export const extracePublicKeyJwk = (privateKeyJwk: SecretKeyJwk) => {
+  if (privateKeyJwk.kty !== 'EC') {
     throw new Error('Only EC keys are supported')
   }
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { d, p, q, dp, dq, qi, key_ops, ...publicKeyJwk } = secretKeyJwk
+  const { d, p, q, dp, dq, qi, key_ops, ...publicKeyJwk } = privateKeyJwk
   return publicKeyJwk
 }
 

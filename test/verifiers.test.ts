@@ -8,19 +8,19 @@ it('verify multiple receipts', async () => {
   const notary2SecretKey = await cose.key.generate<cose.key.CoseKey>('ES256', 'application/cose-key')
   const issuerSigner = cose.detached.signer({
     remote: cose.crypto.signer({
-      secretKeyJwk: await cose.key.convertCoseKeyToJsonWebKey<cose.SecretKeyJwk>(issuerSecretKey)
+      privateKeyJwk: await cose.key.convertCoseKeyToJsonWebKey<cose.SecretKeyJwk>(issuerSecretKey)
     })
 
   })
   const notary1Signer = cose.detached.signer({
     remote: cose.crypto.signer({
-      secretKeyJwk: await cose.key.convertCoseKeyToJsonWebKey<cose.SecretKeyJwk>(notary1SecretKey)
+      privateKeyJwk: await cose.key.convertCoseKeyToJsonWebKey<cose.SecretKeyJwk>(notary1SecretKey)
     })
 
   })
   const notary2Signer = cose.detached.signer({
     remote: cose.crypto.signer({
-      secretKeyJwk: await cose.key.convertCoseKeyToJsonWebKey<cose.SecretKeyJwk>(notary2SecretKey)
+      privateKeyJwk: await cose.key.convertCoseKeyToJsonWebKey<cose.SecretKeyJwk>(notary2SecretKey)
     })
   })
   const issuerCkt = await cose.key.thumbprint.calculateCoseKeyThumbprintUri(issuerSecretKey)

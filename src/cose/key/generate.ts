@@ -29,16 +29,16 @@ export const generate = async <T>(alg: CoseSignatureAlgorithms, contentType: Pri
     throw new Error('Algorithm is not supported.')
   }
   const cryptoKeyPair = await generateKeyPair(knownAlgorithm.Name, { extractable: true });
-  const secretKeyJwk = await exportJWK(cryptoKeyPair.privateKey)
-  const jwkThumbprint = await calculateJwkThumbprint(secretKeyJwk)
-  secretKeyJwk.kid = jwkThumbprint
-  secretKeyJwk.alg = alg
+  const privateKeyJwk = await exportJWK(cryptoKeyPair.privateKey)
+  const jwkThumbprint = await calculateJwkThumbprint(privateKeyJwk)
+  privateKeyJwk.kid = jwkThumbprint
+  privateKeyJwk.alg = alg
   if (contentType === 'application/jwk+json') {
-    return formatJwk(secretKeyJwk) as T
+    return formatJwk(privateKeyJwk) as T
   }
   if (contentType === 'application/cose-key') {
-    delete secretKeyJwk.kid;
-    const secretKeyCoseKey = await convertJsonWebKeyToCoseKey<CoseKey>(secretKeyJwk)
+    delete privateKeyJwk.kid;
+    const secretKeyCoseKey = await convertJsonWebKeyToCoseKey<CoseKey>(privateKeyJwk)
     const coseKeyThumbprint = await thumbprint.calculateCoseKeyThumbprint(secretKeyCoseKey)
     secretKeyCoseKey.set(2, coseKeyThumbprint)
     return secretKeyCoseKey as T

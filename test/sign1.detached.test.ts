@@ -2,12 +2,12 @@ import fs from 'fs'
 import * as cose from '../src'
 
 it('sign and verify', async () => {
-  const secretKeyJwk = await cose.key.generate<cose.SecretKeyJwk>('ES256', 'application/jwk+json')
+  const privateKeyJwk = await cose.key.generate<cose.SecretKeyJwk>('ES256', 'application/jwk+json')
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { d, ...publicKeyJwk } = secretKeyJwk
+  const { d, ...publicKeyJwk } = privateKeyJwk
   const signer = cose.detached.signer({
     remote: cose.crypto.signer({
-      secretKeyJwk
+      privateKeyJwk
     })
   })
   const message = '💣 test ✨ mesage 🔥'
@@ -36,12 +36,12 @@ it('sign and verify', async () => {
 })
 
 it('sign and verify large image from file system', async () => {
-  const secretKeyJwk = await cose.key.generate<cose.SecretKeyJwk>('ES256', 'application/jwk+json')
+  const privateKeyJwk = await cose.key.generate<cose.SecretKeyJwk>('ES256', 'application/jwk+json')
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { d, ...publicKeyJwk } = secretKeyJwk
+  const { d, ...publicKeyJwk } = privateKeyJwk
   const signer = cose.detached.signer({
     remote: cose.crypto.signer({
-      secretKeyJwk
+      privateKeyJwk
     })
   })
   const content = fs.readFileSync('./examples/image.png')

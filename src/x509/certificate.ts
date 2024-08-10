@@ -99,11 +99,11 @@ const pkcs8Signer = async ({ alg, privateKeyPKCS8 }: { alg: number, privateKeyPK
   if (!foundAlgorithm) {
     throw new Error('Could not find algorithm in registry for: ' + alg)
   }
-  const secretKeyJwk = await exportJWK(await importPKCS8(privateKeyPKCS8, `${foundAlgorithm.Name}`)) as SecretKeyJwk
-  secretKeyJwk.alg = foundAlgorithm.Name;
+  const privateKeyJwk = await exportJWK(await importPKCS8(privateKeyPKCS8, `${foundAlgorithm.Name}`)) as SecretKeyJwk
+  privateKeyJwk.alg = foundAlgorithm.Name;
   return detached.signer({
     remote: crypto.signer({
-      secretKeyJwk
+      privateKeyJwk
     })
   })
 }
