@@ -16,7 +16,10 @@ export * from './x509'
 
 export * from './cose/Params'
 
-export * from './cose/encrypt'
+// https://github.com/dajiaji/hpke-js/issues/302
+// this issue also effect vercel ncc
+// a better fix would be to move hpke stuff to its won package.
+// export * from './cose/encrypt'
 
 import * as cbor from './cbor'
 
