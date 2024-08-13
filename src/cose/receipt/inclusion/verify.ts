@@ -1,7 +1,7 @@
 
 import { CoMETRE } from '@transmute/rfc9162'
 
-import { cbor, Protected, Unprotected } from '../../..'
+import { cbor, Protected, Unprotected, VerifiableDataProofTypes } from '../../..'
 
 import { CoseSign1Bytes, CoseSign1DetachedVerifier } from "../../sign1"
 
@@ -24,7 +24,7 @@ export const verify = async (req: RequestVerifyInclusionReceipt) => {
     throw new Error('Unsupported verifiable data structure. See https://datatracker.ietf.org/doc/draft-ietf-cose-merkle-tree-proofs')
   }
   const proofs = unprotectedHeaderMap.get(Unprotected.VerifiableDataProofs)
-  const [inclusion] = proofs.get(-1) // get first inclusion proof
+  const [inclusion] = proofs.get(VerifiableDataProofTypes['RFC9162-Inclusion-Proof']) // get first inclusion proof
   if (payload !== null) {
     throw new Error('payload must be null for this type of proof')
   }

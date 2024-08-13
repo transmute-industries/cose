@@ -1,7 +1,7 @@
 
 import { CoMETRE } from '@transmute/rfc9162'
 
-import { cbor, Protected, Unprotected } from '../../..'
+import { cbor, Protected, Unprotected, VerifiableDataProofTypes } from '../../..'
 
 import { CoseSign1Bytes, CoseSign1Signer, ProtectedHeaderMap } from "../../sign1"
 import { toArrayBuffer } from '../../../cbor'
@@ -32,7 +32,8 @@ export const issue = async (req: RequestIssueConsistencyReceipt) => {
     throw new Error('Unsupported verifiable data structure. See https://datatracker.ietf.org/doc/draft-ietf-cose-merkle-tree-proofs')
   }
 
-  const [inclusion] = unprotectedHeaderMap.get(Unprotected.VerifiableDataProofs).get(-1) // get first inclusion proof
+  const [inclusion] = unprotectedHeaderMap.get(Unprotected.VerifiableDataProofs)
+    .get(VerifiableDataProofTypes['RFC9162-Inclusion-Proof']) // get first inclusion proof
   if (payload !== null) {
     throw new Error('payload must be null for this type of proof')
   }
@@ -51,7 +52,7 @@ export const issue = async (req: RequestIssueConsistencyReceipt) => {
   const root = await CoMETRE.RFC9162_SHA256.root(entries)
 
   const proofs = new Map();
-  proofs.set(-2, [ // -2 is consistency proof for 395 (vds), 1 (RFC9162)
+  proofs.set(VerifiableDataProofTypes['RFC9162-Consistency-Proof'], [ // -2 is consistency proof for 395 (vds), 1 (RFC9162)
     cbor.encode([
       consistency_proof.tree_size_1,
       consistency_proof.tree_size_2,

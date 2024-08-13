@@ -47,6 +47,12 @@ export const VerifiableDataStructures = {
   'RFC9162-Binary-Merkle-Tree': 1
 }
 
+// only for RFC9162-Binary-Merkle-Tree
+export const VerifiableDataProofTypes = {
+  'RFC9162-Inclusion-Proof': -1,
+  'RFC9162-Consistency-Proof': -2
+}
+
 export const Protected = {
   ...HeaderParameters,
   PartyUIdentity,

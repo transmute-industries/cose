@@ -1,7 +1,7 @@
 
 import { CoMETRE } from '@transmute/rfc9162'
 
-import { cbor, Protected, Unprotected } from '../../..'
+import { cbor, Protected, Unprotected, VerifiableDataProofTypes } from '../../..'
 
 import { CoseSign1Signer, ProtectedHeaderMap } from "../../sign1"
 
@@ -24,7 +24,7 @@ export const issue = async (req: RequestIssueInclusionReceipt) => {
     entries,
   )
   const proofs = new Map();
-  proofs.set(-1, [ // -1 is inclusion proof for 395 (vds), 1 (RFC9162)
+  proofs.set(VerifiableDataProofTypes['RFC9162-Inclusion-Proof'], [ // -1 is inclusion proof for 395 (vds), 1 (RFC9162)
     cbor.encode([ // encoded proof
       proof.tree_size,
       proof.leaf_index,
