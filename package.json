@@ -1,6 +1,6 @@
 {
   "name": "@transmute/cose",
-  "version": "0.2.10",
+  "version": "0.2.11",
   "description": "COSE and related work.",
   "main": "./dist/index.js",
   "typings": "dist/index.d.ts",
