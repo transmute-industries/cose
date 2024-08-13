@@ -30,8 +30,6 @@ export const PartyVOther = -26
 
 export const ContentType = 3
 
-export const ProofType = 395
-
 export const PayloadLocation = -6801;
 export const PayloadPreImageContentType = -6802;
 export const PayloadHashAlgorithm = -6800;
@@ -39,6 +37,15 @@ export const PayloadHashAlgorithm = -6800;
 
 export const CWTClaims = 15
 export const Type = 16
+
+// https://datatracker.ietf.org/doc/draft-ietf-cose-merkle-tree-proofs/
+export const Receipts = 394
+export const VerifiableDataStructure = 395
+export const VerifiableDataProofs = 396
+
+export const VerifiableDataStructures = {
+  'RFC9162-Binary-Merkle-Tree': 1
+}
 
 export const Protected = {
   ...HeaderParameters,
@@ -49,20 +56,26 @@ export const Protected = {
   PartyVNonce,
   PartyVOther,
   ContentType,
-  ProofType, // new from COSE Merkle Tree Proofs
+
+  Type, // https://datatracker.ietf.org/doc/html/rfc9596
+  CWTClaims, // https://datatracker.ietf.org/doc/html/rfc9597
 
   PayloadHashAlgorithm, // new COSE Hash Envelop
   PayloadPreImageContentType,
   PayloadLocation,
 
-  Type, // https://datatracker.ietf.org/doc/html/rfc9596
-  CWTClaims // https://datatracker.ietf.org/doc/html/rfc9597
+  VerifiableDataStructure,
+
 }
+
 
 export const Unprotected = {
   ...HeaderParameters,
   Iv: 5,
-  Ek: -4 // new from COSE HPKE
+  Ek: -4, // new from COSE HPKE
+
+  Receipts,
+  VerifiableDataProofs
 }
 
 export const A128GCM = 1
@@ -78,10 +91,6 @@ export const Hash = {
 
 export const Signature = {
   'ES256': -7
-}
-
-export const Receipt = {
-  Inclusion: 1
 }
 
 

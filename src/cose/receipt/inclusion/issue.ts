@@ -1,7 +1,7 @@
 
 import { CoMETRE } from '@transmute/rfc9162'
 
-import { cbor } from '../../..'
+import { cbor, Protected, Unprotected } from '../../..'
 
 import { CoseSign1Signer, ProtectedHeaderMap } from "../../sign1"
 
@@ -14,7 +14,7 @@ export type RequestIssueInclusionReceipt = {
 
 export const issue = async (req: RequestIssueInclusionReceipt) => {
   const { protectedHeader, entry, entries, signer } = req;
-  const vds = protectedHeader.get(395)
+  const vds = protectedHeader.get(Protected.VerifiableDataStructure)
   if (vds !== 1) {
     throw new Error('Unsupported verifiable data structure. See https://datatracker.ietf.org/doc/draft-ietf-cose-merkle-tree-proofs')
   }
@@ -32,7 +32,7 @@ export const issue = async (req: RequestIssueInclusionReceipt) => {
     ])
   ])
   const unprotectedHeader = new Map();
-  unprotectedHeader.set(396, proofs)
+  unprotectedHeader.set(Unprotected.VerifiableDataProofs, proofs)
   return signer.sign({
     protectedHeader,
     unprotectedHeader,

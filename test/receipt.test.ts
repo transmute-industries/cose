@@ -35,7 +35,7 @@ it('issue & verify', async () => {
   const inclusion = await cose.receipt.inclusion.issue({
     protectedHeader: cose.ProtectedHeader([
       [cose.Protected.Alg, cose.Signature.ES256],  // alg ES256
-      [cose.Protected.ProofType, cose.Receipt.Inclusion] // vds RFC9162
+      [cose.Protected.VerifiableDataStructure, cose.VerifiableDataStructures['RFC9162-Binary-Merkle-Tree']] // vds RFC9162
     ]),
     entry: 1,
     entries,
@@ -55,7 +55,7 @@ it('issue & verify', async () => {
   const { root, receipt } = await cose.receipt.consistency.issue({
     protectedHeader: cose.ProtectedHeader([
       [cose.Protected.Alg, cose.Signature.ES256],  // alg ES256
-      [cose.Protected.ProofType, cose.Receipt.Inclusion] // vds RFC9162
+      [cose.Protected.VerifiableDataStructure, cose.VerifiableDataStructures['RFC9162-Binary-Merkle-Tree']] // vds RFC9162
     ]),
     receipt: inclusion,
     entries,
@@ -91,7 +91,7 @@ it("add / remove from receipts", async () => {
   const receiptForImageSignature = await cose.receipt.inclusion.issue({
     protectedHeader: cose.ProtectedHeader([
       [cose.Protected.Alg, cose.Signature.ES256],  // alg ES256
-      [cose.Protected.ProofType, cose.Receipt.Inclusion] // vds RFC9162
+      [cose.Protected.VerifiableDataStructure, cose.VerifiableDataStructures['RFC9162-Binary-Merkle-Tree']] // vds RFC9162
     ]),
     entry: 0,
     entries: transparencyLogContainingImageSignatures,
@@ -99,7 +99,7 @@ it("add / remove from receipts", async () => {
   })
   const transparentSignature = await cose.receipt.add(signatureForImage, receiptForImageSignature)
   const { value } = cose.cbor.decode(transparentSignature)
-  expect(value[1].get(394).length).toBe(1) // expect 1 receipt
+  expect(value[1].get(cose.Unprotected.Receipts).length).toBe(1) // expect 1 receipt
   const receipts = await cose.receipt.get(transparentSignature)
   expect(receipts.length).toBe(1) // expect 1 receipt
   const coseKey = await cose.key.convertJsonWebKeyToCoseKey<cose.key.CoseKey>(publicKeyJwk)

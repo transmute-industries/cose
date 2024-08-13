@@ -42,7 +42,7 @@ it('verify multiple receipts', async () => {
     protectedHeader: cose.ProtectedHeader([
       [cose.Protected.Kid, notary1Ckt], // kid urn:ietf:params:oauth:ckt:sha-256:T6ixLT_utMNJ...
       [cose.Protected.Alg, cose.Signature.ES256],  // alg ES256
-      [cose.Protected.ProofType, cose.Receipt.Inclusion] // vds RFC9162
+      [cose.Protected.VerifiableDataStructure, cose.VerifiableDataStructures['RFC9162-Binary-Merkle-Tree']] // vds RFC9162
     ]),
     entry: 0,
     entries: transparencyLogContainingImageSignatures,
@@ -52,7 +52,7 @@ it('verify multiple receipts', async () => {
     protectedHeader: cose.ProtectedHeader([
       [cose.Protected.Kid, notary2Ckt], // kid urn:ietf:params:oauth:ckt:sha-256:T6ixLT_utMNJ...
       [cose.Protected.Alg, cose.Signature.ES256],  // alg ES256
-      [cose.Protected.ProofType, cose.Receipt.Inclusion] // vds RFC9162
+      [cose.Protected.VerifiableDataStructure, cose.VerifiableDataStructures['RFC9162-Binary-Merkle-Tree']] // vds RFC9162
     ]),
     entry: 0,
     entries: transparencyLogContainingImageSignatures,

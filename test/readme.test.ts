@@ -33,7 +33,7 @@ it('readme', async () => {
   const receiptForImageSignature = await cose.receipt.inclusion.issue({
     protectedHeader: cose.ProtectedHeader([
       [cose.Protected.Alg, cose.Signature.ES256],
-      [cose.Protected.ProofType, cose.Receipt.Inclusion],
+      [cose.Protected.VerifiableDataStructure, cose.VerifiableDataStructures['RFC9162-Binary-Merkle-Tree']],
       [cose.Protected.Kid, notaryPublicKeyJwk.kid]
     ]),
     entry: 0,

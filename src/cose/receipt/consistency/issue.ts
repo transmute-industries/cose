@@ -1,7 +1,7 @@
 
 import { CoMETRE } from '@transmute/rfc9162'
 
-import { cbor } from '../../..'
+import { cbor, Protected, Unprotected } from '../../..'
 
 import { CoseSign1Bytes, CoseSign1Signer, ProtectedHeaderMap } from "../../sign1"
 import { toArrayBuffer } from '../../../cbor'
@@ -15,7 +15,7 @@ export type RequestIssueConsistencyReceipt = {
 
 export const issue = async (req: RequestIssueConsistencyReceipt) => {
   const { protectedHeader, receipt, entries, signer } = req;
-  const consistencyVds = protectedHeader.get(395)
+  const consistencyVds = protectedHeader.get(Protected.VerifiableDataStructure)
   if (consistencyVds !== 1) {
     throw new Error('Unsupported verifiable data structure. See https://datatracker.ietf.org/doc/draft-ietf-cose-merkle-tree-proofs')
   }
@@ -27,12 +27,12 @@ export const issue = async (req: RequestIssueConsistencyReceipt) => {
 
   const [protectedHeaderBytes, unprotectedHeaderMap, payload] = value
   const receiptProtectedHeader = cbor.decode(protectedHeaderBytes)
-  const inclusionVds = receiptProtectedHeader.get(395);
+  const inclusionVds = receiptProtectedHeader.get(Protected.VerifiableDataStructure);
   if (inclusionVds !== 1) {
     throw new Error('Unsupported verifiable data structure. See https://datatracker.ietf.org/doc/draft-ietf-cose-merkle-tree-proofs')
   }
 
-  const [inclusion] = unprotectedHeaderMap.get(396).get(-1) // get first inclusion proof
+  const [inclusion] = unprotectedHeaderMap.get(Unprotected.VerifiableDataProofs).get(-1) // get first inclusion proof
   if (payload !== null) {
     throw new Error('payload must be null for this type of proof')
   }
@@ -60,7 +60,7 @@ export const issue = async (req: RequestIssueConsistencyReceipt) => {
   ])
 
   const unprotectedHeader = new Map();
-  unprotectedHeader.set(396, proofs)
+  unprotectedHeader.set(Unprotected.VerifiableDataProofs, proofs)
 
   const consistency = await signer.sign({
     protectedHeader,
