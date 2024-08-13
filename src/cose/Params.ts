@@ -36,6 +36,10 @@ export const PayloadLocation = -6801;
 export const PayloadPreImageContentType = -6802;
 export const PayloadHashAlgorithm = -6800;
 
+
+export const CWTClaims = 15
+export const Type = 16
+
 export const Protected = {
   ...HeaderParameters,
   PartyUIdentity,
@@ -50,6 +54,9 @@ export const Protected = {
   PayloadHashAlgorithm, // new COSE Hash Envelop
   PayloadPreImageContentType,
   PayloadLocation,
+
+  Type, // https://datatracker.ietf.org/doc/html/rfc9596
+  CWTClaims // https://datatracker.ietf.org/doc/html/rfc9597
 }
 
 export const Unprotected = {
