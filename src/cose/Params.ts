@@ -117,20 +117,29 @@ export const Direct = {
 
 export const EC2 = 2
 
-export const KeyType = {
+export const KeyTypes = {
   EC2
 }
 
+export const KeyType = 1
+export const KeyAlg = 3
+export const KeyCurve = -1
+
 export const Epk = {
-  Kty: 1,
-  Crv: -1,
-  Alg: 3
+  Kty: KeyType,
+  Crv: KeyCurve,
+  Alg: KeyAlg
 }
 
-export const Curve = {
+export const Key = {
+  Kty: KeyType,
+  Crv: KeyCurve,
+  Alg: KeyAlg
+}
+
+export const Curves = {
   P256: 1,
 }
-
 
 export const COSE_Encrypt0 = 16
 export const COSE_Sign1 = 18
