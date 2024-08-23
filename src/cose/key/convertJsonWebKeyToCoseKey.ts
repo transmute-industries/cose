@@ -7,7 +7,7 @@ import { IANACOSEAlgorithms } from '../algorithms';
 import { IANACOSEKeyTypeParameters, IANACOSEKeyTypeParameter } from '../key-type-parameters';
 import { IANACOSEKeyTypes } from '../key-type';
 import { IANACOSEEllipticCurves } from '../elliptic-curves';
-import { PublicKeyJwk, SecretKeyJwk } from '../sign1';
+import { PublicKeyJwk, PrivateKeyJwk } from '../sign1';
 
 
 const algorithms = Object.values(IANACOSEAlgorithms)
@@ -40,7 +40,7 @@ const getKeyTypeSpecificLabel = (keyType: 'EC2' | 'OKP', keyTypeParam: string) =
   return label
 }
 
-export const convertJsonWebKeyToCoseKey = async <T>(jwk: PublicKeyJwk | SecretKeyJwk): Promise<T> => {
+export const convertJsonWebKeyToCoseKey = async <T>(jwk: PublicKeyJwk | PrivateKeyJwk): Promise<T> => {
 
   const { kty } = jwk
   let coseKty = `${kty}` as 'OKP' | 'EC' | 'EC2'; // evidence of terrible design.

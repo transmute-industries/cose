@@ -3,12 +3,12 @@ import { base64url } from 'jose'
 import * as transmute from '../src'
 
 it('generate cose key', async () => {
-  const secretKeyJwk1 = await transmute.key.generate<transmute.SecretKeyJwk>('ES256', 'application/jwk+json')
+  const secretKeyJwk1 = await transmute.key.generate<transmute.PrivateKeyJwk>('ES256', 'application/jwk+json')
   const secretKeyCose1 = await transmute.key.convertJsonWebKeyToCoseKey<transmute.key.CoseKey>(secretKeyJwk1)
   expect(secretKeyCose1.get(-1)).toBe(1) // crv : P-256
   const secretKeyCose2 = await transmute.key.generate<transmute.key.CoseKey>('ES256', 'application/cose-key')
   expect(secretKeyCose2.get(-1)).toBe(1) // crv : P-256
-  const secretKeyJwk2 = await transmute.key.convertCoseKeyToJsonWebKey<transmute.SecretKeyJwk>(secretKeyCose1)
+  const secretKeyJwk2 = await transmute.key.convertCoseKeyToJsonWebKey<transmute.PrivateKeyJwk>(secretKeyCose1)
   expect(secretKeyJwk2.kid).toBe(secretKeyJwk1.kid) // text identifiers survive key conversion
   expect(secretKeyJwk2.alg).toBe(secretKeyJwk1.alg)
   expect(secretKeyJwk2.kty).toBe(secretKeyJwk1.kty)
@@ -16,9 +16,9 @@ it('generate cose key', async () => {
   expect(secretKeyJwk2.x).toBe(secretKeyJwk1.x)
   expect(secretKeyJwk2.y).toBe(secretKeyJwk1.y)
   expect(secretKeyJwk2.d).toBe(secretKeyJwk1.d)
-  const secretKeyJwk3 = await transmute.key.convertCoseKeyToJsonWebKey<transmute.SecretKeyJwk>(secretKeyCose1)
+  const secretKeyJwk3 = await transmute.key.convertCoseKeyToJsonWebKey<transmute.PrivateKeyJwk>(secretKeyCose1)
   const secretKeyCose3 = await transmute.key.convertJsonWebKeyToCoseKey<transmute.key.CoseKey>(secretKeyJwk3)
-  const secretKeyJwk4 = await transmute.key.convertCoseKeyToJsonWebKey<transmute.SecretKeyJwk>(secretKeyCose3)
+  const secretKeyJwk4 = await transmute.key.convertCoseKeyToJsonWebKey<transmute.PrivateKeyJwk>(secretKeyCose3)
   expect(secretKeyJwk4.kid).toBe(secretKeyJwk3.kid) // text identifiers survive key conversion
 
 })
@@ -45,7 +45,7 @@ it('generate thumbprints', async () => {
 })
 
 it('public from private for JWK and cose key', async () => {
-  const privateKeyJwk = await transmute.key.generate<transmute.SecretKeyJwk>('ES256', 'application/jwk+json')
+  const privateKeyJwk = await transmute.key.generate<transmute.PrivateKeyJwk>('ES256', 'application/jwk+json')
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { d, ...expectedPublicKeyJwk } = privateKeyJwk
   const publicKeyJwk = transmute.key.publicFromPrivate<transmute.PublicKeyJwk>(privateKeyJwk)

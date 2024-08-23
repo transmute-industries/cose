@@ -2,10 +2,10 @@ import fs from 'fs'
 import * as cose from '../src'
 
 it('readme', async () => {
-  const issuerSecretKeyJwk = await cose.key.generate<cose.SecretKeyJwk>('ES256', 'application/jwk+json')
+  const issuerSecretKeyJwk = await cose.key.generate<cose.PrivateKeyJwk>('ES256', 'application/jwk+json')
   const issuerPublicKeyJwk = await cose.key.publicFromPrivate<cose.PublicKeyJwk>(issuerSecretKeyJwk)
 
-  const notarySecretKeyJwk = await cose.key.generate<cose.SecretKeyJwk>('ES256', 'application/jwk+json')
+  const notarySecretKeyJwk = await cose.key.generate<cose.PrivateKeyJwk>('ES256', 'application/jwk+json')
   const notaryPublicKeyJwk = await cose.key.publicFromPrivate<cose.PublicKeyJwk>(notarySecretKeyJwk)
 
   const issuer = cose.detached.signer({

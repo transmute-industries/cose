@@ -2,7 +2,7 @@ import fs from 'fs'
 import * as cose from '../src'
 
 it('sign and verify', async () => {
-  const privateKeyJwk = await cose.key.generate<cose.SecretKeyJwk>('ES256', 'application/jwk+json')
+  const privateKeyJwk = await cose.key.generate<cose.PrivateKeyJwk>('ES256', 'application/jwk+json')
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { d, ...publicKeyJwk } = privateKeyJwk
   const signer = cose.detached.signer({
@@ -36,7 +36,7 @@ it('sign and verify', async () => {
 })
 
 it('sign and verify large image from file system', async () => {
-  const privateKeyJwk = await cose.key.generate<cose.SecretKeyJwk>('ES256', 'application/jwk+json')
+  const privateKeyJwk = await cose.key.generate<cose.PrivateKeyJwk>('ES256', 'application/jwk+json')
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { d, ...publicKeyJwk } = privateKeyJwk
   const signer = cose.detached.signer({

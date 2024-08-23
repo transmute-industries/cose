@@ -1,9 +1,9 @@
 
 
 
-import { PublicKeyJwk, SecretKeyJwk } from '../sign1'
+import { PublicKeyJwk, PrivateKeyJwk } from '../sign1'
 
-export type JsonWebKey = SecretKeyJwk | PublicKeyJwk
+export type JsonWebKey = PrivateKeyJwk | PublicKeyJwk
 
 export type CoseMapKey = string | number
 export type CoseMapValue = Uint8Array | ArrayBuffer | string | number | Map<CoseMapKey, unknown>

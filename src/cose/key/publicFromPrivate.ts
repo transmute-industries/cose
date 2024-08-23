@@ -1,8 +1,8 @@
 import { CoseKey } from ".";
-import { SecretKeyJwk } from "../sign1";
+import { PrivateKeyJwk } from "../sign1";
 
 
-export const extracePublicKeyJwk = (privateKeyJwk: SecretKeyJwk) => {
+export const extractPublicKeyJwk = (privateKeyJwk: PrivateKeyJwk) => {
   if (privateKeyJwk.kty !== 'EC') {
     throw new Error('Only EC keys are supported')
   }
@@ -23,9 +23,9 @@ export const extractPublicCoseKey = (secretKey: CoseKey) => {
   return publicCoseKeyMap
 }
 
-export const publicFromPrivate = <T>(secretKey: SecretKeyJwk | CoseKey) => {
+export const publicFromPrivate = <T>(secretKey: PrivateKeyJwk | CoseKey) => {
   if ((secretKey as any).kty) {
-    return extracePublicKeyJwk(secretKey as SecretKeyJwk) as T
+    return extractPublicKeyJwk(secretKey as PrivateKeyJwk) as T
   }
   return extractPublicCoseKey(secretKey as CoseKey) as T
 }

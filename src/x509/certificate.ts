@@ -5,7 +5,7 @@ import * as x509 from "@peculiar/x509";
 
 import { CoseSignatureAlgorithms } from '../cose/key';
 
-import { IANACOSEAlgorithms, SecretKeyJwk, detached, RequestCoseSign1VerifyDetached } from '..';
+import { IANACOSEAlgorithms, PrivateKeyJwk, detached, RequestCoseSign1VerifyDetached } from '..';
 
 
 import { decodeFirstSync } from '../cbor'
@@ -99,7 +99,7 @@ const pkcs8Signer = async ({ alg, privateKeyPKCS8 }: { alg: number, privateKeyPK
   if (!foundAlgorithm) {
     throw new Error('Could not find algorithm in registry for: ' + alg)
   }
-  const privateKeyJwk = await exportJWK(await importPKCS8(privateKeyPKCS8, `${foundAlgorithm.Name}`)) as SecretKeyJwk
+  const privateKeyJwk = await exportJWK(await importPKCS8(privateKeyPKCS8, `${foundAlgorithm.Name}`)) as PrivateKeyJwk
   privateKeyJwk.alg = foundAlgorithm.Name;
   return detached.signer({
     remote: crypto.signer({

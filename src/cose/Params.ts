@@ -96,7 +96,8 @@ export const Hash = {
 }
 
 export const Signature = {
-  'ES256': -7
+  'ES256': -7,
+  'ES384': -35
 }
 
 
@@ -124,11 +125,13 @@ export const KeyTypes = {
 export const KeyType = 1
 export const KeyAlg = 3
 export const KeyCurve = -1
+export const KeyId = 2
 
 export const Epk = {
   Kty: KeyType,
   Crv: KeyCurve,
-  Alg: KeyAlg
+  Alg: KeyAlg,
+  Kid: KeyId
 }
 
 export const Key = {

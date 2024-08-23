@@ -1,12 +1,12 @@
 
 import { toArrayBuffer } from '../cbor'
-import { SecretKeyJwk } from '../cose/sign1'
+import { PrivateKeyJwk } from '../cose/sign1'
 
 import subtleCryptoProvider from './subtleCryptoProvider'
 
 import getDigestFromVerificationKey from '../cose/sign1/getDigestFromVerificationKey'
 
-const signer = ({ privateKeyJwk }: { privateKeyJwk: SecretKeyJwk }) => {
+const signer = ({ privateKeyJwk }: { privateKeyJwk: PrivateKeyJwk }) => {
   const digest = getDigestFromVerificationKey(`${privateKeyJwk.alg}`)
   return {
     sign: async (toBeSigned: ArrayBuffer): Promise<ArrayBuffer> => {
