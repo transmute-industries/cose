@@ -13,8 +13,9 @@ it('sign and verify', async () => {
   const message = '💣 test ✨ mesage 🔥'
   const payload = new TextEncoder().encode(message)
   const coseSign1 = await signer.sign({
-    protectedHeader: new Map([[1, -7]]),
-    unprotectedHeader: new Map(),
+    protectedHeader: cose.ProtectedHeader([
+      [cose.Protected.Alg, cose.Signature.ES256], // alg ES256
+    ]),
     payload
   })
   const { tag, value } = await cose.cbor.decode(coseSign1)
@@ -46,11 +47,10 @@ it('sign and verify large image from file system', async () => {
   })
   const content = fs.readFileSync('./examples/image.png')
   const coseSign1 = await signer.sign({
-    protectedHeader: new Map<number, any>([
-      [1, -7], // alg ES256
-      [3, "image/png"], // content_type image/png
+    protectedHeader: cose.ProtectedHeader([
+      [cose.Protected.Alg, cose.Signature.ES256], // alg ES256
+      [cose.Protected.ContentType, "image/png"], // content_type image/png
     ]),
-    unprotectedHeader: new Map(),
     payload: content
   })
 

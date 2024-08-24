@@ -1,4 +1,5 @@
 import { CoseKey } from ".";
+import { EC2, Key, KeyTypes } from "../Params";
 import { PrivateKeyJwk } from "../sign1";
 
 
@@ -13,13 +14,13 @@ export const extractPublicKeyJwk = (privateKeyJwk: PrivateKeyJwk) => {
 
 export const extractPublicCoseKey = (secretKey: CoseKey) => {
   const publicCoseKeyMap = new Map(secretKey)
-  if (publicCoseKeyMap.get(1) !== 2) {
+  if (publicCoseKeyMap.get(Key.Kty) !== KeyTypes.EC2) {
     throw new Error('Only EC2 keys are supported')
   }
-  if (!publicCoseKeyMap.get(-4)) {
+  if (!publicCoseKeyMap.get(EC2.D)) {
     throw new Error('privateKey is not a secret / private key (has no d / -4)')
   }
-  publicCoseKeyMap.delete(-4);
+  publicCoseKeyMap.delete(EC2.D);
   return publicCoseKeyMap
 }
 

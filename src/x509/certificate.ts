@@ -29,6 +29,11 @@ const provide = async () => {
 
 const algTowebCryptoParams: Record<CoseSignatureAlgorithms, { name: string, hash: string, namedCurve: string }>
   = {
+  'ESP256': {
+    name: "ECDSA",
+    hash: "SHA-256",
+    namedCurve: "P-256",
+  },
   'ES256': {
     name: "ECDSA",
     hash: "SHA-256",

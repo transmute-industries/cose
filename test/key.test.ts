@@ -5,9 +5,9 @@ import * as transmute from '../src'
 it('generate cose key', async () => {
   const secretKeyJwk1 = await transmute.key.generate<transmute.PrivateKeyJwk>('ES256', 'application/jwk+json')
   const secretKeyCose1 = await transmute.key.convertJsonWebKeyToCoseKey<transmute.key.CoseKey>(secretKeyJwk1)
-  expect(secretKeyCose1.get(-1)).toBe(1) // crv : P-256
+  expect(secretKeyCose1.get(transmute.EC2.Crv)).toBe(transmute.Curves.P256) // crv : P-256
   const secretKeyCose2 = await transmute.key.generate<transmute.key.CoseKey>('ES256', 'application/cose-key')
-  expect(secretKeyCose2.get(-1)).toBe(1) // crv : P-256
+  expect(secretKeyCose2.get(transmute.EC2.Crv)).toBe(transmute.Curves.P256) // crv : P-256
   const secretKeyJwk2 = await transmute.key.convertCoseKeyToJsonWebKey<transmute.PrivateKeyJwk>(secretKeyCose1)
   expect(secretKeyJwk2.kid).toBe(secretKeyJwk1.kid) // text identifiers survive key conversion
   expect(secretKeyJwk2.alg).toBe(secretKeyJwk1.alg)
@@ -52,7 +52,7 @@ it('public from private for JWK and cose key', async () => {
   expect(publicKeyJwk).toEqual(expectedPublicKeyJwk)
   const secretKeyCose = await transmute.key.generate<transmute.key.CoseKey>('ES256', 'application/cose-key')
   const expectedPublicKeyCose = new Map(secretKeyCose.entries())
-  expectedPublicKeyCose.delete(-4)
+  expectedPublicKeyCose.delete(transmute.EC2.D)
   const publicKeyCose = transmute.key.publicFromPrivate<transmute.key.CoseKey>(secretKeyCose)
   expect(publicKeyCose).toEqual(expectedPublicKeyCose)
 })

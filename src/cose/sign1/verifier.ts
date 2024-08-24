@@ -1,15 +1,18 @@
 
 import { decodeFirst, decodeFirstSync, encode, EMPTY_BUFFER } from '../../cbor'
 import { RequestCoseSign1Verifier, RequestCoseSign1Verify } from './types'
-import getAlgFromVerificationKey from './getAlgFromVerificationKey'
+
 import { DecodedToBeSigned, ProtectedHeaderMap } from './types'
 import rawVerifier from '../../crypto/verifier'
+
+import { iana } from '../../iana'
+import { Protected } from '../Params'
 
 const verifier = ({ resolver }: RequestCoseSign1Verifier) => {
   return {
     verify: async ({ coseSign1, externalAAD }: RequestCoseSign1Verify): Promise<ArrayBuffer> => {
       const publicKeyJwk = await resolver.resolve(coseSign1)
-      const algInPublicKey = getAlgFromVerificationKey(`${publicKeyJwk.alg}`)
+      const algInPublicKey = parseInt(`${iana['COSE Algorithms'].getByName(`${publicKeyJwk.alg}`)?.Value}`, 10)
       const ecdsa = rawVerifier({ publicKeyJwk })
       const obj = await decodeFirst(coseSign1);
       const signatureStructure = obj.value;
@@ -21,7 +24,7 @@ const verifier = ({ resolver }: RequestCoseSign1Verifier) => {
       }
       const [protectedHeaderBytes, _, payload, signature] = signatureStructure;
       const protectedHeaderMap: ProtectedHeaderMap = (!protectedHeaderBytes.length) ? new Map() : decodeFirstSync(protectedHeaderBytes);
-      const algInHeader = protectedHeaderMap.get(1)
+      const algInHeader = protectedHeaderMap.get(Protected.Alg)
       if (algInHeader !== algInPublicKey) {
         throw new Error('Verification key does not support algorithm: ' + algInHeader);
       }

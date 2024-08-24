@@ -9,15 +9,17 @@ import { PublicKeyJwk } from '../cose/sign1'
 
 const verifier = ({ publicKeyJwk }: { publicKeyJwk: PublicKeyJwk }) => {
   const digest = getDigestFromVerificationKey(`${publicKeyJwk.alg}`)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { alg, ...withoutAlg } = publicKeyJwk
   return {
     verify: async (toBeSigned: ArrayBuffer, signature: ArrayBuffer): Promise<ArrayBuffer> => {
       const subtle = await subtleCryptoProvider()
       const verificationKey = await subtle.importKey(
         "jwk",
-        publicKeyJwk,
+        withoutAlg,
         {
           name: "ECDSA",
-          namedCurve: publicKeyJwk.crv,
+          namedCurve: withoutAlg.crv,
         },
         true,
         ["verify"],
