@@ -1,7 +1,7 @@
 
 import { CoMETRE } from '@transmute/rfc9162'
 
-import { cbor, Protected, Unprotected, VerifiableDataProofTypes } from '../../..'
+import { cbor, Protected, Unprotected, VerifiableDataProofTypes, VerifiableDataStructures } from '../../..'
 
 import { CoseSign1Bytes, CoseSign1DetachedVerifier } from "../../sign1"
 
@@ -20,7 +20,7 @@ export const verify = async (req: RequestVerifyInclusionReceipt) => {
   const [protectedHeaderBytes, unprotectedHeaderMap, payload] = value
   const protectedHeader = cbor.decode(protectedHeaderBytes)
   const vds = protectedHeader.get(Protected.VerifiableDataStructure);
-  if (vds !== 1) {
+  if (vds !== VerifiableDataStructures['RFC9162-Binary-Merkle-Tree']) {
     throw new Error('Unsupported verifiable data structure. See https://datatracker.ietf.org/doc/draft-ietf-cose-merkle-tree-proofs')
   }
   const proofs = unprotectedHeaderMap.get(Unprotected.VerifiableDataProofs)

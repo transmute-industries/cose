@@ -14,7 +14,7 @@ export const hash = {
       sign: async ({ protectedHeader, unprotectedHeader, payload }: RequestCoseSign1): Promise<Uint8Array> => {
         const subtle = await subtleCryptoProvider();
         const hashEnvelopeAlgorithm = protectedHeader.get(Protected.PayloadHashAlgorithm)
-        if (hashEnvelopeAlgorithm !== -Hash.SHA256) {
+        if (hashEnvelopeAlgorithm !== Hash.SHA256) {
           throw new Error('Unsupported hash envelope algorithm (-16 is only one supported)')
         }
         const payloadHash = await subtle.digest("SHA-256", payload)

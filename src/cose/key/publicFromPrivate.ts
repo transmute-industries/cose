@@ -25,7 +25,7 @@ export const extractPublicCoseKey = (secretKey: CoseKey) => {
 }
 
 export const publicFromPrivate = <T>(secretKey: PrivateKeyJwk | CoseKey) => {
-  if ((secretKey as any).kty) {
+  if ((secretKey as PrivateKeyJwk).kty) {
     return extractPublicKeyJwk(secretKey as PrivateKeyJwk) as T
   }
   return extractPublicCoseKey(secretKey as CoseKey) as T

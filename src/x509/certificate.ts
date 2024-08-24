@@ -1,15 +1,8 @@
 import { exportJWK, exportPKCS8, importPKCS8 } from 'jose';
-import { ProtectedHeaderMap, PublicKeyJwk } from "../cose/sign1"
-
+import { PublicKeyJwk } from "../cose/sign1"
 import * as x509 from "@peculiar/x509";
-
 import { CoseSignatureAlgorithms } from '../cose/key';
-
-import { IANACOSEAlgorithms, PrivateKeyJwk, detached, RequestCoseSign1VerifyDetached } from '..';
-
-
-import { decodeFirstSync } from '../cbor'
-
+import { IANACOSEAlgorithms, PrivateKeyJwk, detached, RequestCoseSign1VerifyDetached, Hash } from '..';
 import { crypto } from '..';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -34,6 +27,11 @@ const algTowebCryptoParams: Record<CoseSignatureAlgorithms, { name: string, hash
     hash: "SHA-256",
     namedCurve: "P-256",
   },
+  'ESP384': {
+    name: "ECDSA",
+    hash: "SHA-384",
+    namedCurve: "P-384",
+  },
   'ES256': {
     name: "ECDSA",
     hash: "SHA-256",
@@ -57,12 +55,13 @@ export type RequestRootCertificate = {
   iss: string
   nbf: string
   exp: string
+  serial: string
 }
 
 // https://datatracker.ietf.org/doc/html/rfc9360#section-2-5.6.1
 const thumbprint = async (cert: string): Promise<[number, ArrayBuffer]> => {
   const current = new x509.X509Certificate(cert)
-  return [-16, await current.getThumbprint('SHA-256')]
+  return [Hash.SHA256, await current.getThumbprint('SHA-256')]
 }
 
 export type RootCertificateResponse = { public: string, private: string }
@@ -78,7 +77,7 @@ const root = async (req: RequestRootCertificate): Promise<RootCertificateRespons
   const webCryptoAlgorithm = algTowebCryptoParams[req.alg]
   const caKeys = await crypto.subtle.generateKey(webCryptoAlgorithm, extractable, ["sign", "verify"]);
   const caCert = await x509.X509CertificateGenerator.create({
-    serialNumber: "01",
+    serialNumber: req.serial || "01",
     subject: req.sub,
     issuer: req.iss,
     notBefore: new Date(req.nbf),

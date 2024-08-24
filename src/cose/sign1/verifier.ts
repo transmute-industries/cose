@@ -22,6 +22,7 @@ const verifier = ({ resolver }: RequestCoseSign1Verifier) => {
       if (signatureStructure.length !== 4) {
         throw new Error('Expecting Array of length 4');
       }
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const [protectedHeaderBytes, _, payload, signature] = signatureStructure;
       const protectedHeaderMap: ProtectedHeaderMap = (!protectedHeaderBytes.length) ? new Map() : decodeFirstSync(protectedHeaderBytes);
       const algInHeader = protectedHeaderMap.get(Protected.Alg)
