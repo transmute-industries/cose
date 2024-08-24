@@ -1,7 +1,7 @@
 
 import { CoMETRE } from '@transmute/rfc9162'
 
-import { cbor, Protected, Unprotected, VerifiableDataProofTypes } from '../../..'
+import { cbor, Protected, Unprotected, VerifiableDataProofTypes, VerifiableDataStructures } from '../../..'
 
 import { CoseSign1Bytes, CoseSign1Signer, ProtectedHeaderMap } from "../../sign1"
 import { toArrayBuffer } from '../../../cbor'
@@ -16,7 +16,7 @@ export type RequestIssueConsistencyReceipt = {
 export const issue = async (req: RequestIssueConsistencyReceipt) => {
   const { protectedHeader, receipt, entries, signer } = req;
   const consistencyVds = protectedHeader.get(Protected.VerifiableDataStructure)
-  if (consistencyVds !== 1) {
+  if (consistencyVds !== VerifiableDataStructures['RFC9162-Binary-Merkle-Tree']) {
     throw new Error('Unsupported verifiable data structure. See https://datatracker.ietf.org/doc/draft-ietf-cose-merkle-tree-proofs')
   }
 
@@ -28,7 +28,7 @@ export const issue = async (req: RequestIssueConsistencyReceipt) => {
   const [protectedHeaderBytes, unprotectedHeaderMap, payload] = value
   const receiptProtectedHeader = cbor.decode(protectedHeaderBytes)
   const inclusionVds = receiptProtectedHeader.get(Protected.VerifiableDataStructure);
-  if (inclusionVds !== 1) {
+  if (inclusionVds !== VerifiableDataStructures['RFC9162-Binary-Merkle-Tree']) {
     throw new Error('Unsupported verifiable data structure. See https://datatracker.ietf.org/doc/draft-ietf-cose-merkle-tree-proofs')
   }
 

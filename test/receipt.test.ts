@@ -17,7 +17,7 @@ it('issue & verify', async () => {
     }))
 
 
-  const privateKeyJwk = await cose.key.generate<cose.SecretKeyJwk>('ES256', 'application/jwk+json')
+  const privateKeyJwk = await cose.key.generate<cose.PrivateKeyJwk>('ES256', 'application/jwk+json')
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { d, ...publicKeyJwk } = privateKeyJwk
   const signer = cose.detached.signer({
@@ -71,7 +71,7 @@ it('issue & verify', async () => {
 })
 
 it("add / remove from receipts", async () => {
-  const privateKeyJwk = await cose.key.generate<cose.SecretKeyJwk>('ES256', 'application/jwk+json')
+  const privateKeyJwk = await cose.key.generate<cose.PrivateKeyJwk>('ES256', 'application/jwk+json')
   const publicKeyJwk = await cose.key.publicFromPrivate<cose.PublicKeyJwk>(privateKeyJwk)
   const signer = cose.detached.signer({
     remote: cose.crypto.signer({
@@ -103,7 +103,7 @@ it("add / remove from receipts", async () => {
   const receipts = await cose.receipt.get(transparentSignature)
   expect(receipts.length).toBe(1) // expect 1 receipt
   const coseKey = await cose.key.convertJsonWebKeyToCoseKey<cose.key.CoseKey>(publicKeyJwk)
-  coseKey.set(2, await cose.key.thumbprint.calculateCoseKeyThumbprintUri(coseKey))
+  coseKey.set(cose.EC2.Kid, await cose.key.thumbprint.calculateCoseKeyThumbprintUri(coseKey))
   const publicKey = cose.key.serialize<Buffer>(coseKey)
   expect(publicKey).toBeDefined();
   // fs.writeFileSync('./examples/image.ckt.signature.cbor', Buffer.from(transparentSignature))

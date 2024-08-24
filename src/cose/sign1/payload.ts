@@ -1,6 +1,6 @@
 
-import { decodeFirst, decodeFirstSync, encode, EMPTY_BUFFER } from '../../cbor'
-import { DecodedToBeSigned, ProtectedHeaderMap } from './types'
+import { decodeFirst, encode } from '../../cbor'
+
 
 
 export const attach = async (coseSign1Bytes: ArrayBuffer, payload: ArrayBuffer) => {

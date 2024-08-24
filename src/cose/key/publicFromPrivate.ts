@@ -1,8 +1,9 @@
 import { CoseKey } from ".";
-import { SecretKeyJwk } from "../sign1";
+import { EC2, Key, KeyTypes } from "../Params";
+import { PrivateKeyJwk } from "../sign1";
 
 
-export const extracePublicKeyJwk = (privateKeyJwk: SecretKeyJwk) => {
+export const extractPublicKeyJwk = (privateKeyJwk: PrivateKeyJwk) => {
   if (privateKeyJwk.kty !== 'EC') {
     throw new Error('Only EC keys are supported')
   }
@@ -13,19 +14,19 @@ export const extracePublicKeyJwk = (privateKeyJwk: SecretKeyJwk) => {
 
 export const extractPublicCoseKey = (secretKey: CoseKey) => {
   const publicCoseKeyMap = new Map(secretKey)
-  if (publicCoseKeyMap.get(1) !== 2) {
+  if (publicCoseKeyMap.get(Key.Kty) !== KeyTypes.EC2) {
     throw new Error('Only EC2 keys are supported')
   }
-  if (!publicCoseKeyMap.get(-4)) {
+  if (!publicCoseKeyMap.get(EC2.D)) {
     throw new Error('privateKey is not a secret / private key (has no d / -4)')
   }
-  publicCoseKeyMap.delete(-4);
+  publicCoseKeyMap.delete(EC2.D);
   return publicCoseKeyMap
 }
 
-export const publicFromPrivate = <T>(secretKey: SecretKeyJwk | CoseKey) => {
-  if ((secretKey as any).kty) {
-    return extracePublicKeyJwk(secretKey as SecretKeyJwk) as T
+export const publicFromPrivate = <T>(secretKey: PrivateKeyJwk | CoseKey) => {
+  if ((secretKey as PrivateKeyJwk).kty) {
+    return extractPublicKeyJwk(secretKey as PrivateKeyJwk) as T
   }
   return extractPublicCoseKey(secretKey as CoseKey) as T
 }

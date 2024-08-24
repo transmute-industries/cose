@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 // This module is just just a limited set of the IANA registries, 
 // exposed to make Map initialization more readable
 
@@ -96,7 +98,8 @@ export const Hash = {
 }
 
 export const Signature = {
-  'ES256': -7
+  'ES256': -7,
+  'ES384': -35
 }
 
 
@@ -115,26 +118,32 @@ export const Direct = {
   'HPKE-Base-P256-SHA256-AES128GCM': 35
 }
 
-export const EC2 = 2
 
-export const KeyTypes = {
-  EC2
-}
 
 export const KeyType = 1
 export const KeyAlg = 3
-export const KeyCurve = -1
-
-export const Epk = {
-  Kty: KeyType,
-  Crv: KeyCurve,
-  Alg: KeyAlg
-}
+export const KeyId = 2
 
 export const Key = {
   Kty: KeyType,
-  Crv: KeyCurve,
-  Alg: KeyAlg
+  Alg: KeyAlg,
+  Kid: KeyId
+}
+
+export const Epk = {
+  ...Key
+}
+
+export const KeyTypes = {
+  EC2: 2
+}
+
+export const EC2 = {
+  ...Key,
+  Crv: -1,
+  X: -2,
+  Y: -3,
+  D: -4
 }
 
 export const Curves = {

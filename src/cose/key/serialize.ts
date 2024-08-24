@@ -5,7 +5,7 @@ import { CoseKey } from '.'
 
 export const serialize = <T>(key: JWK | CoseKey) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  if ((key as any).kty) {
+  if ((key as JWK).kty) {
     return JSON.stringify(key, null, 2)
   }
   return encode(key)

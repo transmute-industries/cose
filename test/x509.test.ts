@@ -9,7 +9,8 @@ it('sign and verify with x5t and key resolver', async () => {
     iss: 'vendor.example',
     sub: 'vendor.example',
     nbf: moment().toISOString(), // now
-    exp: moment().add(5, 'minutes').toISOString() // in 5 minutes
+    exp: moment().add(5, 'minutes').toISOString(), // in 5 minutes
+    serial: "01"
   })
   // {
   //   "public": "-----BEGIN CERTIFICATE-----\nMIIBSDC...t4fdL0yLEskA7M=\n-----END CERTIFICATE-----",

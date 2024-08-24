@@ -1,27 +1,24 @@
 import { base64url, calculateJwkThumbprint } from "jose";
 import { CoseKey } from ".";
 
-
-import { IANACOSEAlgorithms } from '../algorithms';
 import { IANACOSEEllipticCurves } from '../elliptic-curves';
 
-const algorithms = Object.values(IANACOSEAlgorithms)
 const curves = Object.values(IANACOSEEllipticCurves)
 
 import { formatJwk } from "./formatJwk";
+import { iana } from "../../iana";
+import { EC2, Key, KeyTypes } from "../Params";
 
 export const convertCoseKeyToJsonWebKey = async <T>(coseKey: CoseKey): Promise<T> => {
-  const kty = coseKey.get(1) as number
-  const kid = coseKey.get(2)
-  const alg = coseKey.get(3)
-  const crv = coseKey.get(-1)
-  // kty EC, kty: EK
-  if (![2, 5].includes(kty)) {
+  const kty = coseKey.get(Key.Kty) as number
+  // kty EC2
+  if (![KeyTypes.EC2].includes(kty)) {
     throw new Error('This library requires does not support the given key type')
   }
-  const foundAlgorithm = algorithms.find((param) => {
-    return param.Value === `${alg}`
-  })
+  const kid = coseKey.get(Key.Kid)
+  const alg = coseKey.get(Key.Alg)
+  const crv = coseKey.get(EC2.Crv)
+  const foundAlgorithm = iana["COSE Algorithms"].getByValue(alg as number)
   if (!foundAlgorithm) {
     throw new Error('This library requires keys to use fully specified algorithms')
   }
@@ -36,9 +33,9 @@ export const convertCoseKeyToJsonWebKey = async <T>(coseKey: CoseKey): Promise<T
     alg: foundAlgorithm.Name,
     crv: foundCurve.Name
   } as any
-  const x = coseKey.get(-2) as any
-  const y = coseKey.get(-3) as any
-  const d = coseKey.get(-4) as any
+  const x = coseKey.get(EC2.X) as any
+  const y = coseKey.get(EC2.Y) as any
+  const d = coseKey.get(EC2.D) as any
   if (x) {
     jwk.x = base64url.encode(x)
   }

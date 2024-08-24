@@ -3,14 +3,12 @@ import { base64url } from 'jose'
 import { toArrayBuffer } from '../../cbor'
 
 import { IANACOSEKeyCommonParameters } from '../key-common-parameters';
-import { IANACOSEAlgorithms } from '../algorithms';
 import { IANACOSEKeyTypeParameters, IANACOSEKeyTypeParameter } from '../key-type-parameters';
 import { IANACOSEKeyTypes } from '../key-type';
 import { IANACOSEEllipticCurves } from '../elliptic-curves';
-import { PublicKeyJwk, SecretKeyJwk } from '../sign1';
+import { PublicKeyJwk, PrivateKeyJwk } from '../sign1';
+import { iana } from '../../iana';
 
-
-const algorithms = Object.values(IANACOSEAlgorithms)
 const commonParams = Object.values(IANACOSEKeyCommonParameters)
 const keyTypeParams = Object.values(IANACOSEKeyTypeParameters)
 const keyTypes = Object.values(IANACOSEKeyTypes)
@@ -40,7 +38,7 @@ const getKeyTypeSpecificLabel = (keyType: 'EC2' | 'OKP', keyTypeParam: string) =
   return label
 }
 
-export const convertJsonWebKeyToCoseKey = async <T>(jwk: PublicKeyJwk | SecretKeyJwk): Promise<T> => {
+export const convertJsonWebKeyToCoseKey = async <T>(jwk: PublicKeyJwk | PrivateKeyJwk): Promise<T> => {
 
   const { kty } = jwk
   let coseKty = `${kty}` as 'OKP' | 'EC' | 'EC2'; // evidence of terrible design.
@@ -82,9 +80,7 @@ export const convertJsonWebKeyToCoseKey = async <T>(jwk: PublicKeyJwk | SecretKe
       }
       case 'alg': {
         if (foundCommonParam) {
-          const foundAlgorithm = algorithms.find((param) => {
-            return param.Name === value
-          })
+          const foundAlgorithm = iana['COSE Algorithms'].getByName(value)
           if (foundAlgorithm) {
             coseKey.set(label, parseInt(foundAlgorithm.Value, 10))
           } else {

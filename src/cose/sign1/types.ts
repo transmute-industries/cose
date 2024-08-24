@@ -8,8 +8,8 @@ export type DecodedCoseSign1 = {
   value: CoseSign1Structure
 }
 
-export type SecretKeyJwk = JsonWebKey & { d: string, kid?: string }
-export type PublicKeyJwk = Omit<SecretKeyJwk, 'd'>
+export type PrivateKeyJwk = JsonWebKey & { d: string, kid?: string }
+export type PublicKeyJwk = Omit<PrivateKeyJwk, 'd'>
 
 export type RequestCoseSign1Signer = {
   remote: {

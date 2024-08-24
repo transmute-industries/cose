@@ -1,4 +1,5 @@
 import { decodeFirstSync, toArrayBuffer, encodeAsync, Tagged, Sign1Tag } from '../../cbor'
+import { Receipts } from '../Params';
 import { CoseSign1Bytes } from "../sign1";
 
 export const add = async (signature: CoseSign1Bytes, receipt: CoseSign1Bytes): Promise<ArrayBuffer> => {
@@ -10,8 +11,8 @@ export const add = async (signature: CoseSign1Bytes, receipt: CoseSign1Bytes): P
     value[1] = new Map();
   }
   // unprotected header
-  const receipts = value[1].get(394) || []; // see  https://datatracker.ietf.org/doc/draft-ietf-scitt-architecture/
+  const receipts = value[1].get(Receipts) || []; // see  https://datatracker.ietf.org/doc/draft-ietf-scitt-architecture/
   receipts.push(receipt)
-  value[1].set(394, receipts)
+  value[1].set(Receipts, receipts)
   return toArrayBuffer(await encodeAsync(new Tagged(Sign1Tag, value), { canonical: true }));
 }
