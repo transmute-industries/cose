@@ -249,15 +249,6 @@ export enum okp_curves {
 }
 
 
-export const reserved_for_private_use_algorithm = {
-  'Name': 'Reserved for Private Use',
-  'Value': NaN,
-  'Description': '',
-  'Capabilities': '',
-  'Change Controller': '',
-  'Reference': 'https://datatracker.ietf.org/doc/RFC9053',
-  'Recommended': 'No'
-}
 export const rs1_algorithm = {
   'Name': 'RS1',
   'Value': -65535,
@@ -699,15 +690,6 @@ export const a128kw_algorithm = {
   'Reference': 'https://datatracker.ietf.org/doc/RFC9053',
   'Recommended': 'Yes'
 }
-export const reserved_algorithm = {
-  'Name': 'Reserved',
-  'Value': 0,
-  'Description': '',
-  'Capabilities': '',
-  'Change Controller': '',
-  'Reference': 'https://datatracker.ietf.org/doc/RFC9053',
-  'Recommended': 'No'
-}
 export const a128gcm_algorithm = {
   'Name': 'A128GCM',
   'Value': 1,
@@ -896,6 +878,242 @@ export const iv_generation_algorithm = {
   'Change Controller': '',
   'Reference': 'https://datatracker.ietf.org/doc/RFC9053',
   'Recommended': 'No'
+}
+
+
+export const delegated_to_the_cose_header_algorithm_parameters_registry_algorithm = {
+  'Name': 'delegated to the COSE Header Algorithm Parameters registry',
+  'Label': -65536,
+  'Value Type': '',
+  'Value Registry': '',
+  'Change Controller': 'undefined',
+  'Description': "",
+  'Reference': ''
+}
+export const alg_algorithm = {
+  'Name': 'alg',
+  'Label': 1,
+  'Value Type': 'int / tstr',
+  'Value Registry': 'COSE Algorithms registry',
+  'Change Controller': 'undefined',
+  'Description': "Cryptographic algorithm to use",
+  'Reference': 'https://datatracker.ietf.org/doc/RFC9052'
+}
+export const crit_algorithm = {
+  'Name': 'crit',
+  'Label': 2,
+  'Value Type': '[+ label]',
+  'Value Registry': 'COSE Header Parameters registry',
+  'Change Controller': 'undefined',
+  'Description': "Critical headers to be understood",
+  'Reference': 'https://datatracker.ietf.org/doc/RFC9052'
+}
+export const content_type_algorithm = {
+  'Name': 'content type',
+  'Label': 3,
+  'Value Type': 'tstr / uint',
+  'Value Registry': '[COAP Content-Formats] or [Media Types] registry',
+  'Change Controller': 'undefined',
+  'Description': "Content type of the payload",
+  'Reference': 'https://datatracker.ietf.org/doc/RFC9052'
+}
+export const kid_algorithm = {
+  'Name': 'kid',
+  'Label': 4,
+  'Value Type': 'bstr',
+  'Value Registry': '',
+  'Change Controller': 'undefined',
+  'Description': "Key identifier",
+  'Reference': 'https://datatracker.ietf.org/doc/RFC9052'
+}
+export const iv_algorithm = {
+  'Name': 'IV',
+  'Label': 5,
+  'Value Type': 'bstr',
+  'Value Registry': '',
+  'Change Controller': 'undefined',
+  'Description': "Full Initialization Vector",
+  'Reference': 'https://datatracker.ietf.org/doc/RFC9052'
+}
+export const partial_iv_algorithm = {
+  'Name': 'Partial IV',
+  'Label': 6,
+  'Value Type': 'bstr',
+  'Value Registry': '',
+  'Change Controller': 'undefined',
+  'Description': "Partial Initialization Vector",
+  'Reference': 'https://datatracker.ietf.org/doc/RFC9052'
+}
+export const counter_signature_algorithm = {
+  'Name': 'counter signature',
+  'Label': 7,
+  'Value Type': 'COSE_Signature / [+ COSE_Signature ]',
+  'Value Registry': '',
+  'Change Controller': 'undefined',
+  'Description': "CBOR-encoded signature structure (Deprecated by [RFC9338])",
+  'Reference': 'https://datatracker.ietf.org/doc/RFC8152'
+}
+export const countersignature0_algorithm = {
+  'Name': 'CounterSignature0',
+  'Label': 9,
+  'Value Type': 'bstr',
+  'Value Registry': '',
+  'Change Controller': 'undefined',
+  'Description': "Counter signature with implied signer and headers (Deprecated by [RFC9338])",
+  'Reference': 'https://datatracker.ietf.org/doc/RFC8152'
+}
+export const kid_context_algorithm = {
+  'Name': 'kid context',
+  'Label': 10,
+  'Value Type': 'bstr',
+  'Value Registry': '',
+  'Change Controller': 'undefined',
+  'Description': "Identifies the context for the key identifier",
+  'Reference': 'https://datatracker.ietf.org/doc/RFC8613, Section 5.1'
+}
+export const countersignature_version_2_algorithm = {
+  'Name': 'Countersignature version 2',
+  'Label': 11,
+  'Value Type': 'COSE_Countersignature / [+ COSE_Countersignature]',
+  'Value Registry': '',
+  'Change Controller': 'undefined',
+  'Description': "V2 countersignature attribute",
+  'Reference': 'https://datatracker.ietf.org/doc/RFC9338'
+}
+export const countersignature0_version_2_algorithm = {
+  'Name': 'Countersignature0 version 2',
+  'Label': 12,
+  'Value Type': 'COSE_Countersignature0',
+  'Value Registry': '',
+  'Change Controller': 'undefined',
+  'Description': "V2 Abbreviated Countersignature",
+  'Reference': 'https://datatracker.ietf.org/doc/RFC9338'
+}
+export const kcwt_algorithm = {
+  'Name': 'kcwt',
+  'Label': 13,
+  'Value Type': 'COSE_Messages',
+  'Value Registry': '',
+  'Change Controller': 'undefined',
+  'Description': "A CBOR Web Token (CWT) containing a COSE_Key in a 'cnf' claim and possibly other claims. CWT is defined in [RFC8392]. COSE_Messages is defined in [RFC9052].",
+  'Reference': 'https://datatracker.ietf.org/doc/RFC9528'
+}
+export const kccs_algorithm = {
+  'Name': 'kccs',
+  'Label': 14,
+  'Value Type': 'map',
+  'Value Registry': '',
+  'Change Controller': 'undefined',
+  'Description': "A CWT Claims Set (CCS) containing a COSE_Key in a 'cnf' claim and possibly other claims. CCS is defined in [RFC8392].",
+  'Reference': 'https://datatracker.ietf.org/doc/RFC9528'
+}
+export const cwt_claims_algorithm = {
+  'Name': 'CWT Claims',
+  'Label': 15,
+  'Value Type': 'map',
+  'Value Registry': 'map keys in [CWT Claims]',
+  'Change Controller': 'undefined',
+  'Description': "Location for CWT Claims in COSE Header Parameters.",
+  'Reference': 'https://datatracker.ietf.org/doc/RFC9597, Section 2'
+}
+export const typ__type__algorithm = {
+  'Name': 'typ (type)',
+  'Label': 16,
+  'Value Type': 'uint / tstr',
+  'Value Registry': '[COAP Content-Formats] or [Media Types] registry',
+  'Change Controller': 'undefined',
+  'Description': "Content type of the complete COSE object",
+  'Reference': 'https://datatracker.ietf.org/doc/RFC9596, Section 2'
+}
+export const c5t_algorithm = {
+  'Name': 'c5t',
+  'Label': 22,
+  'Value Type': 'COSE_CertHash',
+  'Value Registry': '',
+  'Change Controller': 'undefined',
+  'Description': "Hash of a C509Certificate (TEMPORARY - registered 2024-03-11, expires 2025-03-11)",
+  'Reference': '[draft-ietf-cose-cbor-encoded-cert-09]'
+}
+export const c5u_algorithm = {
+  'Name': 'c5u',
+  'Label': 23,
+  'Value Type': 'uri',
+  'Value Registry': '',
+  'Change Controller': 'undefined',
+  'Description': "URI pointing to a COSE_C509 containing a ordered chain of certificates (TEMPORARY - registered 2024-03-11, expires 2025-03-11)",
+  'Reference': '[draft-ietf-cose-cbor-encoded-cert-09]'
+}
+export const c5b_algorithm = {
+  'Name': 'c5b',
+  'Label': 24,
+  'Value Type': 'COSE_C509',
+  'Value Registry': '',
+  'Change Controller': 'undefined',
+  'Description': "An unordered bag of C509 certificates (TEMPORARY - registered 2024-03-11, expires 2025-03-11)",
+  'Reference': '[draft-ietf-cose-cbor-encoded-cert-09]'
+}
+export const c5c_algorithm = {
+  'Name': 'c5c',
+  'Label': 25,
+  'Value Type': 'COSE_C509',
+  'Value Registry': '',
+  'Change Controller': 'undefined',
+  'Description': "An ordered chain of C509 certificates (TEMPORARY - registered 2024-03-11, expires 2025-03-11)",
+  'Reference': '[draft-ietf-cose-cbor-encoded-cert-09]'
+}
+export const x5bag_algorithm = {
+  'Name': 'x5bag',
+  'Label': 32,
+  'Value Type': 'COSE_X509',
+  'Value Registry': '',
+  'Change Controller': 'undefined',
+  'Description': "An unordered bag of X.509 certificates",
+  'Reference': 'https://datatracker.ietf.org/doc/RFC9360'
+}
+export const x5chain_algorithm = {
+  'Name': 'x5chain',
+  'Label': 33,
+  'Value Type': 'COSE_X509',
+  'Value Registry': '',
+  'Change Controller': 'undefined',
+  'Description': "An ordered chain of X.509 certificates",
+  'Reference': 'https://datatracker.ietf.org/doc/RFC9360'
+}
+export const x5t_algorithm = {
+  'Name': 'x5t',
+  'Label': 34,
+  'Value Type': 'COSE_CertHash',
+  'Value Registry': '',
+  'Change Controller': 'undefined',
+  'Description': "Hash of an X.509 certificate",
+  'Reference': 'https://datatracker.ietf.org/doc/RFC9360'
+}
+export const x5u_algorithm = {
+  'Name': 'x5u',
+  'Label': 35,
+  'Value Type': 'uri',
+  'Value Registry': '',
+  'Change Controller': 'undefined',
+  'Description': "URI pointing to an X.509 certificate",
+  'Reference': 'https://datatracker.ietf.org/doc/RFC9360'
+}
+export const cuphnonce_algorithm = {
+  'Name': 'CUPHNonce',
+  'Label': 256,
+  'Value Type': 'bstr',
+  'Value Registry': '',
+  'Change Controller': 'undefined',
+  'Description': "Challenge Nonce",
+  'Reference': '[FIDO Device Onboard Specification]'
+}
+export const cuphownerpubkey_algorithm = {
+  'Name': 'CUPHOwnerPubKey',
+  'Label': 257,
+  'Value Type': 'array',
+  'Value Registry': '',
+  'Change Controller': 'undefined',
+  'Description': "Public Key",
+  'Reference': '[FIDO Device Onboard Specification]'
 }
 
 export const okp_crv_parameter = {
@@ -1258,8 +1476,12 @@ export const label_to_curve = new Map([[1,"P-256"],[2,"P-384"],[3,"P-521"],[8,"s
 export const curve_to_label = new Map([...label_to_curve.entries()].map((e: any) => e.reverse())) as Map<string, number>
 
 // alg
-export const labels_to_algorithms = new Map([[null,"Reserved for Private Use"],[-65535,"RS1"],[-65534,"A128CTR"],[-65533,"A192CTR"],[-65532,"A256CTR"],[-65531,"A128CBC"],[-65530,"A192CBC"],[-65529,"A256CBC"],[-260,"WalnutDSA"],[-259,"RS512"],[-258,"RS384"],[-257,"RS256"],[-47,"ES256K"],[-46,"HSS-LMS"],[-45,"SHAKE256"],[-44,"SHA-512"],[-43,"SHA-384"],[-42,"RSAES-OAEP w/ SHA-512"],[-41,"RSAES-OAEP w/ SHA-256"],[-40,"RSAES-OAEP w/ RFC 8017 default parameters"],[-39,"PS512"],[-38,"PS384"],[-37,"PS256"],[-36,"ES512"],[-35,"ES384"],[-34,"ECDH-SS + A256KW"],[-33,"ECDH-SS + A192KW"],[-32,"ECDH-SS + A128KW"],[-31,"ECDH-ES + A256KW"],[-30,"ECDH-ES + A192KW"],[-29,"ECDH-ES + A128KW"],[-28,"ECDH-SS + HKDF-512"],[-27,"ECDH-SS + HKDF-256"],[-26,"ECDH-ES + HKDF-512"],[-25,"ECDH-ES + HKDF-256"],[-18,"SHAKE128"],[-17,"SHA-512/256"],[-16,"SHA-256"],[-15,"SHA-256/64"],[-14,"SHA-1"],[-13,"direct+HKDF-AES-256"],[-12,"direct+HKDF-AES-128"],[-11,"direct+HKDF-SHA-512"],[-10,"direct+HKDF-SHA-256"],[-8,"EdDSA"],[-7,"ES256"],[-6,"direct"],[-5,"A256KW"],[-4,"A192KW"],[-3,"A128KW"],[0,"Reserved"],[1,"A128GCM"],[2,"A192GCM"],[3,"A256GCM"],[4,"HMAC 256/64"],[5,"HMAC 256/256"],[6,"HMAC 384/384"],[7,"HMAC 512/512"],[10,"AES-CCM-16-64-128"],[11,"AES-CCM-16-64-256"],[12,"AES-CCM-64-64-128"],[13,"AES-CCM-64-64-256"],[14,"AES-MAC 128/64"],[15,"AES-MAC 256/64"],[24,"ChaCha20/Poly1305"],[25,"AES-MAC 128/128"],[26,"AES-MAC 256/128"],[30,"AES-CCM-16-128-128"],[31,"AES-CCM-16-128-256"],[32,"AES-CCM-64-128-128"],[33,"AES-CCM-64-128-256"],[34,"IV-GENERATION"]]) as Map<number, string>
+export const labels_to_algorithms = new Map([[-65535,"RS1"],[-65534,"A128CTR"],[-65533,"A192CTR"],[-65532,"A256CTR"],[-65531,"A128CBC"],[-65530,"A192CBC"],[-65529,"A256CBC"],[-260,"WalnutDSA"],[-259,"RS512"],[-258,"RS384"],[-257,"RS256"],[-47,"ES256K"],[-46,"HSS-LMS"],[-45,"SHAKE256"],[-44,"SHA-512"],[-43,"SHA-384"],[-42,"RSAES-OAEP w/ SHA-512"],[-41,"RSAES-OAEP w/ SHA-256"],[-40,"RSAES-OAEP w/ RFC 8017 default parameters"],[-39,"PS512"],[-38,"PS384"],[-37,"PS256"],[-36,"ES512"],[-35,"ES384"],[-34,"ECDH-SS + A256KW"],[-33,"ECDH-SS + A192KW"],[-32,"ECDH-SS + A128KW"],[-31,"ECDH-ES + A256KW"],[-30,"ECDH-ES + A192KW"],[-29,"ECDH-ES + A128KW"],[-28,"ECDH-SS + HKDF-512"],[-27,"ECDH-SS + HKDF-256"],[-26,"ECDH-ES + HKDF-512"],[-25,"ECDH-ES + HKDF-256"],[-18,"SHAKE128"],[-17,"SHA-512/256"],[-16,"SHA-256"],[-15,"SHA-256/64"],[-14,"SHA-1"],[-13,"direct+HKDF-AES-256"],[-12,"direct+HKDF-AES-128"],[-11,"direct+HKDF-SHA-512"],[-10,"direct+HKDF-SHA-256"],[-8,"EdDSA"],[-7,"ES256"],[-6,"direct"],[-5,"A256KW"],[-4,"A192KW"],[-3,"A128KW"],[1,"A128GCM"],[2,"A192GCM"],[3,"A256GCM"],[4,"HMAC 256/64"],[5,"HMAC 256/256"],[6,"HMAC 384/384"],[7,"HMAC 512/512"],[10,"AES-CCM-16-64-128"],[11,"AES-CCM-16-64-256"],[12,"AES-CCM-64-64-128"],[13,"AES-CCM-64-64-256"],[14,"AES-MAC 128/64"],[15,"AES-MAC 256/64"],[24,"ChaCha20/Poly1305"],[25,"AES-MAC 128/128"],[26,"AES-MAC 256/128"],[30,"AES-CCM-16-128-128"],[31,"AES-CCM-16-128-256"],[32,"AES-CCM-64-128-128"],[33,"AES-CCM-64-128-256"],[34,"IV-GENERATION"]]) as Map<number, string>
 export const algorithms_to_labels = new Map([...labels_to_algorithms.entries()].map((e: any) => e.reverse())) as Map<string, number>
+
+// headers
+export const labels_to_headers = new Map([[-65536,"delegated to the COSE Header Algorithm Parameters registry"],[1,"alg"],[2,"crit"],[3,"content type"],[4,"kid"],[5,"IV"],[6,"Partial IV"],[7,"counter signature"],[9,"CounterSignature0"],[10,"kid context"],[11,"Countersignature version 2"],[12,"Countersignature0 version 2"],[13,"kcwt"],[14,"kccs"],[15,"CWT Claims"],[16,"typ (type)"],[22,"c5t"],[23,"c5u"],[24,"c5b"],[25,"c5c"],[32,"x5bag"],[33,"x5chain"],[34,"x5t"],[35,"x5u"],[256,"CUPHNonce"],[257,"CUPHOwnerPubKey"]]) as Map<number, string>
+export const headers_to_labels = new Map([...labels_to_headers.entries()].map((e: any) => e.reverse())) as Map<string, number>
 
 // okp
 export const labels_to_okp_params = new Map([[1,"kty"],[2,"kid"],[3,"alg"],[4,"key_ops"],[5,"base_iv"],[-1,"crv"],[-2,"x"],[-4,"d"]]) as Map<number, string>

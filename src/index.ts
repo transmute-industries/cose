@@ -4,7 +4,6 @@
 
 
 
-export * from './cose/header-parameters'
 
 import * as key from './cose/key'
 import * as attached from './cose/attached'
@@ -21,10 +20,6 @@ export * from './cose/Params'
 // export * from './cose/encrypt'
 
 import * as cbor from './cbor'
-
 import * as receipt from './cose/receipt'
-
-
 import * as crypto from './crypto'
-
 export { crypto, cbor, key, attached, detached, receipt }
