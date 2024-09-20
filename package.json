@@ -19,7 +19,6 @@
     "coverage": "jest --ci --coverage",
     "lint": "eslint ./src ./test --fix",
     "shove": "git add -A; git commit -m ':rocket:'; git push origin main",
-    "generate:iana:ts": "./scripts/make-iana.sh",
     "iana:assignments": "npx ts-node ./scripts/make-iana-assignments.ts"
   },
   "repository": {
