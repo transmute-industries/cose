@@ -1,137 +1,54 @@
 
 import { base64url } from 'jose'
-import { toArrayBuffer } from '../../cbor'
 
-import { IANACOSEKeyCommonParameters } from '../key-common-parameters';
-import { IANACOSEKeyTypeParameters, IANACOSEKeyTypeParameter } from '../key-type-parameters';
-import { IANACOSEKeyTypes } from '../key-type';
-import { IANACOSEEllipticCurves } from '../elliptic-curves';
-import { PublicKeyJwk, PrivateKeyJwk } from '../sign1';
-import { iana } from '../../iana';
+import { curve_to_label, ec2_params_to_labels, key_type_to_label } from '../../iana/assignments/cose'
 
-const commonParams = Object.values(IANACOSEKeyCommonParameters)
-const keyTypeParams = Object.values(IANACOSEKeyTypeParameters)
-const keyTypes = Object.values(IANACOSEKeyTypes)
-const curves = Object.values(IANACOSEEllipticCurves)
+import { algorithms_to_labels } from '../../iana/requested/cose'
 
-
-const keyTypeParamsByKty = {
-  'OKP': keyTypeParams.filter((p) => p['Key Type'] === '1'),
-  'EC2': keyTypeParams.filter((p) => p['Key Type'] === '2')
-} as Record<'OKP' | 'EC2', IANACOSEKeyTypeParameter[]>
-
-const getKeyTypeSpecificLabel = (keyType: 'EC2' | 'OKP', keyTypeParam: string) => {
-  let label: string | number = keyTypeParam;
-  let foundKeyTypeParam = keyTypeParamsByKty[keyType].find((param) => {
-    return param.Name === keyTypeParam
-  })
-  if (!foundKeyTypeParam) {
-    foundKeyTypeParam = keyTypeParamsByKty[keyType].find((param) => {
-      return param.Name === keyTypeParam
-    })
-  }
-  if (foundKeyTypeParam) {
-    label = parseInt(foundKeyTypeParam.Label, 10)
-  } else {
-    throw new Error(`Unable to find a label for this param (${keyTypeParam}) for the given key type ${keyType}`)
-  }
-  return label
-}
-
-export const convertJsonWebKeyToCoseKey = async <T>(jwk: PublicKeyJwk | PrivateKeyJwk): Promise<T> => {
-
-  const { kty } = jwk
-  let coseKty = `${kty}` as 'OKP' | 'EC' | 'EC2'; // evidence of terrible design.
-  if (coseKty === 'EC') {
-    coseKty = 'EC2'
-  }
-  if (!keyTypeParamsByKty[coseKty]) {
-    throw new Error('Unsupported key type')
-  }
+export const convertJsonWebKeyToCoseKey = async <T>(jwk: any): Promise<T> => {
   const coseKey = new Map();
-
+  const { kty } = jwk
   for (const [key, value] of Object.entries(jwk)) {
-    const foundCommonParam = commonParams.find((param) => {
-      return param.Name === key
-    })
-    let label: string | number = key
-    if (foundCommonParam) {
-      label = parseInt(foundCommonParam.Label, 10)
-    }
-    switch (key) {
-      case 'kty': {
-        const foundKeyType = keyTypes.find((param) => {
-          return param.Name === coseKty
-        })
-        if (foundKeyType) {
-          coseKey.set(label, parseInt(foundKeyType.Value, 10))
-        } else {
-          throw new Error('Unsupported key type: ' + value)
-        }
-        break
-      }
-      case 'kid': {
-        if (foundCommonParam) {
-          coseKey.set(label, value)
-        } else {
-          throw new Error('Expected common parameter was not found in iana registry.')
-        }
-        break
-      }
-      case 'alg': {
-        if (foundCommonParam) {
-          const foundAlgorithm = iana['COSE Algorithms'].getByName(value)
-          if (foundAlgorithm) {
-            coseKey.set(label, parseInt(foundAlgorithm.Value, 10))
-          } else {
-            throw new Error('Expected algorithm was not found in iana registry.')
+    switch (kty) {
+      case 'EC': {
+        switch (key) {
+          case 'kty': {
+            coseKey.set(ec2_params_to_labels.get(key), key_type_to_label.get(value as string))
+            break;
           }
-        } else {
-          throw new Error('Expected common parameter was not found in iana registry.')
+          case 'crv': {
+            coseKey.set(ec2_params_to_labels.get(key), curve_to_label.get(value as string))
+            break;
+          }
+          case 'alg': {
+            const maybeUnknown = algorithms_to_labels.get(value as string) || value as string
+            coseKey.set(ec2_params_to_labels.get(key), maybeUnknown)
+            break;
+          }
+          case 'kid': {
+            coseKey.set(ec2_params_to_labels.get(key), value as string)
+            break;
+          }
+          case 'x':
+          case 'y':
+          case 'd': {
+            // todo check lengths based on curves
+            coseKey.set(ec2_params_to_labels.get(key), Buffer.from(base64url.decode(value as string)))
+            break;
+          }
+          default: {
+            coseKey.set(key, value)
+          }
         }
-        break
-      }
-      case 'crv': {
-        label = getKeyTypeSpecificLabel(coseKty, 'crv')
-        const foundCurve = curves.find((param) => {
-          return param.Name === value
-        })
-        if (foundCurve) {
-          coseKey.set(label, parseInt(foundCurve.Value, 10))
-        } else {
-          throw new Error('Expected curve was not found in iana registry.')
-        }
-        break
-      }
-      case 'x':
-      case 'y':
-      case 'd': {
-        label = getKeyTypeSpecificLabel(coseKty, key)
-        coseKey.set(label, toArrayBuffer(base64url.decode(value as string)))
-        break
-      }
-      case 'x5c': {
-        const items = (value as string[] || []).map((item: string) => {
-          return toArrayBuffer(base64url.decode(item as string))
-        })
-        coseKey.set(label, items)
-        break
-      }
-      case 'x5t#S256': {
-        coseKey.set(label, toArrayBuffer(base64url.decode(value as string)))
-        break
+        break;
       }
       default: {
-        // by default we assume a text label
-        coseKey.set(label, value)
+        coseKey.set(key, value)
       }
     }
   }
-
-
-
-  // TODO: Length checks on x, y, d
   return coseKey as T
 }
 
+// coseKey.set(label, Buffer.from(base64url.decode(value as string)))
 

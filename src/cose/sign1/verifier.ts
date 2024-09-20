@@ -5,14 +5,16 @@ import { RequestCoseSign1Verifier, RequestCoseSign1Verify } from './types'
 import { DecodedToBeSigned, ProtectedHeaderMap } from './types'
 import rawVerifier from '../../crypto/verifier'
 
-import { iana } from '../../iana'
+
 import { Protected } from '../Params'
+
+import { algorithms_to_labels } from '../../iana/requested/cose'
 
 const verifier = ({ resolver }: RequestCoseSign1Verifier) => {
   return {
     verify: async ({ coseSign1, externalAAD }: RequestCoseSign1Verify): Promise<ArrayBuffer> => {
       const publicKeyJwk = await resolver.resolve(coseSign1)
-      const algInPublicKey = parseInt(`${iana['COSE Algorithms'].getByName(`${publicKeyJwk.alg}`)?.Value}`, 10)
+      const algInPublicKey = algorithms_to_labels.get(publicKeyJwk.alg as string)
       const ecdsa = rawVerifier({ publicKeyJwk })
       const obj = await decodeFirst(coseSign1);
       const signatureStructure = obj.value;

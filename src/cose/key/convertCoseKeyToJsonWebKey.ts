@@ -1,37 +1,33 @@
 import { base64url, calculateJwkThumbprint } from "jose";
 import { CoseKey } from ".";
 
-import { IANACOSEEllipticCurves } from '../elliptic-curves';
-
-const curves = Object.values(IANACOSEEllipticCurves)
-
 import { formatJwk } from "./formatJwk";
-import { iana } from "../../iana";
+
 import { EC2, Key, KeyTypes } from "../Params";
 
+import * as iana2 from '../../iana/assignments/cose'
+
+import { labels_to_algorithms } from "../../iana/requested/cose";
+
 export const convertCoseKeyToJsonWebKey = async <T>(coseKey: CoseKey): Promise<T> => {
+  // todo refactor...
   const kty = coseKey.get(Key.Kty) as number
   // kty EC2
   if (![KeyTypes.EC2].includes(kty)) {
     throw new Error('This library requires does not support the given key type')
   }
   const kid = coseKey.get(Key.Kid)
-  const alg = coseKey.get(Key.Alg)
+  const algLabel = coseKey.get(Key.Alg)
   const crv = coseKey.get(EC2.Crv)
-  const foundAlgorithm = iana["COSE Algorithms"].getByValue(alg as number)
-  if (!foundAlgorithm) {
-    throw new Error('This library requires keys to use fully specified algorithms')
-  }
-  const foundCurve = curves.find((param) => {
-    return param.Value === `${crv}`
-  })
-  if (!foundCurve) {
+  const algName = labels_to_algorithms.get(algLabel as number)
+  const crv2 = iana2.label_to_curve.get(crv as number)
+  if (!crv2) {
     throw new Error('This library requires does not support the given curve')
   }
   const jwk = {
     kty: 'EC',
-    alg: foundAlgorithm.Name,
-    crv: foundCurve.Name
+    alg: algName,
+    crv: crv2
   } as any
   const x = coseKey.get(EC2.X) as any
   const y = coseKey.get(EC2.Y) as any

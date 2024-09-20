@@ -32,7 +32,10 @@ const helpTestSignAndVerify = async (privateKey: cose.key.CoseKey) => {
 
 // https://datatracker.ietf.org/doc/draft-ietf-jose-fully-specified-algorithms/
 
-const algorithms = ["ESP256", "ESP384"] as CoseSignatureAlgorithms[]
+const algorithms = [
+  "ESP256",
+  "ESP384"
+] as CoseSignatureAlgorithms[]
 
 algorithms.forEach((alg) => {
   it(alg, async () => {

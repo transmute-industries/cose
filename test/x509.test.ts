@@ -2,6 +2,7 @@ import fs from 'fs'
 import moment from 'moment'
 import * as jose from 'jose'
 import * as cose from '../src'
+import { labels_to_algorithms } from '../src/iana/requested/cose'
 
 it('sign and verify with x5t and key resolver', async () => {
   const cert = await cose.certificate.root({
@@ -46,15 +47,10 @@ it('sign and verify with x5t and key resolver', async () => {
     // normally this would be a trust store lookup
     if (hashAlgorith === rootCertificateThumbprint[0]) {
       if (Buffer.from(hash).toString('hex') === Buffer.from(rootCertificateThumbprint[1]).toString('hex')) {
-        const foundAlgorithm = Object.values(cose.IANACOSEAlgorithms).find((entry) => {
-          return entry.Value === `${alg}`
-        })
-        if (!foundAlgorithm) {
-          throw new Error('Could not find algorithm in registry for: ' + alg)
-        }
+        const algName = labels_to_algorithms.get(alg) as any
         // could do extra certificate policy validation here...
-        const publicKeyJwk = await jose.exportJWK(await jose.importX509(cert.public, foundAlgorithm.Name))
-        publicKeyJwk.alg = foundAlgorithm.Name
+        const publicKeyJwk = await jose.exportJWK(await jose.importX509(cert.public, algName))
+        publicKeyJwk.alg = algName
         return publicKeyJwk
       }
     }
