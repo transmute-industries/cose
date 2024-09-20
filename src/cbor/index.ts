@@ -1,3 +1,4 @@
+export * from './diag'
 
 import { encodeCanonical, encode, decode, encodeAsync, decodeFirst, decodeFirstSync, diagnose, Tagged } from 'cbor-web'
 

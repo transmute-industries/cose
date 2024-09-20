@@ -1,6 +1,6 @@
 {
   "exclude": [
-    "test",
+    "tests",
     "attic",
     "examples"
   ],
