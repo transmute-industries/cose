@@ -1,15 +1,15 @@
 
 import { base64url } from 'jose'
-
 import { curve_to_label, ec2_params_to_labels, key_type_to_label } from '../../iana/assignments/cose'
-
 import { algorithms_to_labels } from '../../iana/requested/cose'
 
-export const convertJsonWebKeyToCoseKey = async <T>(jwk: any): Promise<T> => {
+export const convertJsonWebKeyToCoseKey = async <T>(jwk: Record<string, any>): Promise<T> => {
   const coseKey = new Map();
   const { kty } = jwk
   for (const [key, value] of Object.entries(jwk)) {
     switch (kty) {
+      // we should be used iana namespace here
+      // instead of magic strings
       case 'EC': {
         switch (key) {
           case 'kty': {
@@ -49,6 +49,4 @@ export const convertJsonWebKeyToCoseKey = async <T>(jwk: any): Promise<T> => {
   }
   return coseKey as T
 }
-
-// coseKey.set(label, Buffer.from(base64url.decode(value as string)))
 

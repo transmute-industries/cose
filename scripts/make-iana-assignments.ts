@@ -244,7 +244,7 @@ export const ${ktyName}_${paramName}_parameter = {
         keyParams += '}\n\n'
       }
 
-      keyParams += `\nexport type any_cose_key = {\n`
+      keyParams += `\nexport type any_cose_key = Map<any, any> & {\n`
       for (const entry of Object.entries(commonKeyParams)) {
         const [label, [tag, type]] = entry as any
         if (label === '0') {

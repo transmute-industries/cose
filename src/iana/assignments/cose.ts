@@ -1408,7 +1408,7 @@ export enum walnutdsa {
 }
 
 
-export type any_cose_key = {
+export type any_cose_key = Map<any, any> & {
   get(k: cose_key.kid): Buffer
   get(k: cose_key.alg): string | number
   get(k: cose_key.key_ops): [ (string|number)]

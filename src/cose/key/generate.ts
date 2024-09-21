@@ -30,10 +30,10 @@ export const generate = async <T>(alg: CoseSignatureAlgorithms, contentType: Pri
   }
   if (contentType === 'application/cose-key') {
     delete privateKeyJwk.kid;
-    const secretKeyCoseKey = await convertJsonWebKeyToCoseKey<CoseKey>(privateKeyJwk)
-    const coseKeyThumbprint = await thumbprint.calculateCoseKeyThumbprint(secretKeyCoseKey)
-    secretKeyCoseKey.set(Key.Kid, coseKeyThumbprint)
-    return secretKeyCoseKey as T
+    const privateKeyCoseKey = await convertJsonWebKeyToCoseKey<CoseKey>(privateKeyJwk)
+    const coseKeyThumbprint = await thumbprint.calculateCoseKeyThumbprint(privateKeyCoseKey)
+    privateKeyCoseKey.set(Key.Kid, coseKeyThumbprint)
+    return privateKeyCoseKey as T
   }
   throw new Error('Unsupported content type.')
 }

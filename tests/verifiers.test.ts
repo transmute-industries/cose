@@ -3,9 +3,9 @@ import fs from 'fs'
 import * as cose from '../src'
 
 it('verify multiple receipts', async () => {
-  const issuerSecretKey = await cose.key.generate<cose.key.CoseKey>('ES256', 'application/cose-key')
-  const notary1SecretKey = await cose.key.generate<cose.key.CoseKey>('ES256', 'application/cose-key')
-  const notary2SecretKey = await cose.key.generate<cose.key.CoseKey>('ES256', 'application/cose-key')
+  const issuerSecretKey = await cose.key.generate<cose.ec2_key>('ES256', 'application/cose-key')
+  const notary1SecretKey = await cose.key.generate<cose.ec2_key>('ES256', 'application/cose-key')
+  const notary2SecretKey = await cose.key.generate<cose.ec2_key>('ES256', 'application/cose-key')
   const issuerSigner = cose.detached.signer({
     remote: cose.crypto.signer({
       privateKeyJwk: await cose.key.convertCoseKeyToJsonWebKey<cose.PrivateKeyJwk>(issuerSecretKey)

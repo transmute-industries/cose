@@ -4,8 +4,8 @@ import { CoseSignatureAlgorithms } from '../src/cose/key'
 
 const message = '💣 test ✨ mesage 🔥'
 
-const helpTestSignAndVerify = async (privateKey: cose.key.CoseKey) => {
-  const publicKey = await cose.key.extractPublicCoseKey(privateKey)
+const helpTestSignAndVerify = async (privateKey: cose.any_cose_key) => {
+  const publicKey = await cose.key.extractPublicCoseKey<cose.any_cose_key>(privateKey)
   expect(new TextDecoder().decode(await cose.attached
     .verifier({
       resolver: {
@@ -39,7 +39,7 @@ const algorithms = [
 
 algorithms.forEach((alg) => {
   it(alg, async () => {
-    const privateKey = await cose.key.generate<cose.key.CoseKey>(alg, 'application/cose-key')
+    const privateKey = await cose.key.generate<cose.ec2_key>(alg, 'application/cose-key')
     await helpTestSignAndVerify(privateKey)
   })
 })

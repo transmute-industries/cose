@@ -17,5 +17,3 @@ it('detached payload cose sign1', async () => {
   // expect(diag).toBe(output.toString())
 })
 
-
-// Move this to transmute/cose

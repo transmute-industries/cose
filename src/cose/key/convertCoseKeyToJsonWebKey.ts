@@ -1,51 +1,49 @@
-import { base64url, calculateJwkThumbprint } from "jose";
-import { CoseKey } from ".";
-
+import { base64url } from "jose";
 import { formatJwk } from "./formatJwk";
-
-import { EC2, Key, KeyTypes } from "../Params";
-
-import * as iana2 from '../../iana/assignments/cose'
-
+import { labels_to_ec2_params, ec2, label_to_key_type, any_cose_key, label_to_curve } from '../../iana/assignments/cose'
 import { labels_to_algorithms } from "../../iana/requested/cose";
 
-export const convertCoseKeyToJsonWebKey = async <T>(coseKey: CoseKey): Promise<T> => {
-  // todo refactor...
-  const kty = coseKey.get(Key.Kty) as number
-  // kty EC2
-  if (![KeyTypes.EC2].includes(kty)) {
-    throw new Error('This library requires does not support the given key type')
+export const convertCoseKeyToJsonWebKey = async <T>(key: any_cose_key): Promise<T> => {
+
+  const jwk = {} as Record<string, any>
+  const ktyLabel = key.get(ec2.kty)
+  const kty = labels_to_ec2_params.get(ktyLabel)
+  if (!kty) {
+    throw new Error('Unknown cose key type: ' + ktyLabel)
   }
-  const kid = coseKey.get(Key.Kid)
-  const algLabel = coseKey.get(Key.Alg)
-  const crv = coseKey.get(EC2.Crv)
-  const algName = labels_to_algorithms.get(algLabel as number)
-  const crv2 = iana2.label_to_curve.get(crv as number)
-  if (!crv2) {
-    throw new Error('This library requires does not support the given curve')
-  }
-  const jwk = {
-    kty: 'EC',
-    alg: algName,
-    crv: crv2
-  } as any
-  const x = coseKey.get(EC2.X) as any
-  const y = coseKey.get(EC2.Y) as any
-  const d = coseKey.get(EC2.D) as any
-  if (x) {
-    jwk.x = base64url.encode(x)
-  }
-  if (y) {
-    jwk.y = base64url.encode(y)
-  }
-  if (d) {
-    jwk.d = base64url.encode(d)
-  }
-  // TODO check lengths for x, y, d
-  if (kid && typeof kid === 'string') {
-    jwk.kid = kid
-  } else {
-    jwk.kid = await calculateJwkThumbprint(jwk)
+  for (const [label, value] of key.entries()) {
+    switch (label) {
+      case ec2.kty: {
+        const key = labels_to_ec2_params.get(label)
+        jwk[`${key}`] = label_to_key_type.get(value)
+        break
+      }
+      case ec2.kid: {
+        const key = labels_to_ec2_params.get(label)
+        jwk[`${key}`] = value
+        break
+      }
+      case ec2.alg: {
+        const key = labels_to_ec2_params.get(label)
+        jwk[`${key}`] = labels_to_algorithms.get(value)
+        break
+      }
+      case ec2.crv: {
+        const key = labels_to_ec2_params.get(label)
+        jwk[`${key}`] = label_to_curve.get(value)
+        break
+      }
+      case ec2.x:
+      case ec2.y:
+      case ec2.d: {
+        const key = labels_to_ec2_params.get(label)
+        jwk[`${key}`] = base64url.encode(value)
+        break
+      }
+      default: {
+        jwk[label] = value
+      }
+    }
   }
   return formatJwk(jwk) as T
 }
