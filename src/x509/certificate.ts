@@ -2,9 +2,9 @@ import { exportJWK, exportPKCS8, importPKCS8 } from 'jose';
 import { PublicKeyJwk } from "../cose/sign1"
 import * as x509 from "@peculiar/x509";
 import { CoseSignatureAlgorithms } from '../cose/key';
-import { PrivateKeyJwk, detached, RequestCoseSign1VerifyDetached } from '..';
+import { detached, RequestCoseSign1VerifyDetached } from '..';
 import { crypto } from '..';
-
+import { JWK } from 'jose'
 import * as cose from '../iana/assignments/cose';
 import { labels_to_algorithms } from '../iana/requested/cose';
 
@@ -99,7 +99,7 @@ const root = async (req: RequestRootCertificate): Promise<RootCertificateRespons
 
 const pkcs8Signer = async ({ alg, privateKeyPKCS8 }: { alg: number, privateKeyPKCS8: string }) => {
   const algName = labels_to_algorithms.get(alg)
-  const privateKeyJwk = await exportJWK(await importPKCS8(privateKeyPKCS8, `${algName}`)) as PrivateKeyJwk
+  const privateKeyJwk = await exportJWK(await importPKCS8(privateKeyPKCS8, `${algName}`)) as JWK
   privateKeyJwk.alg = algName;
   return detached.signer({
     remote: crypto.signer({

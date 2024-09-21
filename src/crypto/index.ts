@@ -2,4 +2,7 @@ import signer from "./signer";
 
 import verifier from "./verifier";
 
-export { signer, verifier }
+import * as key from './key'
+
+
+export { signer, verifier, key }

@@ -2,6 +2,9 @@
 import * as cose from '../src'
 import { CoseSignatureAlgorithms } from '../src/cose/key'
 
+
+import { JWK } from 'jose'
+
 const message = '💣 test ✨ mesage 🔥'
 
 const helpTestSignAndVerify = async (privateKey: cose.any_cose_key) => {
@@ -18,7 +21,7 @@ const helpTestSignAndVerify = async (privateKey: cose.any_cose_key) => {
       coseSign1: await cose.attached
         .signer({
           remote: cose.crypto.signer({
-            privateKeyJwk: await cose.key.convertCoseKeyToJsonWebKey<cose.PrivateKeyJwk>(privateKey)
+            privateKeyJwk: await cose.key.convertCoseKeyToJsonWebKey<JWK>(privateKey)
           })
         })
         .sign({

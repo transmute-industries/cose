@@ -2,25 +2,27 @@ import fs from 'fs'
 
 import * as cose from '../src'
 
+import { JWK } from 'jose'
+
 it('verify multiple receipts', async () => {
   const issuerSecretKey = await cose.key.generate<cose.ec2_key>('ES256', 'application/cose-key')
   const notary1SecretKey = await cose.key.generate<cose.ec2_key>('ES256', 'application/cose-key')
   const notary2SecretKey = await cose.key.generate<cose.ec2_key>('ES256', 'application/cose-key')
   const issuerSigner = cose.detached.signer({
     remote: cose.crypto.signer({
-      privateKeyJwk: await cose.key.convertCoseKeyToJsonWebKey<cose.PrivateKeyJwk>(issuerSecretKey)
+      privateKeyJwk: await cose.key.convertCoseKeyToJsonWebKey<JWK>(issuerSecretKey)
     })
 
   })
   const notary1Signer = cose.detached.signer({
     remote: cose.crypto.signer({
-      privateKeyJwk: await cose.key.convertCoseKeyToJsonWebKey<cose.PrivateKeyJwk>(notary1SecretKey)
+      privateKeyJwk: await cose.key.convertCoseKeyToJsonWebKey<JWK>(notary1SecretKey)
     })
 
   })
   const notary2Signer = cose.detached.signer({
     remote: cose.crypto.signer({
-      privateKeyJwk: await cose.key.convertCoseKeyToJsonWebKey<cose.PrivateKeyJwk>(notary2SecretKey)
+      privateKeyJwk: await cose.key.convertCoseKeyToJsonWebKey<JWK>(notary2SecretKey)
     })
   })
   const issuerCkt = await cose.key.thumbprint.calculateCoseKeyThumbprintUri(issuerSecretKey)
