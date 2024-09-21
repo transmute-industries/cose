@@ -12,9 +12,9 @@ export type PrivateKeyContentType = ContentTypeOfCoseKey | ContentTypeOfJsonWebK
 import { convertJsonWebKeyToCoseKey } from './convertJsonWebKeyToCoseKey'
 import { thumbprint } from "./thumbprint"
 import { formatJwk } from './formatJwk'
-import { Key } from "../Params"
+
 import { less_specified } from "../../iana/requested/cose"
-import { any_cose_key } from "../../iana/assignments/cose"
+import * as cose from "../../iana/assignments/cose"
 
 export const generate = async <T>(alg: CoseSignatureAlgorithms, contentType: PrivateKeyContentType = 'application/jwk+json'): Promise<T> => {
   const cryptoKeyPair = await generateKeyPair(
@@ -30,9 +30,9 @@ export const generate = async <T>(alg: CoseSignatureAlgorithms, contentType: Pri
   }
   if (contentType === 'application/cose-key') {
     delete privateKeyJwk.kid;
-    const privateKeyCoseKey = await convertJsonWebKeyToCoseKey<any_cose_key>(privateKeyJwk)
+    const privateKeyCoseKey = await convertJsonWebKeyToCoseKey<cose.any_cose_key>(privateKeyJwk)
     const coseKeyThumbprint = await thumbprint.calculateCoseKeyThumbprint(privateKeyCoseKey)
-    privateKeyCoseKey.set(Key.Kid, coseKeyThumbprint)
+    privateKeyCoseKey.set(cose.ec2.kid, coseKeyThumbprint)
     return privateKeyCoseKey as T
   }
   throw new Error('Unsupported content type.')

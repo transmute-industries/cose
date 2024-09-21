@@ -117,21 +117,6 @@ export const KeyType = 1
 export const KeyAlg = 3
 export const KeyId = 2
 
-export const Key = {
-  Kty: KeyType,
-  Alg: KeyAlg,
-  Kid: KeyId
-}
-
-export const Epk = {
-  ...Key
-}
-
-export const KeyTypes = {
-  EC2: 2
-}
-
-
 
 export const COSE_Encrypt0 = 16
 export const COSE_Sign1 = 18
