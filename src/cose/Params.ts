@@ -131,17 +131,7 @@ export const KeyTypes = {
   EC2: 2
 }
 
-export const EC2 = {
-  ...Key,
-  Crv: -1,
-  X: -2,
-  Y: -3,
-  D: -4
-}
 
-export const Curves = {
-  P256: 1,
-}
 
 export const COSE_Encrypt0 = 16
 export const COSE_Sign1 = 18

@@ -51,7 +51,7 @@ it('public from private', async () => {
   expect(publicKeyJwk).toEqual(expectedPublicKeyJwk)
   const privateKeyCose = await cose.key.generate<cose.ec2_key>('ES256', 'application/cose-key')
   const expectedPublicKeyCose = new Map(privateKeyCose.entries())
-  expectedPublicKeyCose.delete(cose.EC2.D)
+  expectedPublicKeyCose.delete(cose.ec2.d)
   const publicKeyCose = cose.key.publicFromPrivate<cose.ec2_key>(privateKeyCose)
   expect(publicKeyCose).toEqual(expectedPublicKeyCose)
 })

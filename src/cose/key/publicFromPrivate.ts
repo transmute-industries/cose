@@ -1,7 +1,9 @@
 
-import { any_cose_key, ec2_key } from "../../iana/assignments/cose";
-import { EC2, Key, KeyTypes } from "../Params";
+import * as cose from "../../iana/assignments/cose";
+
 import { PrivateKeyJwk } from "../sign1";
+
+
 
 export const extractPublicKeyJwk = (privateKeyJwk: PrivateKeyJwk) => {
   if (privateKeyJwk.kty !== 'EC') {
@@ -12,21 +14,21 @@ export const extractPublicKeyJwk = (privateKeyJwk: PrivateKeyJwk) => {
   return publicKeyJwk
 }
 
-export const extractPublicCoseKey = <T extends any_cose_key | ec2_key>(privateKey: any_cose_key) => {
+export const extractPublicCoseKey = <T extends cose.any_cose_key | cose.ec2_key>(privateKey: cose.any_cose_key) => {
   const publicCoseKeyMap = new Map(privateKey)
-  if (publicCoseKeyMap.get(Key.Kty) !== KeyTypes.EC2) {
+  if (publicCoseKeyMap.get(cose.cose_key.kty) !== cose.cose_key_type.ec2) {
     throw new Error('Only EC2 keys are supported')
   }
-  if (!publicCoseKeyMap.get(EC2.D)) {
+  if (!publicCoseKeyMap.get(cose.ec2.d)) {
     throw new Error('privateKey is not a secret / private key (has no d / -4)')
   }
-  publicCoseKeyMap.delete(EC2.D);
+  publicCoseKeyMap.delete(cose.ec2.d);
   return publicCoseKeyMap as T
 }
 
-export const publicFromPrivate = <T>(privateKey: PrivateKeyJwk | any_cose_key) => {
+export const publicFromPrivate = <T>(privateKey: PrivateKeyJwk | cose.any_cose_key) => {
   if ((privateKey as PrivateKeyJwk).kty) {
     return extractPublicKeyJwk(privateKey as PrivateKeyJwk) as T
   }
-  return extractPublicCoseKey(privateKey as any_cose_key) as T
+  return extractPublicCoseKey(privateKey as cose.any_cose_key) as T
 }
