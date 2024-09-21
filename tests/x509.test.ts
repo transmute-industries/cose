@@ -27,7 +27,7 @@ it('sign and verify with x5t and key resolver', async () => {
     protectedHeader: cose.ProtectedHeader([
       [cose.header.alg, cose.algorithm.es256],  // alg ES256
       [cose.header.x5t, rootCertificateThumbprint], // xt5 thumbprint
-      [cose.Protected.ContentType, "image/png"], // content_type image/png
+      [cose.header.content_type, "image/png"], // content_type image/png
     ]),
     payload: content
   })

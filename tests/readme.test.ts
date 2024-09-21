@@ -22,7 +22,7 @@ it('readme', async () => {
   const signatureForImage = await issuer.sign({
     protectedHeader: cose.ProtectedHeader([
       [cose.header.alg, cose.algorithm.es256], // signing algorithm ES256
-      [cose.Protected.ContentType, "image/png"], // content type image/png
+      [cose.header.content_type, "image/png"], // content type image/png
       [cose.header.kid, issuerPublicKeyJwk.kid] // issuer key identifier
     ]),
     payload: content
@@ -33,7 +33,7 @@ it('readme', async () => {
   const receiptForImageSignature = await cose.receipt.inclusion.issue({
     protectedHeader: cose.ProtectedHeader([
       [cose.header.alg, cose.algorithm.es256],
-      [cose.Protected.VerifiableDataStructure, cose.VerifiableDataStructures['RFC9162-Binary-Merkle-Tree']],
+      [cose.draft_headers.verifiable_data_structure, cose.VerifiableDataStructures['RFC9162-Binary-Merkle-Tree']],
       [cose.header.kid, notaryPublicKeyJwk.kid]
     ]),
     entry: 0,

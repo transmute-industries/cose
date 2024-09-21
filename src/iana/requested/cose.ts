@@ -19,8 +19,14 @@ export enum draft_headers {
   // https://datatracker.ietf.org/doc/draft-ietf-cose-hash-envelope/
   payload_hash_algorithm = -6800,
   payload_location = -6801,
-  payload_preimage_content_type = -6802
-}
+  payload_preimage_content_type = -6802,
 
+  // https://datatracker.ietf.org/doc/draft-ietf-cose-merkle-tree-proofs/
+  receipts = 394,
+  verifiable_data_structure = 395,
+  verifiable_data_proofs = 395
+
+
+}
 
 export { algorithms_to_labels, labels_to_algorithms }

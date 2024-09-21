@@ -16,7 +16,7 @@ it('sign and verify large image from file system', async () => {
   const coseSign1 = await signer.sign({
     protectedHeader: cose.ProtectedHeader([
       [cose.header.alg, cose.algorithm.es256], // alg ES256
-      [cose.Protected.ContentType, "image/png"], // content_type image/png
+      [cose.header.content_type, "image/png"], // content_type image/png
     ]),
     payload: content
   })

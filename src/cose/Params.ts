@@ -32,9 +32,6 @@ export const CWTClaims = 15
 export const Type = 16
 
 // https://datatracker.ietf.org/doc/draft-ietf-cose-merkle-tree-proofs/
-export const Receipts = 394
-export const VerifiableDataStructure = 395
-export const VerifiableDataProofs = 396
 
 export const VerifiableDataStructures = {
   'RFC9162-Binary-Merkle-Tree': 1
@@ -46,31 +43,11 @@ export const VerifiableDataProofTypes = {
   'RFC9162-Consistency-Proof': -2
 }
 
-export const Protected = {
-
-  PartyUIdentity,
-  PartyUNonce,
-  PartyUOther,
-  PartyVIdentity,
-  PartyVNonce,
-  PartyVOther,
-  ContentType,
-
-  Type, // https://datatracker.ietf.org/doc/html/rfc9596
-  CWTClaims, // https://datatracker.ietf.org/doc/html/rfc9597
-
-  VerifiableDataStructure,
-
-}
-
 
 export const Unprotected = {
 
   Iv: 5,
   Ek: -4, // new from COSE HPKE
-
-  Receipts,
-  VerifiableDataProofs
 }
 
 export const A128GCM = 1
@@ -78,10 +55,6 @@ export const A128GCM = 1
 export const Aead = {
   A128GCM
 }
-
-
-
-
 
 export const COSE_Encrypt0 = 16
 export const COSE_Sign1 = 18
