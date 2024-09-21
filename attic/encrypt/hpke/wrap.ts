@@ -1,6 +1,6 @@
 
 import { createAAD } from '../utils'
-import { COSE_Encrypt, Protected, Unprotected, UnprotectedHeader } from '../../Params'
+import { COSE_Encrypt, Protected, UnprotectedHeader } from '../../Params'
 import { RequestWrapDecryption, RequestWrapEncryption, } from '../types'
 import { EMPTY_BUFFER } from "../../../cbor"
 import { Tagged, decodeFirst, encodeAsync } from "cbor-web"

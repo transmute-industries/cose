@@ -1,7 +1,7 @@
 
 import { CoMETRE } from '@transmute/rfc9162'
 
-import { cbor, Unprotected, VerifiableDataProofTypes, VerifiableDataStructures } from '../../..'
+import { cbor, VerifiableDataProofTypes, VerifiableDataStructures } from '../../..'
 
 import { CoseSign1Bytes, CoseSign1DetachedVerifier } from "../../sign1"
 

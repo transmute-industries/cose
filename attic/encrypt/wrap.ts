@@ -12,7 +12,7 @@ import { RequestWrapDecryption, RequestWrapEncryption } from './types'
 import { EMPTY_BUFFER } from "../../cbor"
 
 import * as hpke from './hpke'
-import { UnprotectedHeader, COSE_Encrypt, Unprotected, KeyWrap, KeyAgreementWithKeyWrap, Aead, ProtectedHeader, Protected, Epk } from "../Params"
+import { UnprotectedHeader, COSE_Encrypt, KeyWrap, KeyAgreementWithKeyWrap, Aead, ProtectedHeader, Protected, Epk } from "../Params"
 
 import { toArrayBuffer } from "../../cbor"
 

@@ -1,6 +1,6 @@
 
 
-import { COSE_Encrypt0, Direct, Protected, Unprotected, UnprotectedHeader } from '../../Params'
+import { COSE_Encrypt0, Direct, Protected, UnprotectedHeader } from '../../Params'
 import { RequestDirectEncryption, RequestDirectDecryption } from '../types'
 import { Tagged, decodeFirst, encodeAsync } from "cbor-web"
 
