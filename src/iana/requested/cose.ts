@@ -12,7 +12,10 @@ export const less_specified = {
   'ESP256': 'ES256',
   'ES256': 'ES256',
   'ES384': 'ES384',
-  'ES512': 'ES512'
+  'ES512': 'ES512',
+  'Ed25519': 'EdDSA',
+  'Ed448': 'EdDSA',
+  'EdDSA': 'EdDSA'
 }
 
 export enum draft_headers {

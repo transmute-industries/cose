@@ -2,15 +2,15 @@
 import { exportJWK, KeyLike, JWK, generateKeyPair, calculateJwkThumbprint } from 'jose'
 import { crypto_key_type } from '../iana/assignments/media-types'
 import { web_key_type, private_rsa_web_key_params, private_oct_web_key_params, private_ec_web_key_params, private_okp_web_key_params, jose_key_type } from '../iana/assignments/jose'
-import { ec2_key } from '../iana/assignments/cose'
+import { ec2_curves, ec2_key, okp_key, ec2, okp, okp_curves } from '../iana/assignments/cose'
 
 import * as cbor from 'cbor-web'
+import { less_specified } from '../iana/requested/cose'
 
-const encoder = new TextEncoder()
 const decoder = new TextDecoder()
 
 export type algorithm_specified_web_key_params = {
-  'ESP256': {
+  'ESP256': web_key_type & {
     kty: 'EC'
     crv: 'P-256'
     alg: 'ES256',
@@ -18,7 +18,7 @@ export type algorithm_specified_web_key_params = {
     y: string
     d?: string
   },
-  'ES256': {
+  'ES256': web_key_type & {
     kty: 'EC'
     crv: 'P-256'
     alg: 'ES256',
@@ -26,7 +26,7 @@ export type algorithm_specified_web_key_params = {
     y: string
     d?: string
   },
-  'ES384': {
+  'ES384': web_key_type & {
     kty: 'EC'
     crv: 'P-384'
     alg: 'ES384',
@@ -34,18 +34,48 @@ export type algorithm_specified_web_key_params = {
     y: string
     d?: string
   },
-  'Ed25519': {
+  'ESP384': web_key_type & {
+    kty: 'EC'
+    crv: 'P-384'
+    alg: 'ES384',
+    x: string
+    y: string
+    d?: string
+  },
+  'EdDSA': web_key_type & {
+    kty: 'OKP'
+    crv: 'Ed25519' | 'Ed448'
+    alg: 'EdDSA',
+    x: string
+    d?: string
+  },
+  'Ed25519': web_key_type & {
     kty: 'OKP'
     crv: 'Ed25519'
     alg: 'Ed25519',
+    x: string
+    d?: string
+  },
+  'Ed448': web_key_type & {
+    kty: 'OKP'
+    crv: 'Ed448'
+    alg: 'Ed448',
     x: string
     d?: string
   }
 }
 
 export type algorithm_specified_cose_key_params = {
-  'ES256': ec2_key & { get(k: -1): 1 | 2 | 3 }
-  'ESP256': ec2_key & { get(k: -1): 1 }
+  'ES256': ec2_key & { get(k: -1): ec2_curves.p_256 | ec2_curves.p_384 | ec2_curves.p_521 }
+  'ESP256': ec2_key & { get(k: -1): ec2_curves.p_256 }
+
+  'ES384': ec2_key & { get(k: -1): ec2_curves.p_256 | ec2_curves.p_384 | ec2_curves.p_521 }
+  'ESP384': ec2_key & { get(k: -1): ec2_curves.p_384 }
+
+  'EdDSA': okp_key & { get(k: -1): okp_curves.ed25519 | okp_curves.ed448 }
+
+  'Ed25519': ec2_key & { get(k: -1): okp_curves.ed25519 }
+  'Ed448': ec2_key & { get(k: -1): okp_curves.ed448 }
 }
 
 export type fully_specified_signature_algorithms = keyof algorithm_specified_web_key_params
@@ -119,14 +149,15 @@ export const generate_web_key = async ({ alg, ext, kid }: {
   ext: boolean,
   kid?: string
 }) => {
-  const k = await generateKeyPair(alg, { extractable: ext })
+  const lessSpecific = less_specified[alg]
+  const k = await generateKeyPair(lessSpecific, { extractable: ext })
   return {
     publicKey: await export_public_web_key_with_algorithm(k.publicKey, alg, ext, kid),
     privateKey: await export_private_web_key_with_algorithm(k.privateKey, alg, kid),
   }
 }
 
-export type parseable_fully_specified_signature_algorithms = 'ES256' | 'ESP256'
+export type parseable_fully_specified_signature_algorithms = keyof algorithm_specified_cose_key_params | keyof algorithm_specified_web_key_params
 export type parsable_fully_specified_keys<alg extends parseable_fully_specified_signature_algorithms, cty extends crypto_key_type> =
   cty extends 'application/jwk+json' ? fully_specified_web_key<alg> : cty extends 'application/cose-key' ? fully_specified_cose_key<alg> : unknown
 
