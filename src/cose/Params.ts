@@ -15,13 +15,6 @@ export const UnprotectedHeader = (entries: HeaderMapEntry[]) => {
   return new Map<number, any>(entries)
 }
 
-export const HeaderParameters = {
-  Alg: 1,
-  Epk: -1,
-  Kid: 4,
-  X5t: 34
-}
-
 export const PartyUIdentity = -21
 export const PartyUNonce = -22
 export const PartyUOther = -23
@@ -56,7 +49,7 @@ export const VerifiableDataProofTypes = {
 }
 
 export const Protected = {
-  ...HeaderParameters,
+
   PartyUIdentity,
   PartyUNonce,
   PartyUOther,
@@ -78,7 +71,7 @@ export const Protected = {
 
 
 export const Unprotected = {
-  ...HeaderParameters,
+
   Iv: 5,
   Ek: -4, // new from COSE HPKE
 

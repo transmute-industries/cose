@@ -881,15 +881,6 @@ export const iv_generation_algorithm = {
 }
 
 
-export const delegated_to_the_cose_header_algorithm_parameters_registry_algorithm = {
-  'Name': 'delegated to the COSE Header Algorithm Parameters registry',
-  'Label': -65536,
-  'Value Type': '',
-  'Value Registry': '',
-  'Change Controller': 'undefined',
-  'Description': "",
-  'Reference': ''
-}
 export const alg_algorithm = {
   'Name': 'alg',
   'Label': 1,
@@ -1114,6 +1105,33 @@ export const cuphownerpubkey_algorithm = {
   'Change Controller': 'undefined',
   'Description': "Public Key",
   'Reference': '[FIDO Device Onboard Specification]'
+}
+export enum headers {
+  alg = 1,
+  crit = 2,
+  content_type = 3,
+  kid = 4,
+  iv = 5,
+  partial_iv = 6,
+  counter_signature = 7,
+  countersignature0 = 9,
+  kid_context = 10,
+  countersignature_version_2 = 11,
+  countersignature0_version_2 = 12,
+  kcwt = 13,
+  kccs = 14,
+  cwt_claims = 15,
+  typ = 16,
+  c5t = 22,
+  c5u = 23,
+  c5b = 24,
+  c5c = 25,
+  x5bag = 32,
+  x5chain = 33,
+  x5t = 34,
+  x5u = 35,
+  cuphnonce = 256,
+  cuphownerpubkey = 257,
 }
 
 export const okp_crv_parameter = {
@@ -1480,7 +1498,7 @@ export const labels_to_algorithms = new Map([[-65535,"RS1"],[-65534,"A128CTR"],[
 export const algorithms_to_labels = new Map([...labels_to_algorithms.entries()].map((e: any) => e.reverse())) as Map<string, number>
 
 // headers
-export const labels_to_headers = new Map([[-65536,"delegated to the COSE Header Algorithm Parameters registry"],[1,"alg"],[2,"crit"],[3,"content type"],[4,"kid"],[5,"IV"],[6,"Partial IV"],[7,"counter signature"],[9,"CounterSignature0"],[10,"kid context"],[11,"Countersignature version 2"],[12,"Countersignature0 version 2"],[13,"kcwt"],[14,"kccs"],[15,"CWT Claims"],[16,"typ (type)"],[22,"c5t"],[23,"c5u"],[24,"c5b"],[25,"c5c"],[32,"x5bag"],[33,"x5chain"],[34,"x5t"],[35,"x5u"],[256,"CUPHNonce"],[257,"CUPHOwnerPubKey"]]) as Map<number, string>
+export const labels_to_headers = new Map([[1,"alg"],[2,"crit"],[3,"content type"],[4,"kid"],[5,"IV"],[6,"Partial IV"],[7,"counter signature"],[9,"CounterSignature0"],[10,"kid context"],[11,"Countersignature version 2"],[12,"Countersignature0 version 2"],[13,"kcwt"],[14,"kccs"],[15,"CWT Claims"],[16,"typ (type)"],[22,"c5t"],[23,"c5u"],[24,"c5b"],[25,"c5c"],[32,"x5bag"],[33,"x5chain"],[34,"x5t"],[35,"x5u"],[256,"CUPHNonce"],[257,"CUPHOwnerPubKey"]]) as Map<number, string>
 export const headers_to_labels = new Map([...labels_to_headers.entries()].map((e: any) => e.reverse())) as Map<string, number>
 
 // okp

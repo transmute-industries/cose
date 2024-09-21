@@ -341,7 +341,7 @@ const createHeaderParamesters = () => {
       .pipe(csv())
     let headerParameterDefinitions = `\n`
     stream.on('data', (row: any) => {
-      if (row.Name === 'Unassigned' || row.Name.includes('Reserved')) {
+      if (row.Name === 'Unassigned' || row.Name.includes('Reserved') || row.Name.includes('delegated')) {
         return
       }
       const valueName = row.Name
@@ -370,6 +370,14 @@ export const ${valueName}_algorithm = {
       labelToHeaderParam.set(row['Label'], row['Name'])
     });
     stream.on('end', () => {
+      headerParameterDefinitions += `export enum headers {\n`
+      for (const [label, name] of labelToHeaderParam.entries()) {
+        let betterName = name.split(' (')[0]
+        betterName = betterName.replace(/ /g, '_')
+        betterName = betterName.toLowerCase()
+        headerParameterDefinitions += `  ${betterName} = ${label},\n`
+      }
+      headerParameterDefinitions += `}\n`
       resolve({ labelToHeaderParam, headerParameterDefinitions })
     });
   })
