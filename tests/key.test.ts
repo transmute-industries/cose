@@ -1,23 +1,23 @@
-import { base64url } from 'jose'
+import { base64url, JWK } from 'jose'
 
 import * as cose from '../src'
 
 it('ES256', async () => {
-  const privateKeyJwk = await cose.key.generate<cose.PrivateKeyJwk>('ES256', 'application/jwk+json');
+  const privateKeyJwk = await cose.key.generate<JWK>('ES256', 'application/jwk+json');
   expect(privateKeyJwk.alg).toBe('ES256')
 })
 
 it('conversion', async () => {
-  const privateKeyJwk = await cose.key.generate<cose.PrivateKeyJwk>('ES256', 'application/jwk+json');
+  const privateKeyJwk = await cose.key.generate<JWK>('ES256', 'application/jwk+json');
   const privateKeyCose = await cose.key.convertJsonWebKeyToCoseKey<cose.ec2_key>(privateKeyJwk)
-  const privateKey = await cose.key.convertCoseKeyToJsonWebKey<cose.PrivateKeyJwk>(privateKeyCose)
+  const privateKey = await cose.key.convertCoseKeyToJsonWebKey<JWK>(privateKeyCose)
   expect(privateKey.alg).toBe('ES256')
 })
 
 it('thumbprint', async () => {
-  const privateKeyJwk = await cose.key.generate<cose.PrivateKeyJwk>('ES256', 'application/jwk+json');
+  const privateKeyJwk = await cose.key.generate<JWK>('ES256', 'application/jwk+json');
   const privateKeyCose = await cose.key.convertJsonWebKeyToCoseKey<cose.ec2_key>(privateKeyJwk)
-  const privateKey = await cose.key.convertCoseKeyToJsonWebKey<cose.PrivateKeyJwk>(privateKeyCose)
+  const privateKey = await cose.key.convertCoseKeyToJsonWebKey<JWK>(privateKeyCose)
   expect(privateKey.alg).toBe('ES256')
 })
 
@@ -44,10 +44,10 @@ it('generate thumbprints', async () => {
 })
 
 it('public from private', async () => {
-  const privateKeyJwk = await cose.key.generate<cose.PrivateKeyJwk>('ES256', 'application/jwk+json')
+  const privateKeyJwk = await cose.key.generate<JWK>('ES256', 'application/jwk+json')
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { d, ...expectedPublicKeyJwk } = privateKeyJwk
-  const publicKeyJwk = cose.key.publicFromPrivate<cose.PublicKeyJwk>(privateKeyJwk)
+  const publicKeyJwk = cose.key.publicFromPrivate<JWK>(privateKeyJwk)
   expect(publicKeyJwk).toEqual(expectedPublicKeyJwk)
   const privateKeyCose = await cose.key.generate<cose.ec2_key>('ES256', 'application/cose-key')
   const expectedPublicKeyCose = new Map(privateKeyCose.entries())

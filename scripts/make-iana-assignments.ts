@@ -542,6 +542,13 @@ const getJose = async () => {
   }
   let definitions = `
 
+export const jose_key_type = {
+  RSA: 'RSA',
+  EC: 'EC',
+  OKP: 'OKP',
+  oct: 'oct'
+} as const
+
 export type key_type = 'EC' | 'OKP' | 'RSA' | 'oct'
 export type key_use = 'enc' | 'sig';
 export type key_ops = 'sign' | 'verify' | 'encrypt' | 'decrypt' | 'wrapKey' | 'unwrapKey' | 'deriveKey' | 'deriveBits';

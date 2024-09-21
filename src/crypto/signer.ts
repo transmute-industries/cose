@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import { JWK } from 'jose'
 
 import { toArrayBuffer } from '../cbor'
 import { PrivateKeyJwk } from '../cose/sign1'
@@ -7,7 +8,7 @@ import subtleCryptoProvider from './subtleCryptoProvider'
 
 import getDigestFromVerificationKey from '../cose/sign1/getDigestFromVerificationKey'
 
-const signer = ({ privateKeyJwk }: { privateKeyJwk: PrivateKeyJwk }) => {
+const signer = ({ privateKeyJwk }: { privateKeyJwk: JWK }) => {
   const digest = getDigestFromVerificationKey(`${privateKeyJwk.alg}`)
   const { alg, ...withoutAlg } = privateKeyJwk
   return {

@@ -1,7 +1,9 @@
 
 import { exportJWK, KeyLike, JWK, generateKeyPair, calculateJwkThumbprint } from 'jose'
 
-import { web_key_type, private_rsa_web_key_params, private_oct_web_key_params, private_ec_web_key_params, private_okp_web_key_params } from './iana/assignments/jose'
+import { web_key_type, private_rsa_web_key_params, private_oct_web_key_params, private_ec_web_key_params, private_okp_web_key_params, jose_key_type } from '../iana/assignments/jose'
+
+type signature_algorithms = 'ES256'
 
 type algorithm_specified_key_params = {
   'ES256': {
@@ -14,7 +16,7 @@ type algorithm_specified_key_params = {
   }
 }
 
-export type fully_specified_web_key<T extends 'ES256'> = web_key_type & algorithm_specified_key_params[T]
+export type fully_specified_web_key<T extends signature_algorithms> = web_key_type & algorithm_specified_key_params[T]
 
 export const format_web_key = (jwk: JWK) => {
   const { kid, alg, kty, crv, x, y, d, ext, ...rest } = jwk
@@ -34,23 +36,23 @@ const without_private_information = <T>(jwk: JWK, private_params: Record<string,
   return format_web_key(public_information) as T
 }
 
-export const export_public_web_key_with_algorithm = async <T extends 'ES256'>(k: KeyLike, alg: 'ES256', ext: boolean, kid?: string): Promise<fully_specified_web_key<T>> => {
+export const export_public_web_key_with_algorithm = async <T extends signature_algorithms>(k: KeyLike, alg: signature_algorithms, ext: boolean, kid?: string): Promise<fully_specified_web_key<T>> => {
   const jwk = await exportJWK(k);
   jwk.alg = alg
   jwk.ext = ext
   jwk.kid = kid || await calculateJwkThumbprint(jwk)
   const { kty } = jwk
   switch (kty) {
-    case 'RSA': {
+    case jose_key_type.RSA: {
       return without_private_information(jwk, private_rsa_web_key_params)
     }
-    case 'EC': {
+    case jose_key_type.EC: {
       return without_private_information(jwk, private_ec_web_key_params)
     }
-    case 'OKP': {
+    case jose_key_type.OKP: {
       return without_private_information(jwk, private_okp_web_key_params)
     }
-    case 'oct': {
+    case jose_key_type.oct: {
       return without_private_information(jwk, private_oct_web_key_params)
     }
     default: {
@@ -59,7 +61,7 @@ export const export_public_web_key_with_algorithm = async <T extends 'ES256'>(k:
   }
 }
 
-export const export_private_web_key_with_algorithm = async <T extends 'ES256'>(k: KeyLike, alg: 'ES256'): Promise<fully_specified_web_key<T>> => {
+export const export_private_web_key_with_algorithm = async <T extends signature_algorithms>(k: KeyLike, alg: signature_algorithms): Promise<fully_specified_web_key<T>> => {
   const privateKey = await exportJWK(k);
   privateKey.alg = alg
   privateKey.ext = true; // impossible to export otherwise.
@@ -68,7 +70,7 @@ export const export_private_web_key_with_algorithm = async <T extends 'ES256'>(k
 }
 
 export type RequestFullySpecifiedWebKey = {
-  alg: 'ES256',
+  alg: signature_algorithms,
   ext: boolean,
   kid?: string
 }

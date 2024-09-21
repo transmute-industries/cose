@@ -1,12 +1,13 @@
 import fs from 'fs'
+import { JWK } from 'jose'
 import * as cose from '../src'
 
 it('readme', async () => {
-  const issuerSecretKeyJwk = await cose.key.generate<cose.PrivateKeyJwk>('ES256', 'application/jwk+json')
-  const issuerPublicKeyJwk = await cose.key.publicFromPrivate<cose.PublicKeyJwk>(issuerSecretKeyJwk)
+  const issuerSecretKeyJwk = await cose.key.generate<JWK>('ES256', 'application/jwk+json')
+  const issuerPublicKeyJwk = await cose.key.publicFromPrivate<JWK>(issuerSecretKeyJwk)
 
-  const notarySecretKeyJwk = await cose.key.generate<cose.PrivateKeyJwk>('ES256', 'application/jwk+json')
-  const notaryPublicKeyJwk = await cose.key.publicFromPrivate<cose.PublicKeyJwk>(notarySecretKeyJwk)
+  const notarySecretKeyJwk = await cose.key.generate<JWK>('ES256', 'application/jwk+json')
+  const notaryPublicKeyJwk = await cose.key.publicFromPrivate<JWK>(notarySecretKeyJwk)
 
   const issuer = cose.detached.signer({
     remote: cose.crypto.signer({
@@ -41,7 +42,7 @@ it('readme', async () => {
     signer: notary
   })
   const transparentSignature = await cose.receipt.add(signatureForImage, receiptForImageSignature)
-  const resolve = async (coseSign1: cose.CoseSign1Bytes): Promise<cose.PublicKeyJwk> => {
+  const resolve = async (coseSign1: cose.CoseSign1Bytes): Promise<JWK> => {
     const { tag, value } = cose.cbor.decodeFirstSync(coseSign1)
     if (tag !== cose.tag.COSE_Sign1) {
       throw new Error('Only tagged cose sign 1 are supported')

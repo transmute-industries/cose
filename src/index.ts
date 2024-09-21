@@ -10,7 +10,7 @@ export * from './x509'
 
 
 export * from './desugar'
-export * from './draft'
+export * from './drafts/draft-ietf-jose-fully-specified-algorithms'
 
 // https://github.com/dajiaji/hpke-js/issues/302
 // this issue also effect vercel ncc

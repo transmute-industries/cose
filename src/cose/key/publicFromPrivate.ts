@@ -1,11 +1,9 @@
 
 import * as cose from "../../iana/assignments/cose";
 
-import { PrivateKeyJwk } from "../sign1";
+import { JWK } from 'jose'
 
-
-
-export const extractPublicKeyJwk = (privateKeyJwk: PrivateKeyJwk) => {
+export const extractPublicKeyJwk = (privateKeyJwk: JWK) => {
   if (privateKeyJwk.kty !== 'EC') {
     throw new Error('Only EC keys are supported')
   }
@@ -26,9 +24,9 @@ export const extractPublicCoseKey = <T extends cose.any_cose_key | cose.ec2_key>
   return publicCoseKeyMap as T
 }
 
-export const publicFromPrivate = <T>(privateKey: PrivateKeyJwk | cose.any_cose_key) => {
-  if ((privateKey as PrivateKeyJwk).kty) {
-    return extractPublicKeyJwk(privateKey as PrivateKeyJwk) as T
+export const publicFromPrivate = <T>(privateKey: JWK | cose.any_cose_key) => {
+  if ((privateKey as JWK).kty) {
+    return extractPublicKeyJwk(privateKey as JWK) as T
   }
   return extractPublicCoseKey(privateKey as cose.any_cose_key) as T
 }
