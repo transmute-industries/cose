@@ -90,32 +90,8 @@ export const Hash = {
   'SHA256': -16
 }
 
-export const Signature = {
-  'ES256': -7,
-  'ES384': -35
-}
 
 
-export const KeyAgreement = {
-  'ECDH-ES+HKDF-256': -25
-}
-export const KeyAgreementWithKeyWrap = {
-  'ECDH-ES+A128KW': -29
-}
-
-export const KeyWrap = {
-  A128KW: -3
-}
-
-export const Direct = {
-  'HPKE-Base-P256-SHA256-AES128GCM': 35
-}
-
-
-
-export const KeyType = 1
-export const KeyAlg = 3
-export const KeyId = 2
 
 
 export const COSE_Encrypt0 = 16

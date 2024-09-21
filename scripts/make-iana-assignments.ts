@@ -328,6 +328,18 @@ export const ${valueName}_algorithm = {
       labelToAlgorithm.set(row['Value'], row['Name'])
     });
     stream.on('end', () => {
+      algorithmDefinitions += `export enum algorithm {\n`
+      for (const [label, name] of labelToAlgorithm.entries()) {
+        let betterName = name.split(' (')[0]
+        betterName = betterName
+          .replace(/ /g, '_')
+          .replace(/-/g, '_')
+          .replace(/\+/g, '_')
+          .replace(/\//g, '_')
+        betterName = betterName.toLowerCase()
+        algorithmDefinitions += `  ${betterName} = ${label},\n`
+      }
+      algorithmDefinitions += `}\n`
       resolve({ labelToAlgorithm, algorithmDefinitions })
     });
   })

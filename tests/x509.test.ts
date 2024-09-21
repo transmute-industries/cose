@@ -19,13 +19,13 @@ it('sign and verify with x5t and key resolver', async () => {
   // }
   const rootCertificateThumbprint = await cose.certificate.thumbprint(cert.public)
   const signer = await cose.certificate.pkcs8Signer({
-    alg: cose.Signature.ES256,
+    alg: cose.algorithm.es256,
     privateKeyPKCS8: cert.private
   })
   const content = fs.readFileSync('./examples/image.png')
   const coseSign1 = await signer.sign({
     protectedHeader: cose.ProtectedHeader([
-      [cose.header.alg, cose.Signature.ES256],  // alg ES256
+      [cose.header.alg, cose.algorithm.es256],  // alg ES256
       [cose.header.x5t, rootCertificateThumbprint], // xt5 thumbprint
       [cose.Protected.ContentType, "image/png"], // content_type image/png
     ]),
