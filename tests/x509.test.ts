@@ -33,7 +33,7 @@ it('sign and verify with x5t and key resolver', async () => {
   })
   const certificateFromThumbprint = async (coseSign1: cose.CoseSign1Bytes): Promise<cose.PublicKeyJwk> => {
     const { tag, value } = cose.cbor.decodeFirstSync(coseSign1)
-    if (tag !== cose.COSE_Sign1) {
+    if (tag !== cose.tag.COSE_Sign1) {
       throw new Error('Only tagged cose sign 1 are supported')
     }
     const [protectedHeaderBytes] = value;

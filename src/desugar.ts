@@ -13,7 +13,3 @@ export const UnprotectedHeader = (entries: HeaderMapEntry[]) => {
   return new Map<number, any>(entries)
 }
 
-// move to iana cbor
-export const COSE_Encrypt0 = 16
-export const COSE_Sign1 = 18
-export const COSE_Encrypt = 96
