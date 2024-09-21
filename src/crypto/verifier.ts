@@ -1,13 +1,12 @@
 
 
-
+import { JWK } from 'jose'
 
 import getDigestFromVerificationKey from '../cose/sign1/getDigestFromVerificationKey'
 
 import subtleCryptoProvider from './subtleCryptoProvider'
-import { PublicKeyJwk } from '../cose/sign1'
 
-const verifier = ({ publicKeyJwk }: { publicKeyJwk: PublicKeyJwk }) => {
+const verifier = ({ publicKeyJwk }: { publicKeyJwk: JWK }) => {
   const digest = getDigestFromVerificationKey(`${publicKeyJwk.alg}`)
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { alg, ...withoutAlg } = publicKeyJwk
