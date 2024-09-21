@@ -2,13 +2,14 @@ import { exportJWK, exportPKCS8, importPKCS8 } from 'jose';
 import { PublicKeyJwk } from "../cose/sign1"
 import * as x509 from "@peculiar/x509";
 import { CoseSignatureAlgorithms } from '../cose/key';
-import { PrivateKeyJwk, detached, RequestCoseSign1VerifyDetached, Hash } from '..';
+import { PrivateKeyJwk, detached, RequestCoseSign1VerifyDetached } from '..';
 import { crypto } from '..';
+
+import * as cose from '../iana/assignments/cose';
 import { labels_to_algorithms } from '../iana/requested/cose';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 const nodeCrypto = import('crypto').catch(() => { })
-
 
 const extractable = true;
 
@@ -19,7 +20,6 @@ const provide = async () => {
     return (await (await nodeCrypto) as Crypto)
   }
 }
-
 
 const algTowebCryptoParams: Record<CoseSignatureAlgorithms, { name: string, hash: string, namedCurve: string }>
   = {
@@ -62,7 +62,7 @@ export type RequestRootCertificate = {
 // https://datatracker.ietf.org/doc/html/rfc9360#section-2-5.6.1
 const thumbprint = async (cert: string): Promise<[number, ArrayBuffer]> => {
   const current = new x509.X509Certificate(cert)
-  return [Hash.SHA256, await current.getThumbprint('SHA-256')]
+  return [cose.algorithm.sha_256, await current.getThumbprint('SHA-256')]
 }
 
 export type RootCertificateResponse = { public: string, private: string }

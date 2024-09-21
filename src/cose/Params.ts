@@ -25,9 +25,7 @@ export const PartyVOther = -26
 
 export const ContentType = 3
 
-export const PayloadLocation = -6801;
-export const PayloadPreImageContentType = -6802;
-export const PayloadHashAlgorithm = -6800;
+
 
 
 export const CWTClaims = 15
@@ -61,10 +59,6 @@ export const Protected = {
   Type, // https://datatracker.ietf.org/doc/html/rfc9596
   CWTClaims, // https://datatracker.ietf.org/doc/html/rfc9597
 
-  PayloadHashAlgorithm, // new COSE Hash Envelop
-  PayloadPreImageContentType,
-  PayloadLocation,
-
   VerifiableDataStructure,
 
 }
@@ -83,11 +77,6 @@ export const A128GCM = 1
 
 export const Aead = {
   A128GCM
-}
-
-
-export const Hash = {
-  'SHA256': -16
 }
 
 

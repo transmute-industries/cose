@@ -15,5 +15,12 @@ export const less_specified = {
   'ES512': 'ES512'
 }
 
+export enum draft_headers {
+  // https://datatracker.ietf.org/doc/draft-ietf-cose-hash-envelope/
+  payload_hash_algorithm = -6800,
+  payload_location = -6801,
+  payload_preimage_content_type = -6802
+}
+
 
 export { algorithms_to_labels, labels_to_algorithms }
