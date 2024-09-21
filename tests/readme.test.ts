@@ -21,9 +21,9 @@ it('readme', async () => {
   const content = fs.readFileSync('./examples/image.png')
   const signatureForImage = await issuer.sign({
     protectedHeader: cose.ProtectedHeader([
-      [cose.Protected.Alg, cose.Signature.ES256], // signing algorithm ES256
+      [cose.header.alg, cose.Signature.ES256], // signing algorithm ES256
       [cose.Protected.ContentType, "image/png"], // content type image/png
-      [cose.Protected.Kid, issuerPublicKeyJwk.kid] // issuer key identifier
+      [cose.header.kid, issuerPublicKeyJwk.kid] // issuer key identifier
     ]),
     payload: content
   })
@@ -32,9 +32,9 @@ it('readme', async () => {
   ]
   const receiptForImageSignature = await cose.receipt.inclusion.issue({
     protectedHeader: cose.ProtectedHeader([
-      [cose.Protected.Alg, cose.Signature.ES256],
+      [cose.header.alg, cose.Signature.ES256],
       [cose.Protected.VerifiableDataStructure, cose.VerifiableDataStructures['RFC9162-Binary-Merkle-Tree']],
-      [cose.Protected.Kid, notaryPublicKeyJwk.kid]
+      [cose.header.kid, notaryPublicKeyJwk.kid]
     ]),
     entry: 0,
     entries: transparencyLogContainingImageSignatures,
@@ -48,7 +48,7 @@ it('readme', async () => {
     }
     const [protectedHeaderBytes] = value;
     const protectedHeaderMap = cose.cbor.decodeFirstSync(protectedHeaderBytes)
-    const kid = protectedHeaderMap.get(cose.Protected.Kid);
+    const kid = protectedHeaderMap.get(cose.header.kid);
     if (kid === issuerPublicKeyJwk.kid) {
       return issuerPublicKeyJwk
     }

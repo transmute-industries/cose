@@ -42,7 +42,7 @@ it('wrap with external aad', async () => {
   const ciphertext = await encrypt.wrap({
     aad,
     protectedHeader: ProtectedHeader([
-      [Protected.Alg, Aead.A128GCM],
+      [cose.header.alg, Aead.A128GCM],
     ]),
     plaintext,
     recipients: encryptionKeys
@@ -60,7 +60,7 @@ it('direct', async () => {
   const ciphertext = await encrypt.direct({
     aad,
     protectedHeader: ProtectedHeader([
-      [Protected.Alg, Direct['HPKE-Base-P256-SHA256-AES128GCM']],
+      [cose.header.alg, Direct['HPKE-Base-P256-SHA256-AES128GCM']],
     ]),
     plaintext,
     recipients: encryptionKeys

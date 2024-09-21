@@ -6,8 +6,8 @@ import { DecodedToBeSigned, ProtectedHeaderMap } from './types'
 import rawVerifier from '../../crypto/verifier'
 
 
-import { Protected } from '../Params'
 
+import * as cose from '../../iana/assignments/cose'
 import { algorithms_to_labels } from '../../iana/requested/cose'
 
 const verifier = ({ resolver }: RequestCoseSign1Verifier) => {
@@ -27,7 +27,7 @@ const verifier = ({ resolver }: RequestCoseSign1Verifier) => {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const [protectedHeaderBytes, _, payload, signature] = signatureStructure;
       const protectedHeaderMap: ProtectedHeaderMap = (!protectedHeaderBytes.length) ? new Map() : decodeFirstSync(protectedHeaderBytes);
-      const algInHeader = protectedHeaderMap.get(Protected.Alg)
+      const algInHeader = protectedHeaderMap.get(cose.header.alg)
       if (algInHeader !== algInPublicKey) {
         throw new Error('Verification key does not support algorithm: ' + algInHeader);
       }

@@ -34,7 +34,7 @@ it('issue & verify', async () => {
   })
   const inclusion = await cose.receipt.inclusion.issue({
     protectedHeader: cose.ProtectedHeader([
-      [cose.Protected.Alg, cose.Signature.ES256],  // alg ES256
+      [cose.header.alg, cose.Signature.ES256],  // alg ES256
       [cose.Protected.VerifiableDataStructure, cose.VerifiableDataStructures['RFC9162-Binary-Merkle-Tree']] // vds RFC9162
     ]),
     entry: 1,
@@ -54,7 +54,7 @@ it('issue & verify', async () => {
   // based on a previous receipt
   const { root, receipt } = await cose.receipt.consistency.issue({
     protectedHeader: cose.ProtectedHeader([
-      [cose.Protected.Alg, cose.Signature.ES256],  // alg ES256
+      [cose.header.alg, cose.Signature.ES256],  // alg ES256
       [cose.Protected.VerifiableDataStructure, cose.VerifiableDataStructures['RFC9162-Binary-Merkle-Tree']] // vds RFC9162
     ]),
     receipt: inclusion,
@@ -81,7 +81,7 @@ it("add / remove from receipts", async () => {
   const content = fs.readFileSync('./examples/image.png')
   const signatureForImage = await signer.sign({
     protectedHeader: cose.ProtectedHeader([
-      [cose.Protected.Alg, cose.Signature.ES256], // alg ES256
+      [cose.header.alg, cose.Signature.ES256], // alg ES256
       [cose.Protected.ContentType, "image/png"], // content_type image/png
     ]),
     payload: content
@@ -90,7 +90,7 @@ it("add / remove from receipts", async () => {
   // inclusion proof receipt for image signature
   const receiptForImageSignature = await cose.receipt.inclusion.issue({
     protectedHeader: cose.ProtectedHeader([
-      [cose.Protected.Alg, cose.Signature.ES256],  // alg ES256
+      [cose.header.alg, cose.Signature.ES256],  // alg ES256
       [cose.Protected.VerifiableDataStructure, cose.VerifiableDataStructures['RFC9162-Binary-Merkle-Tree']] // vds RFC9162
     ]),
     entry: 0,

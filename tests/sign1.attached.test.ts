@@ -12,7 +12,7 @@ it('sign and verify', async () => {
   })
   const message = '💣 test ✨ mesage 🔥'
   const coseSign1 = await signer.sign({
-    protectedHeader: new Map([[cose.Protected.Alg, cose.Signature.ES256]]),
+    protectedHeader: new Map([[cose.header.alg, cose.Signature.ES256]]),
     unprotectedHeader: new Map(),
     payload: new TextEncoder().encode(message)
   })
@@ -45,7 +45,7 @@ it('sign and verify large image from file system', async () => {
 
   const coseSign1 = await signer.sign({
     protectedHeader: new Map<number, any>([
-      [cose.Protected.Alg, cose.Signature.ES256], // alg ES256
+      [cose.header.alg, cose.Signature.ES256], // alg ES256
       [cose.Protected.ContentType, "image/png"], // content_type image/png
     ]),
     unprotectedHeader: new Map(),

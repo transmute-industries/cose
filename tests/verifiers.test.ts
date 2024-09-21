@@ -30,8 +30,8 @@ it('verify multiple receipts', async () => {
   const content = fs.readFileSync('./examples/image.png')
   const signatureForImage = await issuerSigner.sign({
     protectedHeader: cose.ProtectedHeader([
-      [cose.Protected.Kid, issuerCkt], // kid urn:ietf:params:oauth:ckt:sha-256:T6ixLT_utMNJ...
-      [cose.Protected.Alg, cose.Signature.ES256], // alg ES256
+      [cose.header.kid, issuerCkt], // kid urn:ietf:params:oauth:ckt:sha-256:T6ixLT_utMNJ...
+      [cose.header.alg, cose.Signature.ES256], // alg ES256
       [cose.Protected.ContentType, "image/png"], // content_type image/png
     ]),
     payload: content
@@ -40,8 +40,8 @@ it('verify multiple receipts', async () => {
   // inclusion proof receipt for image signature
   const receiptForImageSignature1 = await cose.receipt.inclusion.issue({
     protectedHeader: cose.ProtectedHeader([
-      [cose.Protected.Kid, notary1Ckt], // kid urn:ietf:params:oauth:ckt:sha-256:T6ixLT_utMNJ...
-      [cose.Protected.Alg, cose.Signature.ES256],  // alg ES256
+      [cose.header.kid, notary1Ckt], // kid urn:ietf:params:oauth:ckt:sha-256:T6ixLT_utMNJ...
+      [cose.header.alg, cose.Signature.ES256],  // alg ES256
       [cose.Protected.VerifiableDataStructure, cose.VerifiableDataStructures['RFC9162-Binary-Merkle-Tree']] // vds RFC9162
     ]),
     entry: 0,
@@ -50,8 +50,8 @@ it('verify multiple receipts', async () => {
   })
   const receiptForImageSignature2 = await cose.receipt.inclusion.issue({
     protectedHeader: cose.ProtectedHeader([
-      [cose.Protected.Kid, notary2Ckt], // kid urn:ietf:params:oauth:ckt:sha-256:T6ixLT_utMNJ...
-      [cose.Protected.Alg, cose.Signature.ES256],  // alg ES256
+      [cose.header.kid, notary2Ckt], // kid urn:ietf:params:oauth:ckt:sha-256:T6ixLT_utMNJ...
+      [cose.header.alg, cose.Signature.ES256],  // alg ES256
       [cose.Protected.VerifiableDataStructure, cose.VerifiableDataStructures['RFC9162-Binary-Merkle-Tree']] // vds RFC9162
     ]),
     entry: 0,
@@ -67,7 +67,7 @@ it('verify multiple receipts', async () => {
     }
     const [protectedHeaderBytes] = value;
     const protectedHeaderMap = cose.cbor.decodeFirstSync(protectedHeaderBytes)
-    const kid = protectedHeaderMap.get(cose.Protected.Kid);
+    const kid = protectedHeaderMap.get(cose.header.kid);
     if (kid === issuerCkt) {
       return cose.key.convertCoseKeyToJsonWebKey(
         await cose.key.publicFromPrivate(issuerSecretKey)

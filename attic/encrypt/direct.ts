@@ -39,7 +39,7 @@ export const encrypt = async (req: RequestDirectEncryption) => {
   if (recipientPublicKeyJwk.alg === hpke.primaryAlgorithm.label) {
     return hpke.encrypt.direct(req)
   }
-  const alg = req.protectedHeader.get(Protected.Alg)
+  const alg = req.protectedHeader.get(cose.header.alg)
   const protectedHeader = await encodeAsync(req.protectedHeader)
   const unprotectedHeader = req.unprotectedHeader;
   const directAgreementAlgorithm = getCoseAlgFromRecipientJwk(recipientPublicKeyJwk)
@@ -88,7 +88,7 @@ export const decrypt = async (req: RequestDirectDecryption) => {
     throw new Error('Expected recipient cipher text length to the be zero')
   }
   const decodedRecipientProtectedHeader = decode(recipientProtectedHeader)
-  const recipientAlgorithm = decodedRecipientProtectedHeader.get(Protected.Alg)
+  const recipientAlgorithm = decodedRecipientProtectedHeader.get(cose.header.alg)
   const epk = recipientUnprotectedHeader.get(Unprotected.Epk)
   // ensure the epk has the algorithm that is set in the protected header
   epk.set(Epk.Alg, recipientAlgorithm)
@@ -98,6 +98,6 @@ export const decrypt = async (req: RequestDirectDecryption) => {
   const aad = await createAAD(protectedHeader, 'Encrypt', externalAad)
   const iv = unprotectedHeader.get(Unprotected.Iv)
   const decodedProtectedHeader = decode(protectedHeader)
-  const alg = decodedProtectedHeader.get(Protected.Alg)
+  const alg = decodedProtectedHeader.get(cose.header.alg)
   return aes.decrypt(alg, ciphertext, new Uint8Array(iv), new Uint8Array(aad), new Uint8Array(cek))
 }

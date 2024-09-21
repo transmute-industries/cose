@@ -370,7 +370,7 @@ export const ${valueName}_algorithm = {
       labelToHeaderParam.set(row['Label'], row['Name'])
     });
     stream.on('end', () => {
-      headerParameterDefinitions += `export enum headers {\n`
+      headerParameterDefinitions += `export enum header {\n`
       for (const [label, name] of labelToHeaderParam.entries()) {
         let betterName = name.split(' (')[0]
         betterName = betterName.replace(/ /g, '_')

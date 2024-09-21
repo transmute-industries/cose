@@ -23,7 +23,7 @@ const helpTestSignAndVerify = async (privateKey: cose.any_cose_key) => {
         })
         .sign({
           protectedHeader: new Map([
-            [cose.Protected.Alg, privateKey.get(cose.Key.Alg)]
+            [cose.header.alg, privateKey.get(cose.Key.Alg)]
           ]),
           payload: new TextEncoder().encode(message)
         })

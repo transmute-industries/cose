@@ -32,7 +32,7 @@ export const decrypt = async (req: RequestWrapDecryption) => {
     throw new Error('Only tag 96 cose encrypt are supported')
   }
   const decodedRecipientProtectedHeader = await decodeFirst(recipientProtectedHeader)
-  const recipientAlgorithm = decodedRecipientProtectedHeader.get(Protected.Alg)
+  const recipientAlgorithm = decodedRecipientProtectedHeader.get(cose.header.alg)
   const epk = recipientUnprotectedHeader.get(Unprotected.Epk)
   // ensure the epk has the algorithm that is set in the protected header
   epk.set(Epk.Alg, recipientAlgorithm)
@@ -47,7 +47,7 @@ export const decrypt = async (req: RequestWrapDecryption) => {
   }
   const cek = await aes.unwrap(kwAlg, recipientCipherText, new Uint8Array(kek))
   const decodedProtectedHeader = await decodeFirst(protectedHeader)
-  const alg = decodedProtectedHeader.get(Protected.Alg)
+  const alg = decodedProtectedHeader.get(cose.header.alg)
   return aes.decrypt(alg, ciphertext, new Uint8Array(iv), new Uint8Array(aad), new Uint8Array(cek))
 }
 
@@ -75,7 +75,7 @@ export const encrypt = async (req: RequestWrapEncryption) => {
   if (recipientPublicKeyJwk.alg === 'HPKE-Base-P256-SHA256-AES128GCM') {
     return hpke.encrypt.wrap(req)
   }
-  const alg = req.protectedHeader.get(Protected.Alg)
+  const alg = req.protectedHeader.get(cose.header.alg)
   if (alg !== Aead.A128GCM) {
     throw new Error('Only A128GCM is supported currently')
   }
@@ -83,7 +83,7 @@ export const encrypt = async (req: RequestWrapEncryption) => {
   const unprotectedHeader = req.unprotectedHeader;
   const keyAgreementWithKeyWrappingAlgorithm = getCoseAlgFromRecipientJwk(recipientPublicKeyJwk)
   const recipientProtectedHeader = await encodeAsync(ProtectedHeader([
-    [Protected.Alg, KeyAgreementWithKeyWrap["ECDH-ES+A128KW"]],
+    [cose.header.alg, KeyAgreementWithKeyWrap["ECDH-ES+A128KW"]],
   ]))
   const senderPrivateKeyJwk = await generate<any>('ES256', "application/jwk+json")
   const kek = await ecdh.deriveKey(protectedHeader, recipientProtectedHeader, recipientPublicKeyJwk, senderPrivateKeyJwk)

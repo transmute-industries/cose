@@ -1106,7 +1106,7 @@ export const cuphownerpubkey_algorithm = {
   'Description': "Public Key",
   'Reference': '[FIDO Device Onboard Specification]'
 }
-export enum headers {
+export enum header {
   alg = 1,
   crit = 2,
   content_type = 3,

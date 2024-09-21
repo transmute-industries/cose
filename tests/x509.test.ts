@@ -25,8 +25,8 @@ it('sign and verify with x5t and key resolver', async () => {
   const content = fs.readFileSync('./examples/image.png')
   const coseSign1 = await signer.sign({
     protectedHeader: cose.ProtectedHeader([
-      [cose.Protected.Alg, cose.Signature.ES256],  // alg ES256
-      [cose.Protected.X5t, rootCertificateThumbprint], // xt5 thumbprint
+      [cose.header.alg, cose.Signature.ES256],  // alg ES256
+      [cose.header.x5t, rootCertificateThumbprint], // xt5 thumbprint
       [cose.Protected.ContentType, "image/png"], // content_type image/png
     ]),
     payload: content
@@ -38,8 +38,8 @@ it('sign and verify with x5t and key resolver', async () => {
     }
     const [protectedHeaderBytes] = value;
     const protectedHeaderMap = cose.cbor.decodeFirstSync(protectedHeaderBytes)
-    const alg = protectedHeaderMap.get(cose.Protected.Alg)
-    const x5t = protectedHeaderMap.get(cose.Protected.X5t) // get x5t
+    const alg = protectedHeaderMap.get(cose.header.alg)
+    const x5t = protectedHeaderMap.get(cose.header.x5t) // get x5t
     if (!x5t) {
       throw new Error('x5t is required in protected header to use the certificate verifer exposed by this library')
     }
