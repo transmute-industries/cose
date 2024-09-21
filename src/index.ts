@@ -10,6 +10,7 @@ export * from './x509'
 
 
 export * from './desugar'
+export * from './draft'
 
 // https://github.com/dajiaji/hpke-js/issues/302
 // this issue also effect vercel ncc
