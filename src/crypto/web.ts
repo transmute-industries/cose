@@ -4,6 +4,11 @@ import { any_cose_key, cose_key, cose_key_type } from "../iana/assignments/cose"
 import { cose_key_to_web_key } from "./key"
 
 export const webCryptoKeyParamsByCoseAlgorithm = {
+  'ESP256': {
+    name: "ECDSA",
+    hash: 'SHA-256',
+    namedCurve: 'P-256', // true
+  },
   'ES256': {
     name: "ECDSA",
     hash: 'SHA-256',
@@ -63,6 +68,9 @@ export const web_key_to_crypto_key = async (jwk: any, key_ops?: string[]): Promi
   }
   return subtle().then((subtle) => {
     const { alg, ...unrestrictedKey } = jwk
+    if (!webCryptoKeyParamsByCoseAlgorithm[alg as WebCryptoCoseAlgorithm]) {
+      throw new Error('Unknown algorithm: ' + alg)
+    }
     return subtle.importKey(
       "jwk",
       unrestrictedKey,

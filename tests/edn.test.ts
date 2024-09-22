@@ -16,7 +16,7 @@ it('detached payload cose sign1', async () => {
   expect(diag).toBe(output.toString())
 })
 
-it.skip('hash envelope', async () => {
+it('hash envelope', async () => {
   const k = await cose.crypto.key.parse<'ES256', 'application/cose-key'>({
     key,
     type: 'application/cose-key'
@@ -32,11 +32,16 @@ it.skip('hash envelope', async () => {
     .sign({
       protectedHeader: cose.ProtectedHeader([
         [cose.header.alg, cose.algorithm.es256],
-        [cose.draft_headers.payload_hash_algorithm, cose.algorithm.sha_256]
+        [cose.draft_headers.payload_hash_algorithm, cose.algorithm.sha_256],
+        [cose.draft_headers.payload_preimage_content_type, 'text/plain; charset=utf-8']
       ]),
-      payload: Buffer.from('hello')
+      payload: Buffer.from('🔥 hello')
     })
-
-  console.log(signature)
+  fs.writeFileSync('./tests/__fixtures__/hash-envelope.cbor', signature)
+  const input = fs.readFileSync('./tests/__fixtures__/hash-envelope.cbor')
+  const diag = await cose.cbor.diag(input, "application/cose")
+  fs.writeFileSync('./tests/__fixtures__/hash-envelope.diag', diag)
+  const output = fs.readFileSync('./tests/__fixtures__/hash-envelope.diag')
+  expect(diag).toBe(output.toString())
 })
 
