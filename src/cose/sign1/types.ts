@@ -32,7 +32,7 @@ export type CoseSign1Signer = {
 
 export type RequestCoseSign1Verifier = {
   resolver: {
-    resolve: (signature: ArrayBuffer) => Promise<PublicKeyJwk>
+    resolve: (signature: ArrayBuffer) => Promise<any>
   }
 }
 

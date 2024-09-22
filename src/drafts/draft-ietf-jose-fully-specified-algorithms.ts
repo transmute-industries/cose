@@ -7,6 +7,9 @@ import { ec2_curves, ec2_key, okp_key, ec2, okp, okp_curves } from '../iana/assi
 import * as cbor from 'cbor-web'
 import { less_specified } from '../iana/requested/cose'
 
+import { web_key_to_cose_key } from '../crypto/web_key_to_cose_key'
+
+const encoder = new TextEncoder()
 const decoder = new TextDecoder()
 
 export type algorithm_specified_web_key_params = {
@@ -161,6 +164,18 @@ export type parseable_fully_specified_signature_algorithms = keyof algorithm_spe
 export type parsable_fully_specified_keys<alg extends parseable_fully_specified_signature_algorithms, cty extends crypto_key_type> =
   cty extends 'application/jwk+json' ? fully_specified_web_key<alg> : cty extends 'application/cose-key' ? fully_specified_cose_key<alg> : unknown
 
+
+
+export type request_crypto_key = {
+
+  type: crypto_key_type,
+  algorithm: fully_specified_signature_algorithms
+
+  id?: string,
+  extractable?: boolean
+}
+
+
 export const parse = <
   alg extends parseable_fully_specified_signature_algorithms,
   cty extends crypto_key_type
@@ -180,4 +195,56 @@ export const parse = <
       throw new Error('Unknown key: ' + type)
     }
   }
+}
+
+
+export const generate = async ({ id, type, algorithm, extractable }: request_crypto_key) => {
+  switch (type) {
+    case 'application/jwk+json': {
+      const { privateKey } = await generate_web_key({ kid: id, alg: algorithm, ext: extractable || true })
+      return encoder.encode(JSON.stringify(privateKey))
+    }
+    case 'application/cose-key': {
+      const { privateKey } = await generate_web_key({ kid: id, alg: algorithm, ext: extractable || true })
+      return convert({
+        key: encoder.encode(JSON.stringify(privateKey)),
+        from: 'application/jwk+json',
+        to: 'application/cose-key'
+      })
+    }
+    default: {
+      throw new Error('Unsupported key type: ' + type)
+    }
+  }
+}
+
+export const convert = async ({ key, from, to }: { key: Uint8Array, from: crypto_key_type, to: crypto_key_type }) => {
+  switch (from) {
+    case 'application/jwk+json': {
+      switch (to) {
+        case 'application/cose-key': {
+          const k = await web_key_to_cose_key(JSON.parse(decoder.decode(key)))
+          return cbor.encode(k)
+        }
+        default: {
+          throw new Error('Unknown key: ' + from)
+        }
+      }
+    }
+    default: {
+      throw new Error('Unknown key: ' + from)
+    }
+  }
+}
+
+// generate parsed.
+export const gen = async <
+  alg extends parseable_fully_specified_signature_algorithms,
+  cty extends crypto_key_type
+>({ algorithm, type }: {
+  algorithm: alg,
+  type: cty
+}): Promise<parsable_fully_specified_keys<alg, cty>> => {
+  const key = await generate({ algorithm, type })
+  return parse<alg, cty>({ key, type })
 }

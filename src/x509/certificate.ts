@@ -1,7 +1,7 @@
 import { exportJWK, exportPKCS8, importPKCS8 } from 'jose';
 import { PublicKeyJwk } from "../cose/sign1"
 import * as x509 from "@peculiar/x509";
-import { CoseSignatureAlgorithms } from '../cose/key';
+
 import { detached, RequestCoseSign1VerifyDetached } from '..';
 import { crypto } from '..';
 import { JWK } from 'jose'
@@ -21,7 +21,7 @@ const provide = async () => {
   }
 }
 
-const algTowebCryptoParams: Record<CoseSignatureAlgorithms, { name: string, hash: string, namedCurve: string }>
+const algTowebCryptoParams: Record<string, { name: string, hash: string, namedCurve: string }>
   = {
   'ESP256': {
     name: "ECDSA",
@@ -51,7 +51,7 @@ const algTowebCryptoParams: Record<CoseSignatureAlgorithms, { name: string, hash
 }
 
 export type RequestRootCertificate = {
-  alg: CoseSignatureAlgorithms
+  alg: string
   sub: string
   iss: string
   nbf: string

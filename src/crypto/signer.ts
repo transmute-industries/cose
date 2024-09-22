@@ -8,7 +8,7 @@ import subtleCryptoProvider from './subtleCryptoProvider'
 
 import getDigestFromVerificationKey from '../cose/sign1/getDigestFromVerificationKey'
 
-const signer = ({ privateKeyJwk }: { privateKeyJwk: JWK }) => {
+const signer = ({ privateKeyJwk }: { privateKeyJwk: JWK | any }) => {
   const digest = getDigestFromVerificationKey(`${privateKeyJwk.alg}`)
   const { alg, ...withoutAlg } = privateKeyJwk
   return {

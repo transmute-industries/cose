@@ -17,3 +17,6 @@ it('detached payload cose sign1', async () => {
   // expect(diag).toBe(output.toString())
 })
 
+// Tomorrow...
+// More EDN examples for SCITT stuff
+// maybe HPKE...

@@ -39,6 +39,7 @@ describe('web key', () => {
     })
     const { crv } = jwk
     expect(crv).toBe('Ed25519')
+    // crv is cannot narrow beyond Ed25519 | Ed448
   })
 
   it('parse fully specified', async () => {
@@ -52,6 +53,7 @@ describe('web key', () => {
     })
     const { crv } = jwk
     expect(crv).toBe('Ed25519')
+    // crv is narrowed to Ed25519
   })
 })
 
