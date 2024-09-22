@@ -3,14 +3,16 @@ import { CoMETRE } from '@transmute/rfc9162'
 
 import { cbor, VerifiableDataProofTypes, VerifiableDataStructures } from '../../..'
 
-import { CoseSign1Bytes, CoseSign1Signer, ProtectedHeaderMap } from "../../sign1"
+import { CoseSign1Bytes, CoseSign1Signer } from "../../sign1"
 import { toArrayBuffer } from '../../../cbor'
 
 import { draft_headers } from '../../..'
 
+import { HeaderMap } from '../../..'
+
 
 export type RequestIssueConsistencyReceipt = {
-  protectedHeader: ProtectedHeaderMap
+  protectedHeader: HeaderMap
   receipt: CoseSign1Bytes,
   entries: Uint8Array[]
   signer: CoseSign1Signer

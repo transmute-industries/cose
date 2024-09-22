@@ -1,5 +1,5 @@
 import { exportJWK, exportPKCS8, importPKCS8 } from 'jose';
-import { PublicKeyJwk } from "../cose/sign1"
+
 import * as x509 from "@peculiar/x509";
 
 import { detached, RequestCoseSign1VerifyDetached } from '..';
@@ -7,6 +7,8 @@ import { crypto } from '..';
 import { JWK } from 'jose'
 import * as cose from '../iana/assignments/cose';
 import { labels_to_algorithms } from '../iana/requested/cose';
+
+import { web_key_type } from '../iana/assignments/jose';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 const nodeCrypto = import('crypto').catch(() => { })
@@ -110,7 +112,7 @@ const pkcs8Signer = async ({ alg, privateKeyPKCS8 }: { alg: number, privateKeyPK
 
 export type RequestCertificateVerifier = {
   resolver: {
-    resolve: (signature: ArrayBuffer) => Promise<PublicKeyJwk>
+    resolve: (signature: ArrayBuffer) => Promise<web_key_type>
   }
 }
 

@@ -1,6 +1,6 @@
-import { ProtectedHeaderMap, PublicKeyJwk, RequestCoseSign1DectachedVerify } from "../sign1"
+import { RequestCoseSign1DectachedVerify } from "../sign1"
 
-import { decodeFirstSync } from '../../cbor'
+
 
 import { detached } from "../.."
 import { get } from "./get"
@@ -9,8 +9,10 @@ import * as inclusion from './inclusion'
 import { leaf } from "./leaf"
 import { remove } from "./remove"
 
+import { web_key_type } from "../../iana/assignments/jose"
+
 export type RequestHeaderVerifier = {
-  resolve: (signature: ArrayBuffer) => Promise<PublicKeyJwk>
+  resolve: (signature: ArrayBuffer) => Promise<web_key_type>
 }
 
 const getVerifierForMessage = async (req: RequestCoseSign1DectachedVerify, resolver: RequestHeaderVerifier) => {

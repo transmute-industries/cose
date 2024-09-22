@@ -2,7 +2,7 @@
 import { JWK } from 'jose'
 
 import { toArrayBuffer } from '../cbor'
-import { PrivateKeyJwk } from '../cose/sign1'
+
 
 import subtleCryptoProvider from './subtleCryptoProvider'
 

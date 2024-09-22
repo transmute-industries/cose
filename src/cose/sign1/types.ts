@@ -1,15 +1,11 @@
 
-export type ProtectedHeaderMap = Map<any, any>
-export type UnprotectedHeaderMap = Map<any, any>
+import { HeaderMap } from "../../desugar"
 
-export type CoseSign1Structure = [Buffer, UnprotectedHeaderMap, Buffer, Buffer]
+export type CoseSign1Structure = [Buffer, HeaderMap, Buffer, Buffer]
 export type DecodedToBeSigned = [string, Buffer, Buffer, Buffer]
 export type DecodedCoseSign1 = {
   value: CoseSign1Structure
 }
-
-export type PrivateKeyJwk = JsonWebKey & { d: string, kid?: string }
-export type PublicKeyJwk = Omit<PrivateKeyJwk, 'd'>
 
 export type RequestCoseSign1Signer = {
   remote: {
@@ -18,8 +14,8 @@ export type RequestCoseSign1Signer = {
 }
 
 export type RequestCoseSign1 = {
-  protectedHeader: ProtectedHeaderMap,
-  unprotectedHeader?: UnprotectedHeaderMap,
+  protectedHeader: HeaderMap,
+  unprotectedHeader?: HeaderMap,
   payload: ArrayBuffer,
   externalAAD?: ArrayBuffer
 }
