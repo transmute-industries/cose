@@ -1,5 +1,5 @@
 
-import { convertCoseKeyToJsonWebKey, convertJsonWebKeyToCoseKey, generate, publicFromPrivate } from "../key"
+import { cose_key_to_web_key, convertJsonWebKeyToCoseKey, generate, publicFromPrivate } from "../key"
 
 import { Tagged, decodeFirst, encodeAsync } from "cbor-web"
 
@@ -36,7 +36,7 @@ export const decrypt = async (req: RequestWrapDecryption) => {
   const epk = recipientUnprotectedHeader.get(Unprotected.Epk)
   // ensure the epk has the algorithm that is set in the protected header
   epk.set(Epk.Alg, recipientAlgorithm)
-  const senderPublicKeyJwk = await convertCoseKeyToJsonWebKey(epk)
+  const senderPublicKeyJwk = await cose_key_to_web_key(epk)
   const kek = await ecdh.deriveKey(protectedHeader, recipientProtectedHeader, senderPublicKeyJwk, receiverPrivateKeyJwk)
   const iv = unprotectedHeader.get(Unprotected.Iv)
   const externalAad = req.aad ? toArrayBuffer(req.aad) : EMPTY_BUFFER

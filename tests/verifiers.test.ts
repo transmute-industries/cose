@@ -21,19 +21,19 @@ it('verify multiple receipts', async () => {
 
   const issuerSigner = cose.detached.signer({
     remote: cose.crypto.signer({
-      privateKeyJwk: await cose.key.convertCoseKeyToJsonWebKey<JWK>(issuerSecretKey)
+      privateKeyJwk: await cose.crypto.key.cose_key_to_web_key<JWK>(issuerSecretKey)
     })
 
   })
   const notary1Signer = cose.detached.signer({
     remote: cose.crypto.signer({
-      privateKeyJwk: await cose.key.convertCoseKeyToJsonWebKey<JWK>(notary1SecretKey)
+      privateKeyJwk: await cose.crypto.key.cose_key_to_web_key<JWK>(notary1SecretKey)
     })
 
   })
   const notary2Signer = cose.detached.signer({
     remote: cose.crypto.signer({
-      privateKeyJwk: await cose.key.convertCoseKeyToJsonWebKey<JWK>(notary2SecretKey)
+      privateKeyJwk: await cose.crypto.key.cose_key_to_web_key<JWK>(notary2SecretKey)
     })
   })
   const issuerCkt = await cose.key.thumbprint.calculateCoseKeyThumbprintUri(issuerSecretKey)
@@ -82,17 +82,17 @@ it('verify multiple receipts', async () => {
     const protectedHeaderMap = cose.cbor.decodeFirstSync(protectedHeaderBytes)
     const kid = protectedHeaderMap.get(cose.header.kid);
     if (kid === issuerCkt) {
-      return cose.key.convertCoseKeyToJsonWebKey(
+      return cose.crypto.key.cose_key_to_web_key(
         await cose.key.publicFromPrivate(issuerSecretKey)
       )
     }
     if (kid === notary1Ckt) {
-      return cose.key.convertCoseKeyToJsonWebKey(
+      return cose.crypto.key.cose_key_to_web_key(
         await cose.key.publicFromPrivate(notary1SecretKey)
       )
     }
     if (kid === notary2Ckt) {
-      return cose.key.convertCoseKeyToJsonWebKey(
+      return cose.crypto.key.cose_key_to_web_key(
         await cose.key.publicFromPrivate(notary2SecretKey)
       )
     }

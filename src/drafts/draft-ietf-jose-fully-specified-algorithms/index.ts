@@ -8,8 +8,9 @@ import * as cbor from 'cbor-web'
 import { less_specified } from '../../iana/requested/cose'
 
 import { web_key_to_cose_key } from './web_key_to_cose_key'
+import { cose_key_to_web_key } from './cose_key_to_web_key'
 
-export { web_key_to_cose_key }
+export { web_key_to_cose_key, cose_key_to_web_key }
 
 const encoder = new TextEncoder()
 const decoder = new TextDecoder()

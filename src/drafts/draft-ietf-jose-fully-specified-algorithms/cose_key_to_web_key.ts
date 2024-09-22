@@ -4,9 +4,9 @@ import { labels_to_ec2_params, ec2, label_to_key_type, any_cose_key, label_to_cu
 import { labels_to_algorithms } from "../../iana/requested/cose";
 
 
-import { format_web_key } from "../../drafts/draft-ietf-jose-fully-specified-algorithms";
+import { format_web_key } from ".";
 
-export const convertCoseKeyToJsonWebKey = async <T>(key: any_cose_key): Promise<T> => {
+export const cose_key_to_web_key = async <T>(key: any_cose_key): Promise<T> => {
 
   const jwk = {} as Record<string, any>
   const ktyLabel = key.get(ec2.kty)
