@@ -11,8 +11,9 @@ it('cose key', async () => {
 
 it('detached payload cose sign1', async () => {
   const input = fs.readFileSync('./tests/__fixtures__/detached-payload.cbor')
-  const output = fs.readFileSync('./tests/__fixtures__/detached-payload.diag')
   const diag = await cose.cbor.diag(input, "application/cose")
+  fs.writeFileSync('./tests/__fixtures__/detached-payload.diag', diag)
+  const output = fs.readFileSync('./tests/__fixtures__/detached-payload.diag')
   expect(diag).toBe(output.toString())
 })
 
@@ -33,9 +34,10 @@ it('hash envelope', async () => {
       protectedHeader: cose.ProtectedHeader([
         [cose.header.alg, cose.algorithm.es256],
         [cose.draft_headers.payload_hash_algorithm, cose.algorithm.sha_256],
-        [cose.draft_headers.payload_preimage_content_type, 'text/plain; charset=utf-8']
+        [cose.draft_headers.payload_preimage_content_type, 'application/spdx+json'],
+        [cose.draft_headers.payload_location, 'https://s.example/sbom/42']
       ]),
-      payload: Buffer.from('🔥 hello')
+      payload: Buffer.from('🔥 not a real sbom')
     })
   fs.writeFileSync('./tests/__fixtures__/hash-envelope.cbor', signature)
   const input = fs.readFileSync('./tests/__fixtures__/hash-envelope.cbor')

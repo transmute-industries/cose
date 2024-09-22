@@ -1,9 +1,11 @@
-
 / cose-sign1 / 18([
   / protected   / <<
-    / algorithm / 1 : -7, # ES256    -6800: -16,    -6802: text/plain; charset=utf-8,
+    / algorithm / 1 : -7,  # ES256
+    / hash  / -6800 : -16, # SHA-256
+    / content  / -6802 : "application/spdx+json",
+    / location / -6801 : "https://s.example/sbom/42",
   >>
   / unprotected / {},
-  / payload     / payload
-  / signature   / h'08c1cb19...594dcbe8'
+  / payload     / h'61b71758...5657f240'
+  / signature   / h'154fa8db...147e02c4'
 ])    

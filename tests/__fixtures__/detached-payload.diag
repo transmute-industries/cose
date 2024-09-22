@@ -1,7 +1,6 @@
-
 / cose-sign1 / 18([
   / protected   / <<
-    / algorithm / 1 : -35, # ES384
+    / algorithm / 1 : -35,  # ES384
   >>
   / unprotected / {},
   / payload     / null,
