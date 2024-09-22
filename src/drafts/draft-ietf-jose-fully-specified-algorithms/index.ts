@@ -1,5 +1,5 @@
 
-import { exportJWK, KeyLike, JWK, generateKeyPair, calculateJwkThumbprint } from 'jose'
+import { exportJWK, KeyLike, JWK, generateKeyPair } from 'jose'
 import { crypto_key_type } from '../../iana/assignments/media-types'
 import { web_key_type, } from '../../iana/assignments/jose'
 import { ec2_curves, ec2_key, okp_key, okp_curves } from '../../iana/assignments/cose'
@@ -10,10 +10,11 @@ import { less_specified } from '../../iana/requested/cose'
 import { web_key_to_cose_key } from './web_key_to_cose_key'
 import { cose_key_to_web_key } from './cose_key_to_web_key'
 import { public_from_private } from './public_from_private'
+import { web_key_thumbprint } from './thumbprint'
 
 export { web_key_to_cose_key, cose_key_to_web_key, public_from_private }
 
-
+export * from './thumbprint'
 
 const encoder = new TextEncoder()
 const decoder = new TextDecoder()
@@ -134,7 +135,7 @@ export const export_public_web_key_with_algorithm = async <alg extends parseable
   const jwk = await exportJWK(k);
   jwk.alg = alg
   jwk.ext = ext
-  jwk.kid = kid || await calculateJwkThumbprint(jwk)
+  jwk.kid = kid || await web_key_thumbprint(jwk as web_key_type)
   return public_from_private<alg, 'application/jwk+json'>({
     key: jwk as any,
     type: 'application/jwk+json'
@@ -146,11 +147,11 @@ export const export_private_web_key_with_algorithm = async <alg extends parseabl
   alg: alg,
   kid?: string
 ): Promise<fully_specified_web_key<alg>> => {
-  const privateKey = await exportJWK(k);
-  privateKey.alg = alg
-  privateKey.ext = true; // impossible to export otherwise.
-  privateKey.kid = kid || await calculateJwkThumbprint(privateKey)
-  return format_web_key(privateKey) as fully_specified_web_key<alg>
+  const jwk = await exportJWK(k);
+  jwk.alg = alg
+  jwk.ext = true; // impossible to export otherwise.
+  jwk.kid = kid || await web_key_thumbprint(jwk as web_key_type)
+  return format_web_key(jwk) as fully_specified_web_key<alg>
 }
 
 export const generate_web_key = async ({ alg, ext, kid }: {

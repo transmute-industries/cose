@@ -36,9 +36,9 @@ it('verify multiple receipts', async () => {
       privateKeyJwk: await cose.crypto.key.cose_key_to_web_key<JWK>(notary2SecretKey)
     })
   })
-  const issuerCkt = await cose.key.thumbprint.calculateCoseKeyThumbprintUri(issuerSecretKey)
-  const notary1Ckt = await cose.key.thumbprint.calculateCoseKeyThumbprintUri(notary1SecretKey)
-  const notary2Ckt = await cose.key.thumbprint.calculateCoseKeyThumbprintUri(notary2SecretKey)
+  const issuerCkt = await cose.crypto.key.cose_key_thumbprint_uri(issuerSecretKey)
+  const notary1Ckt = await cose.crypto.key.cose_key_thumbprint_uri(notary1SecretKey)
+  const notary2Ckt = await cose.crypto.key.cose_key_thumbprint_uri(notary2SecretKey)
 
   const content = fs.readFileSync('./examples/image.png')
   const signatureForImage = await issuerSigner.sign({

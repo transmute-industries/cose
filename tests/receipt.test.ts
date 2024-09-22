@@ -111,7 +111,7 @@ it("add / remove from receipts", async () => {
   const receipts = await cose.receipt.get(transparentSignature)
   expect(receipts.length).toBe(1) // expect 1 receipt
   const coseKey = await cose.crypto.key.web_key_to_cose_key<cose.fully_specified_cose_key<'ES256'>>(publicKeyJwk)
-  coseKey.set(cose.ec2.kid, await cose.key.thumbprint.calculateCoseKeyThumbprintUri(coseKey))
+  coseKey.set(cose.ec2.kid, await cose.crypto.key.cose_key_thumbprint_uri(coseKey))
   const publicKey = cose.crypto.key.serialize<'ES256', 'application/cose-key'>({ key: coseKey, type: 'application/cose-key' })
   expect(publicKey).toBeDefined();
   // fs.writeFileSync('./examples/image.ckt.signature.cbor', Buffer.from(transparentSignature))
