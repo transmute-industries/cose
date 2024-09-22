@@ -2,6 +2,6 @@
 
 
 
-import { parse, generate, convert, gen } from "../drafts/draft-ietf-jose-fully-specified-algorithms";
+import { parse, generate, convert, gen, serialize } from "../drafts/draft-ietf-jose-fully-specified-algorithms";
 
-export { parse, generate, convert, gen }
+export { gen, generate, parse, serialize, convert }

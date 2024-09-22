@@ -198,11 +198,11 @@ export const parse = <
 }
 
 
-export const generate = async ({ id, type, algorithm, extractable }: request_crypto_key) => {
+export const generate = async ({ id, type, algorithm, extractable }: request_crypto_key): Promise<Buffer> => {
   switch (type) {
     case 'application/jwk+json': {
       const { privateKey } = await generate_web_key({ kid: id, alg: algorithm, ext: extractable || true })
-      return encoder.encode(JSON.stringify(privateKey))
+      return Buffer.from(encoder.encode(JSON.stringify(privateKey)))
     }
     case 'application/cose-key': {
       const { privateKey } = await generate_web_key({ kid: id, alg: algorithm, ext: extractable || true })
