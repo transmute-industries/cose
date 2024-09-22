@@ -48,7 +48,7 @@ it('hash envelope', async () => {
   expect(diag).toBe(output.toString())
 })
 
-it('cose receipt', async () => {
+it('cose receipts', async () => {
   const k = await cose.crypto.key.parse<'ES256', 'application/cose-key'>({
     key,
     type: 'application/cose-key'
@@ -60,7 +60,7 @@ it('cose receipt', async () => {
     .map((entry) => {
       return cose.receipt.leaf(entry)
     }))
-  const signer = await cose.sign1
+  const signer = await cose.detached
     .signer({
       remote: await cose.crypto.key.signer({
         algorithm: 'ES256',
@@ -80,5 +80,21 @@ it('cose receipt', async () => {
   const input = fs.readFileSync('./tests/__fixtures__/inclusion.receipt.cbor')
   const diag = await cose.cbor.diag(input, "application/cose")
   fs.writeFileSync('./tests/__fixtures__/inclusion.receipt.diag', diag)
+
+  entries.push(await cose.receipt.leaf(encoder.encode('✨ new entry ✨')))
+  // ask the transparency service for the latest root, and a consistency proof
+  // based on a previous receipt
+  const { root, receipt } = await cose.receipt.consistency.issue({
+    protectedHeader: cose.ProtectedHeader([
+      [cose.header.alg, cose.algorithm.es256],
+      [cose.draft_headers.verifiable_data_structure, cose.verifiable_data_structures.rfc9162_sha256]
+    ]),
+    receipt: inclusion,
+    entries,
+    signer
+  })
+  fs.writeFileSync('./tests/__fixtures__/consistency.receipt.cbor', receipt)
+  const diag2 = await cose.cbor.diag(receipt, "application/cose")
+  fs.writeFileSync('./tests/__fixtures__/consistency.receipt.diag', diag2)
 })
 

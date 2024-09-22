@@ -5,16 +5,17 @@
   }>>,
   / unprotected / {
     / proofs / 396 : {
-      / inclusion / -1 : [
+      / consistency / -2 : [
         <<[
-          / size / 3, / leaf / 1,
-          / inclusion path / 
-          h'8aba08fe...4fdb8c4d',
-          h'0b317603...f65d1ea6'
+          / old / 3, / new / 4,
+          / consistency path / 
+          h'0b317603...f65d1ea6',
+          h'5b87a132...71b225ed',
+          h'2266e9dd...f94e92e7'
         ]>>
       ],
     },
   },
   / payload     / null,
-  / signature   / h'f6fb3d86...86d38af6'
+  / signature   / h'63e6034a...f37004b6'
 ])    

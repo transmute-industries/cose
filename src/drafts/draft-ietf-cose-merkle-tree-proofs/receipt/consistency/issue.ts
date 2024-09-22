@@ -68,11 +68,11 @@ export const issue = async (req: RequestIssueConsistencyReceipt) => {
   const unprotectedHeader = new Map();
   unprotectedHeader.set(draft_headers.verifiable_data_proofs, proofs)
 
-  const consistency = await signer.sign({
+  const consistency = new Uint8Array(await signer.sign({
     protectedHeader,
     unprotectedHeader,
     payload: root
-  })
+  }))
 
   return { root, receipt: consistency, }
 }
