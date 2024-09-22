@@ -17,15 +17,17 @@ it('detached payload cose sign1', async () => {
 })
 
 it.skip('hash envelope', async () => {
+  const k = await cose.crypto.key.parse<'ES256', 'application/cose-key'>({
+    key,
+    type: 'application/cose-key'
+  })
+  const signer = await cose.crypto.key.signer({
+    algorithm: 'ES256',
+    key: k,
+  })
   const signature = await cose.hash
     .signer({
-      remote: await cose.crypto.key.signer({
-        algorithm: 'ES256',
-        key: await cose.crypto.key.parse<'ES256', 'application/cose-key'>({
-          key,
-          type: 'application/cose-key'
-        }),
-      })
+      remote: signer
     })
     .sign({
       protectedHeader: cose.ProtectedHeader([

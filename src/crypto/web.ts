@@ -3,30 +3,32 @@ import subtle from "./subtle";
 import { any_cose_key, cose_key, cose_key_type } from "../iana/assignments/cose"
 import { cose_key_to_web_key } from "./key"
 
-
-export const webCryptoSignatureAlgorithmByCoseSignatureAlgorithm = {
+export const webCryptoKeyParamsByCoseAlgorithm = {
   'ES256': {
     name: "ECDSA",
-    hash: { name: 'SHA-256' },
+    hash: 'SHA-256',
+    namedCurve: 'P-256', // not true...
   },
   'ES384': {
     name: "ECDSA",
-    hash: { name: 'SHA-384' },
+    hash: 'SHA-384',
+    namedCurve: 'P-384', // not true...
   },
   'ES521': {
     name: "ECDSA",
-    hash: { name: 'SHA-512' },
+    hash: 'SHA-512',
+    namedCurve: 'P-521', // not true...
   }
 } as const
 
-export type WebCryptoCoseSignatureAlgorithm = keyof typeof webCryptoSignatureAlgorithmByCoseSignatureAlgorithm
+export type WebCryptoCoseAlgorithm = keyof typeof webCryptoKeyParamsByCoseAlgorithm
 
-export const signer = ({ key, algorithm }: { key: CryptoKey, algorithm: WebCryptoCoseSignatureAlgorithm }) => {
+export const signer = ({ key, algorithm }: { key: CryptoKey, algorithm: WebCryptoCoseAlgorithm }) => {
   return {
     sign: async (toBeSigned: ArrayBuffer): Promise<ArrayBuffer> => {
       return subtle().then((subtle) => {
         return subtle.sign(
-          webCryptoSignatureAlgorithmByCoseSignatureAlgorithm[algorithm],
+          webCryptoKeyParamsByCoseAlgorithm[algorithm],
           key,
           toBeSigned,
         )
@@ -35,12 +37,12 @@ export const signer = ({ key, algorithm }: { key: CryptoKey, algorithm: WebCrypt
   }
 }
 
-export const verifier = ({ key, algorithm }: { key: CryptoKey, algorithm: WebCryptoCoseSignatureAlgorithm }) => {
+export const verifier = ({ key, algorithm }: { key: CryptoKey, algorithm: WebCryptoCoseAlgorithm }) => {
   return {
     verify: async (toBeSigned: ArrayBuffer, signature: ArrayBuffer): Promise<ArrayBuffer> => {
       return subtle().then(async (subtle) => {
         const verified = await subtle.verify(
-          webCryptoSignatureAlgorithmByCoseSignatureAlgorithm[algorithm],
+          webCryptoKeyParamsByCoseAlgorithm[algorithm],
           key,
           signature,
           toBeSigned,
@@ -54,22 +56,6 @@ export const verifier = ({ key, algorithm }: { key: CryptoKey, algorithm: WebCry
   }
 }
 
-const webCryptoKeyParamsByCoseAlgorithm = {
-  'ES256': {
-    name: "ECDSA",
-    namedCurve: 'P-256', // not true...
-  },
-  'ES384': {
-    name: "ECDSA",
-    namedCurve: 'P-384', // not true...
-  },
-  'ES521': {
-    name: "ECDSA",
-    namedCurve: 'P-521', // not true...
-  }
-} as const
-
-export type WebCryptoCoseAlgorithm = keyof typeof webCryptoKeyParamsByCoseAlgorithm
 
 export const web_key_to_crypto_key = async (jwk: any, key_ops?: string[]): Promise<CryptoKey> => {
   if (jwk.kty != 'EC') {
