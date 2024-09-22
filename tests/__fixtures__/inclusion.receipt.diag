@@ -1,0 +1,20 @@
+/ cose-sign1 / 18([
+  / protected   / <<{
+    / algorithm / 1 : -7,  # ES256
+    / notarized / 395 : 1, # RFC9162 SHA-256
+  }>>,
+  / unprotected / {
+    / proofs / 396 : {
+      / inclusion / -1 : [
+        <<[
+          / size / 3, / leaf / 1,
+          / inclusion path / 
+          h'8aba08fe...4fdb8c4d',
+          h'0b317603...f65d1ea6'
+        ]>>
+      ],
+    },
+  },
+  / payload     / h'd82bd9d3...2f90dab6',
+  / signature   / h'f91ae8b9...0671cca0'
+])    

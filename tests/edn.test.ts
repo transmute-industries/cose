@@ -2,6 +2,7 @@ import fs from 'fs'
 import * as cose from '../src'
 
 const key = fs.readFileSync('./tests/__fixtures__/cose-key.cbor')
+const encoder = new TextEncoder();
 
 it('cose key', async () => {
   const output = fs.readFileSync('./tests/__fixtures__/cose-key.diag')
@@ -45,5 +46,39 @@ it('hash envelope', async () => {
   fs.writeFileSync('./tests/__fixtures__/hash-envelope.diag', diag)
   const output = fs.readFileSync('./tests/__fixtures__/hash-envelope.diag')
   expect(diag).toBe(output.toString())
+})
+
+it('cose receipt', async () => {
+  const k = await cose.crypto.key.parse<'ES256', 'application/cose-key'>({
+    key,
+    type: 'application/cose-key'
+  })
+  const entries = await Promise.all([`💣 test`, `✨ test`, `🔥 test`]
+    .map((entry) => {
+      return encoder.encode(entry)
+    })
+    .map((entry) => {
+      return cose.receipt.leaf(entry)
+    }))
+  const signer = await cose.sign1
+    .signer({
+      remote: await cose.crypto.key.signer({
+        algorithm: 'ES256',
+        key: k,
+      })
+    })
+  const inclusion = await cose.receipt.inclusion.issue({
+    protectedHeader: cose.ProtectedHeader([
+      [cose.header.alg, cose.algorithm.es256],
+      [cose.draft_headers.verifiable_data_structure, cose.verifiable_data_structures.rfc9162_sha256]
+    ]),
+    entry: 1,
+    entries,
+    signer
+  })
+  fs.writeFileSync('./tests/__fixtures__/inclusion.receipt.cbor', inclusion)
+  const input = fs.readFileSync('./tests/__fixtures__/inclusion.receipt.cbor')
+  const diag = await cose.cbor.diag(input, "application/cose")
+  fs.writeFileSync('./tests/__fixtures__/inclusion.receipt.diag', diag)
 })
 

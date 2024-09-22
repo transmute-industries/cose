@@ -27,7 +27,7 @@ export enum draft_headers {
   // https://datatracker.ietf.org/doc/draft-ietf-cose-merkle-tree-proofs/
   receipts = 394,
   verifiable_data_structure = 395,
-  verifiable_data_proofs = 395
+  verifiable_data_proofs = 396
 }
 
 export const VerifiableDataStructures = {

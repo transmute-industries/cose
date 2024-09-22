@@ -16,7 +16,7 @@ export type RequestIssueInclusionReceipt = {
   signer: CoseSign1Signer
 }
 
-export const issue = async (req: RequestIssueInclusionReceipt) => {
+export const issue = async (req: RequestIssueInclusionReceipt): Promise<Uint8Array> => {
   const { protectedHeader, entry, entries, signer } = req;
   const vds = protectedHeader.get(draft_headers.verifiable_data_structure)
   if (vds !== VerifiableDataStructures['RFC9162-Binary-Merkle-Tree']) {
@@ -37,9 +37,9 @@ export const issue = async (req: RequestIssueInclusionReceipt) => {
   ])
   const unprotectedHeader = new Map();
   unprotectedHeader.set(draft_headers.verifiable_data_proofs, proofs)
-  return signer.sign({
+  return new Uint8Array(await signer.sign({
     protectedHeader,
     unprotectedHeader,
     payload: root
-  })
+  }))
 }

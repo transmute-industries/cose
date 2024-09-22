@@ -1,8 +1,9 @@
 / cose-sign1 / 18([
-  / protected   / <<
+  / protected   / <<{
     / algorithm / 1 : -35,  # ES384
-  >>
-  / unprotected / {},
+  }>>,
+  / unprotected / {
+  },
   / payload     / null,
   / signature   / h'b4e0d531...b0a48a3a'
 ])    

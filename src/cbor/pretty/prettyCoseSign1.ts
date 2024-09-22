@@ -7,15 +7,17 @@ import { prettyPayload } from './prettyPayload'
 import { ellideBytes } from './ellideBytes'
 
 export const prettyCoseSign1 = (data: Buffer) => {
-    const decoded = cbor.decode(data)
-    const [encodedProtected, decodedUnprotected, encodedPayload, signature] = decoded.value
-    const decodedProtected = cbor.decode(encodedProtected)
-    return `
+  const decoded = cbor.decode(data)
+  const [encodedProtected, decodedUnprotected, encodedPayload, signature] = decoded.value
+  const decodedProtected = cbor.decode(encodedProtected)
+  return `
 / cose-sign1 / ${decoded.tag}([
-  / protected   / <<
+  / protected   / <<{
 ${prettyHeader(decodedProtected)}
-  >>
-  / unprotected / ${prettyHeader(decodedUnprotected)}
+  }>>,
+  / unprotected / {
+${prettyHeader(decodedUnprotected)}
+  },
   / payload     / ${prettyPayload(encodedPayload)}
   / signature   / ${ellideBytes(signature)}
 ])    
