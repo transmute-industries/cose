@@ -1,11 +1,9 @@
-import { decodeFirstSync, toArrayBuffer, encodeAsync, Tagged } from '../../cbor'
+import { decodeFirstSync, toArrayBuffer, encodeAsync, Tagged } from '../../../cbor'
 
-import { CoseSign1Bytes } from "../sign1";
+import { CoseSign1Bytes } from "../../../cose/sign1";
 
-import { draft_headers } from '../../iana/requested/cose';
-import * as cbor from '../../iana/assignments/cbor';
-
-
+import { draft_headers } from '../../../iana/requested/cose';
+import * as cbor from '../../../iana/assignments/cbor';
 
 export const add = async (signature: CoseSign1Bytes, receipt: CoseSign1Bytes): Promise<ArrayBuffer> => {
   const { tag, value } = decodeFirstSync(signature)

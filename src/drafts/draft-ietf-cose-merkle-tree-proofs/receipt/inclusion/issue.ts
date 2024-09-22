@@ -1,13 +1,13 @@
 
 import { CoMETRE } from '@transmute/rfc9162'
 
-import { cbor, VerifiableDataProofTypes, VerifiableDataStructures } from '../../..'
+import { cbor, VerifiableDataProofTypes, VerifiableDataStructures } from '../../../..'
 
-import { CoseSign1Signer } from "../../sign1"
+import { CoseSign1Signer } from "../../../../cose/sign1"
 
-import { draft_headers } from '../../..'
+import { draft_headers } from '../../../..'
 
-import { HeaderMap } from '../../..'
+import { HeaderMap } from '../../../..'
 
 export type RequestIssueInclusionReceipt = {
   protectedHeader: HeaderMap

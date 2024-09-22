@@ -1,7 +1,7 @@
-import { decodeFirstSync, toArrayBuffer, encodeAsync, Tagged } from '../../cbor'
-import { CoseSign1Bytes } from "../sign1";
+import { decodeFirstSync, toArrayBuffer, encodeAsync, Tagged } from '../../../cbor'
+import { CoseSign1Bytes } from "../../../cose/sign1";
 
-import * as cbor from '../../iana/assignments/cbor'
+import * as cbor from '../../../iana/assignments/cbor'
 
 export const remove = async (signature: CoseSign1Bytes): Promise<ArrayBuffer> => {
   const { tag, value } = decodeFirstSync(signature)

@@ -1,14 +1,14 @@
 
 import { CoMETRE } from '@transmute/rfc9162'
 
-import { cbor, VerifiableDataProofTypes, VerifiableDataStructures } from '../../..'
+import { cbor, VerifiableDataProofTypes, VerifiableDataStructures } from '../../../..'
 
-import { CoseSign1Bytes, CoseSign1Signer } from "../../sign1"
-import { toArrayBuffer } from '../../../cbor'
+import { CoseSign1Bytes, CoseSign1Signer } from "../../../../cose/sign1"
+import { toArrayBuffer } from '../../../../cbor'
 
-import { draft_headers } from '../../..'
+import { draft_headers } from '../../../..'
 
-import { HeaderMap } from '../../..'
+import { HeaderMap } from '../../../..'
 
 
 export type RequestIssueConsistencyReceipt = {

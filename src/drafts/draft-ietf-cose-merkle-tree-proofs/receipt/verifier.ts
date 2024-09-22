@@ -1,15 +1,15 @@
-import { RequestCoseSign1DectachedVerify } from "../sign1"
+import { RequestCoseSign1DectachedVerify } from "../../../cose/sign1"
 
 
 
-import { detached } from "../.."
+import { detached } from "../../.."
 import { get } from "./get"
 
 import * as inclusion from './inclusion'
 import { leaf } from "./leaf"
 import { remove } from "./remove"
 
-import { web_key_type } from "../../iana/assignments/jose"
+import { web_key_type } from "../../../iana/assignments/jose"
 
 export type RequestHeaderVerifier = {
   resolve: (signature: ArrayBuffer) => Promise<web_key_type>

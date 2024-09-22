@@ -4,12 +4,11 @@
 
 import * as attached from './cose/attached'
 import * as detached from './cose/detached'
+import * as cbor from './cbor'
 
-export * from './cose/sign1'
-export * from './x509'
+import * as crypto from './crypto'
 
-
-export * from './desugar'
+export * from './drafts/draft-ietf-cose-merkle-tree-proofs'
 export * from './drafts/draft-ietf-jose-fully-specified-algorithms'
 
 // https://github.com/dajiaji/hpke-js/issues/302
@@ -20,8 +19,8 @@ export * from './drafts/draft-ietf-jose-fully-specified-algorithms'
 export * from './iana/assignments/cbor'
 export * from './iana/assignments/cose'
 export * from './iana/requested/cose'
+export * from './cose/sign1'
+export * from './x509'
+export * from './desugar'
 
-import * as cbor from './cbor'
-import * as receipt from './cose/receipt'
-import * as crypto from './crypto'
-export { crypto, cbor, attached, detached, receipt }
+export { crypto, cbor, attached, detached }

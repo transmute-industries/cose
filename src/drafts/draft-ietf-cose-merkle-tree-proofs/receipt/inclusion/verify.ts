@@ -1,12 +1,12 @@
 
 import { CoMETRE } from '@transmute/rfc9162'
 
-import { cbor, VerifiableDataProofTypes, VerifiableDataStructures } from '../../..'
+import { cbor, VerifiableDataProofTypes, VerifiableDataStructures } from '../../../..'
 
-import { CoseSign1Bytes, CoseSign1DetachedVerifier } from "../../sign1"
+import { CoseSign1Bytes, CoseSign1DetachedVerifier } from "../../../../cose/sign1"
 
 
-import { draft_headers } from '../../..'
+import { draft_headers } from '../../../..'
 
 
 export type RequestVerifyInclusionReceipt = {
