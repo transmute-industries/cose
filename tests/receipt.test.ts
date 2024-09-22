@@ -77,7 +77,10 @@ it("add / remove from receipts", async () => {
     type: "application/jwk+json",
     algorithm: "ES256"
   })
-  const publicKeyJwk = await cose.key.publicFromPrivate<JWK>(privateKeyJwk)
+  const publicKeyJwk = await cose.crypto.key.public_from_private<'ES256', 'application/jwk+json'>({
+    key: privateKeyJwk,
+    type: 'application/jwk+json'
+  })
   const signer = cose.detached.signer({
     remote: cose.crypto.signer({
       privateKeyJwk

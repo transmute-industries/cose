@@ -83,17 +83,26 @@ it('verify multiple receipts', async () => {
     const kid = protectedHeaderMap.get(cose.header.kid);
     if (kid === issuerCkt) {
       return cose.crypto.key.cose_key_to_web_key(
-        await cose.key.publicFromPrivate(issuerSecretKey)
+        await cose.crypto.key.public_from_private<'ES256', 'application/cose-key'>({
+          key: issuerSecretKey,
+          type: 'application/cose-key'
+        })
       )
     }
     if (kid === notary1Ckt) {
       return cose.crypto.key.cose_key_to_web_key(
-        await cose.key.publicFromPrivate(notary1SecretKey)
+        await cose.crypto.key.public_from_private<'ES256', 'application/cose-key'>({
+          key: notary1SecretKey,
+          type: 'application/cose-key'
+        })
       )
     }
     if (kid === notary2Ckt) {
       return cose.crypto.key.cose_key_to_web_key(
-        await cose.key.publicFromPrivate(notary2SecretKey)
+        await cose.crypto.key.public_from_private<'ES256', 'application/cose-key'>({
+          key: notary2SecretKey,
+          type: 'application/cose-key'
+        })
       )
     }
     throw new Error('No verification key found in trust store.')

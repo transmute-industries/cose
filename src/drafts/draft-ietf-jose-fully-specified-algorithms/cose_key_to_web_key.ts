@@ -1,4 +1,4 @@
-import { base64url } from "jose";
+import { base64url, JWK } from "jose";
 
 import { labels_to_ec2_params, ec2, label_to_key_type, any_cose_key, label_to_curve } from '../../iana/assignments/cose'
 import { labels_to_algorithms } from "../../iana/requested/cose";
@@ -8,7 +8,7 @@ import { format_web_key } from ".";
 
 export const cose_key_to_web_key = async <T>(key: any_cose_key): Promise<T> => {
 
-  const jwk = {} as Record<string, any>
+  const jwk = {} as JWK // this should error kty is mandatory
   const ktyLabel = key.get(ec2.kty)
   const kty = labels_to_ec2_params.get(ktyLabel)
   if (!kty) {

@@ -1,16 +1,19 @@
 
 import { exportJWK, KeyLike, JWK, generateKeyPair, calculateJwkThumbprint } from 'jose'
 import { crypto_key_type } from '../../iana/assignments/media-types'
-import { web_key_type, private_rsa_web_key_params, private_oct_web_key_params, private_ec_web_key_params, private_okp_web_key_params, jose_key_type } from '../../iana/assignments/jose'
-import { ec2_curves, ec2_key, okp_key, ec2, okp, okp_curves } from '../../iana/assignments/cose'
+import { web_key_type, } from '../../iana/assignments/jose'
+import { ec2_curves, ec2_key, okp_key, okp_curves } from '../../iana/assignments/cose'
 
 import * as cbor from 'cbor-web'
 import { less_specified } from '../../iana/requested/cose'
 
 import { web_key_to_cose_key } from './web_key_to_cose_key'
 import { cose_key_to_web_key } from './cose_key_to_web_key'
+import { public_from_private } from './public_from_private'
 
-export { web_key_to_cose_key, cose_key_to_web_key }
+export { web_key_to_cose_key, cose_key_to_web_key, public_from_private }
+
+
 
 const encoder = new TextEncoder()
 const decoder = new TextDecoder()
@@ -90,6 +93,20 @@ export type fully_specified_web_key<T extends fully_specified_signature_algorith
 export type fully_specified_cose_signature_algorithms = keyof algorithm_specified_cose_key_params
 export type fully_specified_cose_key<T extends fully_specified_cose_signature_algorithms> = algorithm_specified_cose_key_params[T]
 
+export type parseable_fully_specified_signature_algorithms = keyof algorithm_specified_cose_key_params | keyof algorithm_specified_web_key_params
+export type parsable_fully_specified_keys<alg extends parseable_fully_specified_signature_algorithms, cty extends crypto_key_type> =
+  cty extends 'application/jwk+json' ? fully_specified_web_key<alg> : cty extends 'application/cose-key' ? fully_specified_cose_key<alg> : unknown
+
+export type request_crypto_key = {
+
+  type: crypto_key_type,
+  algorithm: fully_specified_signature_algorithms
+
+  id?: string,
+  extractable?: boolean
+}
+
+
 export const format_web_key = (jwk: JWK) => {
   const { kid, alg, kty, crv, x, y, d, ext, ...rest } = jwk
   return JSON.parse(JSON.stringify({
@@ -97,7 +114,7 @@ export const format_web_key = (jwk: JWK) => {
   }))
 }
 
-const without_private_information = <T>(jwk: JWK, private_params: Record<string, string>) => {
+export const without_private_information = <T>(jwk: JWK, private_params: Record<string, string>) => {
   const public_information = {} as Record<string, unknown>
   for (const [key, value] of Object.entries(jwk)) {
     if (key in private_params) {
@@ -108,46 +125,32 @@ const without_private_information = <T>(jwk: JWK, private_params: Record<string,
   return format_web_key(public_information) as T
 }
 
-export const export_public_web_key_with_algorithm = async <T extends fully_specified_signature_algorithms>(
+export const export_public_web_key_with_algorithm = async <alg extends parseable_fully_specified_signature_algorithms>(
   k: KeyLike,
-  alg: fully_specified_signature_algorithms,
+  alg: alg,
   ext: boolean,
   kid?: string
-): Promise<fully_specified_web_key<T>> => {
+): Promise<fully_specified_web_key<alg>> => {
   const jwk = await exportJWK(k);
   jwk.alg = alg
   jwk.ext = ext
   jwk.kid = kid || await calculateJwkThumbprint(jwk)
-  const { kty } = jwk
-  switch (kty) {
-    case jose_key_type.RSA: {
-      return without_private_information(jwk, private_rsa_web_key_params)
-    }
-    case jose_key_type.EC: {
-      return without_private_information(jwk, private_ec_web_key_params)
-    }
-    case jose_key_type.OKP: {
-      return without_private_information(jwk, private_okp_web_key_params)
-    }
-    case jose_key_type.oct: {
-      return without_private_information(jwk, private_oct_web_key_params)
-    }
-    default: {
-      throw new Error('Unknown key type: ' + kty)
-    }
-  }
+  return public_from_private<alg, 'application/jwk+json'>({
+    key: jwk as any,
+    type: 'application/jwk+json'
+  }) as fully_specified_web_key<alg>
 }
 
-export const export_private_web_key_with_algorithm = async <T extends fully_specified_signature_algorithms>(
+export const export_private_web_key_with_algorithm = async <alg extends parseable_fully_specified_signature_algorithms>(
   k: KeyLike,
-  alg: fully_specified_signature_algorithms,
+  alg: alg,
   kid?: string
-): Promise<fully_specified_web_key<T>> => {
+): Promise<fully_specified_web_key<alg>> => {
   const privateKey = await exportJWK(k);
   privateKey.alg = alg
   privateKey.ext = true; // impossible to export otherwise.
   privateKey.kid = kid || await calculateJwkThumbprint(privateKey)
-  return format_web_key(privateKey) as fully_specified_web_key<T>
+  return format_web_key(privateKey) as fully_specified_web_key<alg>
 }
 
 export const generate_web_key = async ({ alg, ext, kid }: {
@@ -162,22 +165,6 @@ export const generate_web_key = async ({ alg, ext, kid }: {
     privateKey: await export_private_web_key_with_algorithm(k.privateKey, alg, kid),
   }
 }
-
-export type parseable_fully_specified_signature_algorithms = keyof algorithm_specified_cose_key_params | keyof algorithm_specified_web_key_params
-export type parsable_fully_specified_keys<alg extends parseable_fully_specified_signature_algorithms, cty extends crypto_key_type> =
-  cty extends 'application/jwk+json' ? fully_specified_web_key<alg> : cty extends 'application/cose-key' ? fully_specified_cose_key<alg> : unknown
-
-
-
-export type request_crypto_key = {
-
-  type: crypto_key_type,
-  algorithm: fully_specified_signature_algorithms
-
-  id?: string,
-  extractable?: boolean
-}
-
 
 export const parse = <
   alg extends parseable_fully_specified_signature_algorithms,

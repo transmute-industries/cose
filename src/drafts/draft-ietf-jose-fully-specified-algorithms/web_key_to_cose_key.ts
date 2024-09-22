@@ -1,10 +1,10 @@
 
-import { base64url, JWK } from 'jose'
+import { base64url } from 'jose'
 import { curve_to_label, ec2_params_to_labels, key_type_to_label } from '../../iana/assignments/cose'
 import { algorithms_to_labels } from '../../iana/requested/cose'
-import { jose_key_type, ec_web_key } from '../../iana/assignments/jose'
+import { jose_key_type, ec_web_key, web_key_type } from '../../iana/assignments/jose'
 
-export const web_key_to_cose_key = async <T>(jwk: JWK): Promise<T> => {
+export const web_key_to_cose_key = async <T>(jwk: web_key_type): Promise<T> => {
   const coseKey = new Map();
   const { kty } = jwk
   for (const [key, value] of Object.entries(jwk)) {
