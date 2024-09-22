@@ -1,6 +1,6 @@
 import signer from "./signer";
 
-import subtleCryptoProvider from "../../crypto/subtleCryptoProvider";
+import subtleCryptoProvider from "../../crypto/subtle";
 
 import { RequestCoseSign1Signer, RequestCoseSign1 } from "./types"
 

@@ -4,7 +4,7 @@ import { JWK } from 'jose'
 import { toArrayBuffer } from '../cbor'
 
 
-import subtleCryptoProvider from './subtleCryptoProvider'
+import subtleCryptoProvider from './subtle'
 
 import getDigestFromVerificationKey from '../cose/sign1/getDigestFromVerificationKey'
 

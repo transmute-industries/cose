@@ -4,7 +4,7 @@ import { JWK } from 'jose'
 
 import getDigestFromVerificationKey from '../cose/sign1/getDigestFromVerificationKey'
 
-import subtleCryptoProvider from './subtleCryptoProvider'
+import subtleCryptoProvider from './subtle'
 
 const verifier = ({ publicKeyJwk }: { publicKeyJwk: JWK }) => {
   const digest = getDigestFromVerificationKey(`${publicKeyJwk.alg}`)

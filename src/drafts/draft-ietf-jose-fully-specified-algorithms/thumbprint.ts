@@ -2,7 +2,7 @@ import { calculateJwkThumbprint, calculateJwkThumbprintUri, base64url, JWK } fro
 
 import { encodeCanonical } from "../../cbor";
 
-import subtleCryptoProvider from "../../crypto/subtleCryptoProvider";
+import subtleCryptoProvider from "../../crypto/subtle";
 import * as cose from '../../iana/assignments/cose'
 import { web_key_type } from "../../iana/assignments/jose";
 
