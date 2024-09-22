@@ -2,7 +2,7 @@
 
 
 import fs from 'fs'
-import { JWK } from 'jose'
+
 import * as cose from '../src'
 const encoder = new TextEncoder();
 

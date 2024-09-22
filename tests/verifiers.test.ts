@@ -3,6 +3,7 @@ import fs from 'fs'
 import * as cose from '../src'
 
 import { JWK } from 'jose'
+import { web_key_type } from '../src/iana/assignments/jose'
 
 it('verify multiple receipts', async () => {
 
@@ -73,7 +74,7 @@ it('verify multiple receipts', async () => {
   })
   const transparentSignature1 = await cose.receipt.add(signatureForImage, receiptForImageSignature1)
   const transparentSignature = await cose.receipt.add(transparentSignature1, receiptForImageSignature2)
-  const resolve = async (coseSign1: cose.CoseSign1Bytes): Promise<cose.PublicKeyJwk> => {
+  const resolve = async (coseSign1: cose.CoseSign1Bytes): Promise<web_key_type> => {
     const { tag, value } = cose.cbor.decodeFirstSync(coseSign1)
     if (tag !== cose.tag.COSE_Sign1) {
       throw new Error('Only tagged cose sign 1 are supported')

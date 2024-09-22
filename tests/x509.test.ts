@@ -3,6 +3,7 @@ import moment from 'moment'
 import * as jose from 'jose'
 import * as cose from '../src'
 import { labels_to_algorithms } from '../src/iana/requested/cose'
+import { web_key_type } from '../src/iana/assignments/jose'
 
 it('sign and verify with x5t and key resolver', async () => {
   const cert = await cose.certificate.root({
@@ -31,7 +32,7 @@ it('sign and verify with x5t and key resolver', async () => {
     ]),
     payload: content
   })
-  const certificateFromThumbprint = async (coseSign1: cose.CoseSign1Bytes): Promise<cose.PublicKeyJwk> => {
+  const certificateFromThumbprint = async (coseSign1: cose.CoseSign1Bytes): Promise<web_key_type> => {
     const { tag, value } = cose.cbor.decodeFirstSync(coseSign1)
     if (tag !== cose.tag.COSE_Sign1) {
       throw new Error('Only tagged cose sign 1 are supported')
@@ -51,7 +52,7 @@ it('sign and verify with x5t and key resolver', async () => {
         // could do extra certificate policy validation here...
         const publicKeyJwk = await jose.exportJWK(await jose.importX509(cert.public, algName))
         publicKeyJwk.alg = algName
-        return publicKeyJwk
+        return publicKeyJwk as web_key_type
       }
     }
     throw new Error('Certificate is not trusted.')

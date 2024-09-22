@@ -1,12 +1,13 @@
-import { decodeFirstSync, Sign1Tag } from '../../cbor'
+import { decodeFirstSync } from '../../cbor'
 
 import { CoseSign1Bytes } from "../sign1";
 
 import { draft_headers } from '../../iana/requested/cose';
+import * as cbor from '../../iana/assignments/cbor';
 
 export const get = async (signature: CoseSign1Bytes): Promise<CoseSign1Bytes[]> => {
   const { tag, value } = decodeFirstSync(signature)
-  if (tag !== Sign1Tag) {
+  if (tag !== cbor.tag.COSE_Sign1) {
     throw new Error('Receipts can only be added to cose-sign1')
   }
   if (!(value[1] instanceof Map)) {

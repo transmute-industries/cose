@@ -1,9 +1,9 @@
 
-import { encode, encodeAsync, EMPTY_BUFFER, Tagged, Sign1Tag, toArrayBuffer } from '../../cbor'
+import { encode, encodeAsync, EMPTY_BUFFER, Tagged, toArrayBuffer } from '../../cbor'
 
 import { RequestCoseSign1Signer, RequestCoseSign1, CoseSign1Bytes } from "./types"
 
-
+import { tag } from '../../iana/assignments/cbor'
 const signer = ({ remote }: RequestCoseSign1Signer) => {
   return {
     sign: async ({ protectedHeader, unprotectedHeader, externalAAD, payload }: RequestCoseSign1): Promise<CoseSign1Bytes> => {
@@ -19,7 +19,7 @@ const signer = ({ remote }: RequestCoseSign1Signer) => {
       const encodedToBeSigned = encode(decodedToBeSigned);
       const signature = await remote.sign(encodedToBeSigned)
       const coseSign1Structure = [protectedHeaderBytes, unprotectedHeader, payloadBuffer, signature];
-      return toArrayBuffer(await encodeAsync(new Tagged(Sign1Tag, coseSign1Structure), { canonical: true }));
+      return toArrayBuffer(await encodeAsync(new Tagged(tag.COSE_Sign1, coseSign1Structure), { canonical: true }));
     }
   }
 }
