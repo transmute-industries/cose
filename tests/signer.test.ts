@@ -1,10 +1,11 @@
 import fs from 'fs'
 import * as cose from '../src'
 
-import { JWK } from 'jose'
-
 it('sign and verify large image from file system', async () => {
-  const privateKeyJwk = await cose.key.generate<JWK>('ES256', 'application/jwk+json')
+  const privateKeyJwk = await cose.crypto.key.gen<'ES256', 'application/jwk+json'>({
+    type: "application/jwk+json",
+    algorithm: "ES256"
+  })
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { d, ...publicKeyJwk } = privateKeyJwk
   const signer = cose.detached.signer({

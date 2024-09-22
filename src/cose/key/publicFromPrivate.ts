@@ -24,7 +24,7 @@ export const extractPublicCoseKey = <T extends cose.any_cose_key | cose.ec2_key>
   return publicCoseKeyMap as T
 }
 
-export const publicFromPrivate = <T>(privateKey: JWK | cose.any_cose_key) => {
+export const publicFromPrivate = <T>(privateKey: any) => {
   if ((privateKey as JWK).kty) {
     return extractPublicKeyJwk(privateKey as JWK) as T
   }
