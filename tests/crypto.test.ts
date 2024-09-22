@@ -6,20 +6,23 @@ import * as jose from '../src/iana/assignments/jose'
 
 describe('web key', () => {
   it('generate', async () => {
-    const key = new Map(Object.entries(JSON.parse(new TextDecoder().decode(await crypto.key.generate({
+    const key = new Map(Object.entries(await crypto.key.generate({
       id: 'magic-key',
       type: 'application/jwk+json',
       algorithm: 'ES256'
-    })))))
+    })))
     expect(key.get(jose.web_key.kid)).toBe('magic-key')
     expect(key.get(jose.web_key.alg)).toBe('ES256')
   })
   it('parse', async () => {
     const jwk = crypto.key.parse<'ES256', 'application/jwk+json'>({
-      key: await crypto.key.generate({
-        id: 'magic-key',
+      key: crypto.key.serialize({
+        key: await crypto.key.generate({
+          id: 'magic-key',
+          type: 'application/jwk+json',
+          algorithm: 'ES256'
+        }),
         type: 'application/jwk+json',
-        algorithm: 'ES256'
       }),
       type: 'application/jwk+json',
     })
@@ -30,10 +33,13 @@ describe('web key', () => {
 
   it('parse polymorphic', async () => {
     const jwk = crypto.key.parse<'EdDSA', 'application/jwk+json'>({
-      key: await crypto.key.generate({
-        id: 'magic-key',
+      key: crypto.key.serialize({
+        key: await crypto.key.generate({
+          id: 'magic-key',
+          type: 'application/jwk+json',
+          algorithm: 'EdDSA'
+        }),
         type: 'application/jwk+json',
-        algorithm: 'EdDSA'
       }),
       type: 'application/jwk+json',
     })
@@ -44,10 +50,13 @@ describe('web key', () => {
 
   it('parse fully specified', async () => {
     const jwk = crypto.key.parse<'Ed25519', 'application/jwk+json'>({
-      key: await crypto.key.generate({
-        id: 'magic-key',
+      key: crypto.key.serialize({
+        key: await crypto.key.generate({
+          id: 'magic-key',
+          type: 'application/jwk+json',
+          algorithm: 'Ed25519'
+        }),
         type: 'application/jwk+json',
-        algorithm: 'Ed25519'
       }),
       type: 'application/jwk+json',
     })
@@ -59,10 +68,13 @@ describe('web key', () => {
 
 describe('cose key', () => {
   it('generate', async () => {
-    const bytes = await crypto.key.generate({
-      id: 'magic-key',
-      type: 'application/cose-key',
-      algorithm: 'ES256'
+    const bytes = crypto.key.serialize({
+      key: await crypto.key.generate({
+        id: 'magic-key',
+        type: 'application/cose-key',
+        algorithm: 'ES256'
+      }),
+      type: 'application/cose-key'
     })
     const key = cbor.decode(bytes)
     expect(key.get(cose.cose_key.kid)).toBe('magic-key')
@@ -71,9 +83,12 @@ describe('cose key', () => {
 
   it('parse polymorphic EC2', async () => {
     const key = crypto.key.parse<'ES256', 'application/cose-key'>({
-      key: await crypto.key.generate({
+      key: crypto.key.serialize({
+        key: await crypto.key.generate({
+          type: 'application/cose-key',
+          algorithm: 'ES256'
+        }),
         type: 'application/cose-key',
-        algorithm: 'ES256'
       }),
       type: 'application/cose-key',
     })
@@ -84,9 +99,12 @@ describe('cose key', () => {
 
   it('parse fully specified EC2', async () => {
     const key = crypto.key.parse<'ESP256', 'application/cose-key'>({
-      key: await crypto.key.generate({
+      key: crypto.key.serialize({
+        key: await crypto.key.generate({
+          type: 'application/cose-key',
+          algorithm: 'ES256'
+        }),
         type: 'application/cose-key',
-        algorithm: 'ES256'
       }),
       type: 'application/cose-key',
     })

@@ -4,7 +4,7 @@ import * as cose from '../src'
 import { JWK } from 'jose'
 
 it('sign and verify', async () => {
-  const privateKeyJwk = await cose.crypto.key.gen<'ES256', 'application/jwk+json'>({
+  const privateKeyJwk = await cose.crypto.key.generate<'ES256', 'application/jwk+json'>({
     type: "application/jwk+json",
     algorithm: "ES256"
   })
@@ -37,7 +37,7 @@ it('sign and verify', async () => {
 })
 
 it('sign and verify large image from file system', async () => {
-  const privateKeyJwk = await cose.crypto.key.gen<'ES256', 'application/jwk+json'>({
+  const privateKeyJwk = await cose.crypto.key.generate<'ES256', 'application/jwk+json'>({
     type: "application/jwk+json",
     algorithm: "ES256"
   })

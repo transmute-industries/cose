@@ -189,7 +189,7 @@ export const parse = <
 }
 
 
-export const generate = async ({ id, type, algorithm, extractable }: request_crypto_key): Promise<Buffer> => {
+const _generate = async ({ id, type, algorithm, extractable }: request_crypto_key): Promise<Buffer> => {
   switch (type) {
     case 'application/jwk+json': {
       const { privateKey } = await generate_web_key({ kid: id, alg: algorithm, ext: extractable || true })
@@ -207,6 +207,19 @@ export const generate = async ({ id, type, algorithm, extractable }: request_cry
       throw new Error('Unsupported key type: ' + type)
     }
   }
+}
+
+// generate parsed.
+export const generate = async <
+  alg extends parseable_fully_specified_signature_algorithms,
+  cty extends crypto_key_type
+>({ id, algorithm, type }: {
+  id?: string,
+  algorithm: alg,
+  type: cty
+}): Promise<parsable_fully_specified_keys<alg, cty>> => {
+  const key = await _generate({ id, algorithm, type })
+  return parse<alg, cty>({ key, type })
 }
 
 export const convert = async ({ key, from, to }: { key: Uint8Array, from: crypto_key_type, to: crypto_key_type }) => {
@@ -228,17 +241,6 @@ export const convert = async ({ key, from, to }: { key: Uint8Array, from: crypto
   }
 }
 
-// generate parsed.
-export const gen = async <
-  alg extends parseable_fully_specified_signature_algorithms,
-  cty extends crypto_key_type
->({ algorithm, type }: {
-  algorithm: alg,
-  type: cty
-}): Promise<parsable_fully_specified_keys<alg, cty>> => {
-  const key = await generate({ algorithm, type })
-  return parse<alg, cty>({ key, type })
-}
 
 
 export const serialize = <

@@ -16,7 +16,7 @@ it('issue & verify', async () => {
       return cose.receipt.leaf(entry)
     }))
 
-  const privateKeyJwk = await cose.crypto.key.gen<'ES256', 'application/jwk+json'>({
+  const privateKeyJwk = await cose.crypto.key.generate<'ES256', 'application/jwk+json'>({
     type: "application/jwk+json",
     algorithm: "ES256"
   })
@@ -73,7 +73,7 @@ it('issue & verify', async () => {
 })
 
 it("add / remove from receipts", async () => {
-  const privateKeyJwk = await cose.crypto.key.gen<'ES256', 'application/jwk+json'>({
+  const privateKeyJwk = await cose.crypto.key.generate<'ES256', 'application/jwk+json'>({
     type: "application/jwk+json",
     algorithm: "ES256"
   })

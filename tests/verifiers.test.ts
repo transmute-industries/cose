@@ -7,15 +7,15 @@ import { web_key_type } from '../src/iana/assignments/jose'
 
 it('verify multiple receipts', async () => {
 
-  const issuerSecretKey = await cose.crypto.key.gen<'ES256', 'application/cose-key'>({
+  const issuerSecretKey = await cose.crypto.key.generate<'ES256', 'application/cose-key'>({
     type: "application/cose-key",
     algorithm: "ES256"
   })
-  const notary1SecretKey = await cose.crypto.key.gen<'ES256', 'application/cose-key'>({
+  const notary1SecretKey = await cose.crypto.key.generate<'ES256', 'application/cose-key'>({
     type: "application/cose-key",
     algorithm: "ES256"
   })
-  const notary2SecretKey = await cose.crypto.key.gen<'ES256', 'application/cose-key'>({
+  const notary2SecretKey = await cose.crypto.key.generate<'ES256', 'application/cose-key'>({
     type: "application/cose-key",
     algorithm: "ES256"
   })
