@@ -1,13 +1,15 @@
 
 import { exportJWK, KeyLike, JWK, generateKeyPair, calculateJwkThumbprint } from 'jose'
-import { crypto_key_type } from '../iana/assignments/media-types'
-import { web_key_type, private_rsa_web_key_params, private_oct_web_key_params, private_ec_web_key_params, private_okp_web_key_params, jose_key_type } from '../iana/assignments/jose'
-import { ec2_curves, ec2_key, okp_key, ec2, okp, okp_curves } from '../iana/assignments/cose'
+import { crypto_key_type } from '../../iana/assignments/media-types'
+import { web_key_type, private_rsa_web_key_params, private_oct_web_key_params, private_ec_web_key_params, private_okp_web_key_params, jose_key_type } from '../../iana/assignments/jose'
+import { ec2_curves, ec2_key, okp_key, ec2, okp, okp_curves } from '../../iana/assignments/cose'
 
 import * as cbor from 'cbor-web'
-import { less_specified } from '../iana/requested/cose'
+import { less_specified } from '../../iana/requested/cose'
 
-import { web_key_to_cose_key } from '../crypto/web_key_to_cose_key'
+import { web_key_to_cose_key } from './web_key_to_cose_key'
+
+export { web_key_to_cose_key }
 
 const encoder = new TextEncoder()
 const decoder = new TextDecoder()

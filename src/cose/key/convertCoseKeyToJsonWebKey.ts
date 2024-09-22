@@ -1,7 +1,10 @@
 import { base64url } from "jose";
-import { formatJwk } from "./formatJwk";
+
 import { labels_to_ec2_params, ec2, label_to_key_type, any_cose_key, label_to_curve } from '../../iana/assignments/cose'
 import { labels_to_algorithms } from "../../iana/requested/cose";
+
+
+import { format_web_key } from "../../drafts/draft-ietf-jose-fully-specified-algorithms";
 
 export const convertCoseKeyToJsonWebKey = async <T>(key: any_cose_key): Promise<T> => {
 
@@ -45,5 +48,5 @@ export const convertCoseKeyToJsonWebKey = async <T>(key: any_cose_key): Promise<
       }
     }
   }
-  return formatJwk(jwk) as T
+  return format_web_key(jwk) as T
 }
