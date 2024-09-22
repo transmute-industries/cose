@@ -17,7 +17,7 @@ it('detached payload cose sign1', async () => {
 })
 
 it.skip('hash envelope', async () => {
-  const signature = await cose.sign1.hash
+  const signature = await cose.hash
     .signer({
       remote: await cose.crypto.key.signer({
         algorithm: 'ES256',

@@ -9,6 +9,7 @@ import * as crypto from './crypto'
 
 export * from './drafts/draft-ietf-cose-merkle-tree-proofs'
 export * from './drafts/draft-ietf-jose-fully-specified-algorithms'
+export * from './drafts/draft-ietf-cose-hash-envelope'
 
 // https://github.com/dajiaji/hpke-js/issues/302
 // this issue also effect vercel ncc

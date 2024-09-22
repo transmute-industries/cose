@@ -1,8 +1,8 @@
-import signer from "./signer";
+import signer from "../../cose/sign1/signer";
 
 import subtleCryptoProvider from "../../crypto/subtle";
 
-import { RequestCoseSign1Signer, RequestCoseSign1 } from "./types"
+import { RequestCoseSign1Signer, RequestCoseSign1 } from "../../cose/sign1/types"
 
 import * as cose from '../../iana/assignments/cose'
 import { draft_headers } from '../../iana/requested/cose'
