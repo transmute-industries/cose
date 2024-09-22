@@ -18,13 +18,13 @@ describe('crypto key', () => {
     const toBeSigned = Buffer.from('hello')
     const signature = await crypto.web
       .signer({
-        key: await crypto.web_key_to_crypto_key(privateKey, ['sign']),
+        key: await crypto.web.web_key_to_crypto_key(privateKey, ['sign']),
         algorithm: 'ES256'
       })
       .sign(toBeSigned)
     const verified = await crypto.web
       .verifier({
-        key: await crypto.web_key_to_crypto_key(publicKey, ['verify']),
+        key: await crypto.web.web_key_to_crypto_key(publicKey, ['verify']),
         algorithm: 'ES256'
       })
       .verify(toBeSigned, signature)

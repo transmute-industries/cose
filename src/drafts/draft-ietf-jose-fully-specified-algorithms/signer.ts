@@ -10,9 +10,9 @@ export const signer = async ({ key, algorithm }: { key: web_key_type | any_cose_
     // nothing to do
   } else if (key instanceof Map) {
     const jwk = await cose_key_to_web_key(key as any_cose_key)
-    privateKey = await crypto.web_key_to_crypto_key(jwk, ['sign'])
+    privateKey = await crypto.web.web_key_to_crypto_key(jwk, ['sign'])
   } else if ((key as web_key_type).kty) {
-    privateKey = await crypto.web_key_to_crypto_key(key, ['sign'])
+    privateKey = await crypto.web.web_key_to_crypto_key(key, ['sign'])
   }
   if (privateKey === undefined) {
     throw new Error('Unsupported key')
