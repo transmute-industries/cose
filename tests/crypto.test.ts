@@ -1,8 +1,36 @@
 
-import { crypto } from '../src'
+import { crypto, public_from_private } from '../src'
 import * as cbor from 'cbor-web'
 import * as cose from '../src/iana/assignments/cose'
 import * as jose from '../src/iana/assignments/jose'
+
+describe('crypto key', () => {
+  it('sanity', async () => {
+    const privateKey = await crypto.key.generate({
+      id: 'magic-key',
+      type: 'application/jwk+json',
+      algorithm: 'ES256'
+    })
+    const publicKey = public_from_private({
+      key: privateKey,
+      type: 'application/jwk+json'
+    })
+    const toBeSigned = Buffer.from('hello')
+    const signature = await crypto.web
+      .signer({
+        key: await crypto.web_key_to_crypto_key(privateKey, ['sign']),
+        algorithm: 'ES256'
+      })
+      .sign(toBeSigned)
+    const verified = await crypto.web
+      .verifier({
+        key: await crypto.web_key_to_crypto_key(publicKey, ['verify']),
+        algorithm: 'ES256'
+      })
+      .verify(toBeSigned, signature)
+    expect(verified.toString()).toBe('hello')
+  })
+})
 
 describe('web key', () => {
   it('generate', async () => {

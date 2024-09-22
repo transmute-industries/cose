@@ -15,6 +15,7 @@ import { web_key_thumbprint } from './thumbprint'
 export { web_key_to_cose_key, cose_key_to_web_key, public_from_private }
 
 export * from './thumbprint'
+export * from './signer'
 
 const encoder = new TextEncoder()
 const decoder = new TextDecoder()

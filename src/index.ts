@@ -2,8 +2,7 @@
 
 
 
-import * as attached from './cose/attached'
-import * as detached from './cose/detached'
+
 import * as cbor from './cbor'
 
 import * as crypto from './crypto'
@@ -19,8 +18,8 @@ export * from './drafts/draft-ietf-jose-fully-specified-algorithms'
 export * from './iana/assignments/cbor'
 export * from './iana/assignments/cose'
 export * from './iana/requested/cose'
-export * from './cose/sign1'
+export * from './cose'
 export * from './x509'
 export * from './desugar'
 
-export { crypto, cbor, attached, detached }
+export { crypto, cbor }

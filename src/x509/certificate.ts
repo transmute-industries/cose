@@ -2,13 +2,16 @@ import { exportJWK, exportPKCS8, importPKCS8 } from 'jose';
 
 import * as x509 from "@peculiar/x509";
 
-import { detached, RequestCoseSign1VerifyDetached } from '..';
+import { detached } from '..';
 import { crypto } from '..';
 import { JWK } from 'jose'
 import * as cose from '../iana/assignments/cose';
 import { labels_to_algorithms } from '../iana/requested/cose';
 
 import { web_key_type } from '../iana/assignments/jose';
+
+import { RequestCoseSign1DectachedVerify } from '../../src/cose/sign1/types';
+
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 const nodeCrypto = import('crypto').catch(() => { })
@@ -23,6 +26,7 @@ const provide = async () => {
   }
 }
 
+// need to DRY...
 const algTowebCryptoParams: Record<string, { name: string, hash: string, namedCurve: string }>
   = {
   'ESP256': {
@@ -116,9 +120,10 @@ export type RequestCertificateVerifier = {
   }
 }
 
+
 const verifier = ({ resolver }: RequestCertificateVerifier) => {
   return {
-    verify: async (req: RequestCoseSign1VerifyDetached) => {
+    verify: async (req: RequestCoseSign1DectachedVerify) => {
       const verifier = detached.verifier({ resolver })
       return verifier.verify(req)
     }
