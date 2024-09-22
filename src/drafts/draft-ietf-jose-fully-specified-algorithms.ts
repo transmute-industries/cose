@@ -248,3 +248,17 @@ export const gen = async <
   const key = await generate({ algorithm, type })
   return parse<alg, cty>({ key, type })
 }
+
+
+export const serialize = <
+  alg extends parseable_fully_specified_signature_algorithms,
+  cty extends crypto_key_type
+>({ key, type }: { key: fully_specified_cose_key<alg> | fully_specified_web_key<alg>, type: cty }) => {
+  if (type === 'application/jwk+json') {
+    return Buffer.from(encoder.encode(JSON.stringify(format_web_key(key as JWK), null, 2)))
+  }
+  if (type === 'application/cose-key') {
+    return cbor.encode(key)
+  }
+  throw new Error('Cannot serialize to unsupported media type: ' + type)
+}
