@@ -1,4 +1,3 @@
-import * as receipt from './receipt'
 
 export * from './encode_inclusion_proof'
 export * from './decode_inclusion_proof'
@@ -21,7 +20,5 @@ export const rfc9162_sha256_proof_types = {
   'inclusion': -1,
   'consistency': -2
 }
-
-export { receipt }
 
 export * from './log'

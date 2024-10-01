@@ -1,4 +1,4 @@
-
+import fs from 'fs'
 import * as cose from '../../src';
 
 import { log } from './test_log';
@@ -42,6 +42,7 @@ it("cose receipts from a tiled transparency log", async () => {
       ]),
       payload: root_from_inclusion_proof
     })
+  fs.writeFileSync('./tests/draft-ietf-cose-merkle-tree-proofs/inclusion.receipt.diag', await cose.cbor.diag(inclusion_receipt, "application/cose"))
   const [inclusion_proof_from_unprotected_header] = cose.decode_inclusion_proof(inclusion_receipt)
   const reconstructed_inclusion_root_from_unprotected_header = log.root_from_inclusion_proof(inclusion_proof_from_unprotected_header, log.record_hash(encoder.encode(`entry-${17}`)))
   const verified_inclusion_receipt = await cose.detached
@@ -77,6 +78,7 @@ it("cose receipts from a tiled transparency log", async () => {
       ]),
       payload: root_from_consistency_proof
     })
+  fs.writeFileSync('./tests/draft-ietf-cose-merkle-tree-proofs/consistency.receipt.diag', await cose.cbor.diag(consistency_receipt, "application/cose"))
   const [consistency_proof_from_unprotected_header] = cose.decode_consistency_proof(consistency_receipt)
   const reconstructed_consistency_root_from_unprotected_header = log.root_from_consistency_proof(verified_inclusion_receipt, consistency_proof_from_unprotected_header)
   const verified_consistency_receipt = await cose.detached
