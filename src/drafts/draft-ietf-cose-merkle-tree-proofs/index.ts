@@ -1,5 +1,11 @@
 import * as receipt from './receipt'
 
+export * from './encode_inclusion_proof'
+export * from './decode_inclusion_proof'
+
+export * from './encode_consistency_proof'
+export * from './decode_consistency_proof'
+
 
 export const verifiable_data_structures = {
   rfc9162_sha256: 1
@@ -17,3 +23,5 @@ export const rfc9162_sha256_proof_types = {
 }
 
 export { receipt }
+
+export * from './log'

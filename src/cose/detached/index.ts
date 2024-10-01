@@ -16,7 +16,7 @@ export const signer = ({ remote }: sign1.RequestCoseSign1Signer) => {
       const coseSign1 = await coseSign1Signer.sign(req)
       const decoded = decodeFirstSync(coseSign1)
       decoded.value[2] = null
-      return encodeAsync(new Tagged(tag.COSE_Sign1, decoded.value), { canonical: true })
+      return new Uint8Array(await encodeAsync(new Tagged(tag.COSE_Sign1, decoded.value), { canonical: true }))
     }
   }
 }
@@ -29,7 +29,7 @@ export const verifier = ({ resolver }: sign1.RequestCoseSign1Verifier) => {
       const payloadBuffer = toArrayBuffer(req.payload);
       decoded.value[2] = payloadBuffer
       const attached = await encodeAsync(new Tagged(tag.COSE_Sign1, decoded.value), { canonical: true })
-      return verifier.verify({ coseSign1: attached })
+      return new Uint8Array(await verifier.verify({ coseSign1: attached }))
     }
   }
 }

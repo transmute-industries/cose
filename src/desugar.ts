@@ -13,3 +13,8 @@ export const UnprotectedHeader = (entries: HeaderMapEntry[]) => {
   return new Map<number, any>(entries)
 }
 
+
+
+export const VerifiableDataStructureProofs = (entries: [number, any][]) => {
+  return new Map<number, any>(entries)
+}
