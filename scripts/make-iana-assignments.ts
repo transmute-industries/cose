@@ -515,10 +515,6 @@ ${tags}
 }
 
 
-// type WebKeyParameter = {
-
-// }
-
 const getJose = async () => {
   const rows = await getRows<{
     'Parameter Name': string,
