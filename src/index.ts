@@ -18,6 +18,8 @@ export * from './drafts/draft-ietf-jose-fully-specified-algorithms'
 
 export * from './iana/assignments/cbor'
 export * from './iana/assignments/cose'
+export * from './iana/assignments/cwt'
+export * from './iana/assignments/jose'
 export * from './iana/requested/cose'
 export * from './cose'
 export * from './x509'

@@ -29,8 +29,8 @@ it('integration test', async () => {
       [cose.draft_headers.payload_preimage_content_type, 'application/spdx+json'],
       [cose.draft_headers.payload_location, 'https://cloud.example/sbom/42'],
       [cose.header.cwt_claims, cose.CWTClaims([
-        [1, software_producer.website], // iss
-        [2, software_producer.product]  // sub
+        [cose.cwt_claims.iss, software_producer.website],
+        [cose.cwt_claims.sub, software_producer.product]
       ])]
     ]),
     payload: Buffer.from('large file that never moves over a network')

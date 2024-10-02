@@ -1,4 +1,7 @@
 import { indentBlock } from "./indentBlock"
+
+import { cwt_claims } from "../../iana/assignments/cwt"
+
 export const prettyCwtClaims = (claims: Map<any, any>) => {
   if (!(claims instanceof Map)) {
     return ''
@@ -6,11 +9,11 @@ export const prettyCwtClaims = (claims: Map<any, any>) => {
   let result = ``
   for (const [label, value] of claims.entries()) {
     switch (label) {
-      case 1: {
+      case cwt_claims.iss: {
         result += indentBlock(`/ issuer  / ${label} : "${value}",`, '    ') + '\n'
         break
       }
-      case 2: {
+      case cwt_claims.sub: {
         result += indentBlock(`/ subject / ${label} : "${value}",`, '    ') + '\n'
         break
       }

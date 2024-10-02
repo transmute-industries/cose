@@ -66,14 +66,14 @@ export const create_transparency_service = async ({ website, database }: create_
   const { log, db } = create_sqlite_log(database)
 
   const register_signed_statement = async (signed_statement: Uint8Array) => {
+    // registration policy goes here...
+    // for this test, we accept everything
     const root = log.root()
     const index = log.size()
     log.write_record(signed_statement)
-
     const decoded = cose.cbor.decode(signed_statement)
     const signed_statement_header = cose.cbor.decode(decoded.value[0])
     const signed_statement_claims = signed_statement_header.get(cose.header.cwt_claims)
-    // console.log(signed_statement_header)
     const inclusion_proof = log.inclusion_proof(index + 1, index)
     return signer.sign({
       protectedHeader: cose.ProtectedHeader([
@@ -81,11 +81,11 @@ export const create_transparency_service = async ({ website, database }: create_
         [cose.header.alg, cose.algorithm.es256],
         [cose.draft_headers.verifiable_data_structure, cose.verifiable_data_structures.rfc9162_sha256],
         [cose.header.cwt_claims, cose.CWTClaims([
-          // TODO: IANA registry for CWT Claims with types.
-          [1, website], // issuer notary
+
+          [cose.cwt_claims.iss, website], // issuer notary
           // receipt subject is statement subject.
           // ... could be receipts have different subject id
-          [2, signed_statement_claims.get(2)]
+          [cose.cwt_claims.sub, signed_statement_claims.get(cose.cwt_claims.sub)]
         ])]
       ]),
       unprotectedHeader: cose.UnprotectedHeader([
