@@ -1,20 +1,11 @@
 import fs from 'fs'
-import * as cose from '../src'
+import * as cose from '../../src'
 
 const key = fs.readFileSync('./tests/__fixtures__/cose-key.cbor')
-const encoder = new TextEncoder();
 
 it('cose key', async () => {
   const output = fs.readFileSync('./tests/__fixtures__/cose-key.diag')
   const diag = await cose.cbor.diag(key, "application/cose-key")
-  expect(diag).toBe(output.toString())
-})
-
-it('detached payload cose sign1', async () => {
-  const input = fs.readFileSync('./tests/__fixtures__/detached-payload.cbor')
-  const diag = await cose.cbor.diag(input, "application/cose")
-  fs.writeFileSync('./tests/__fixtures__/detached-payload.diag', diag)
-  const output = fs.readFileSync('./tests/__fixtures__/detached-payload.diag')
   expect(diag).toBe(output.toString())
 })
 
@@ -40,10 +31,10 @@ it('hash envelope', async () => {
       ]),
       payload: Buffer.from('🔥 not a real sbom')
     })
-  fs.writeFileSync('./tests/__fixtures__/hash-envelope.cbor', signature)
-  const input = fs.readFileSync('./tests/__fixtures__/hash-envelope.cbor')
+  fs.writeFileSync('./tests/draft-ietf-cose-hash-envelope/hash-envelope.cbor', signature)
+  const input = fs.readFileSync('./tests/draft-ietf-cose-hash-envelope/hash-envelope.cbor')
   const diag = await cose.cbor.diag(input, "application/cose")
-  fs.writeFileSync('./tests/__fixtures__/hash-envelope.diag', diag)
-  const output = fs.readFileSync('./tests/__fixtures__/hash-envelope.diag')
+  fs.writeFileSync('./tests/draft-ietf-cose-hash-envelope/hash-envelope.diag', diag)
+  const output = fs.readFileSync('./tests/draft-ietf-cose-hash-envelope/hash-envelope.diag')
   expect(diag).toBe(output.toString())
 })
