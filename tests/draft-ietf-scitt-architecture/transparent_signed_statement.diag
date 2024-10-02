@@ -1,0 +1,67 @@
+/ cose-sign1 / 18([
+  / protected   / <<{
+    / key / 4 : "1n4tRO6u2tP94w4AZP0jlHgLe8vTwV8T7dvQrRJh8xc",
+    / algorithm / 1 : -7,  # ES256
+    / hash  / -6800 : -16, # SHA-256
+    / content  / -6802 : "application/spdx+json",
+    / location / -6801 : "https://cloud.example/sbom/42",
+    / claims / 15 : {
+      / issuer  / 1 : "https://green.example",
+      / subject / 2 : "https://green.example/cli@v1.2.3",
+    },
+  }>>,
+  / unprotected / {
+    / receipts / 394 : {
+      <</ cose-sign1 / 18([
+        / protected   / <<{
+          / key / 4 : "LB_22009wgfJbcgm3lmWMXpRzy23pSfiwQ0SOcAzHfY",
+          / algorithm / 1 : -7,  # ES256
+          / notary    / 395 : 1, # RFC9162 SHA-256
+          / claims / 15 : {
+            / issuer  / 1 : "https://blue.example",
+            / subject / 2 : "https://green.example/cli@v1.2.3",
+          },
+        }>>,
+        / unprotected / {
+          / proofs / 396 : {
+            / inclusion / -1 : [
+              <<[
+                / size / 1, / leaf / 0,
+                / inclusion path / 
+                []
+              ]>>
+            ],
+          },
+        },
+        / payload     / null,
+        / signature   / h'1086da6a...8b76135a'
+      ])>>,
+      <</ cose-sign1 / 18([
+        / protected   / <<{
+          / key / 4 : "cPwF7-rjnmHpwbgkh6-q7-cdZYbxwYwJkwfJVCs-UPk",
+          / algorithm / 1 : -7,  # ES256
+          / notary    / 395 : 1, # RFC9162 SHA-256
+          / claims / 15 : {
+            / issuer  / 1 : "https://orange.example",
+            / subject / 2 : "https://green.example/cli@v1.2.3",
+          },
+        }>>,
+        / unprotected / {
+          / proofs / 396 : {
+            / inclusion / -1 : [
+              <<[
+                / size / 1, / leaf / 0,
+                / inclusion path / 
+                []
+              ]>>
+            ],
+          },
+        },
+        / payload     / null,
+        / signature   / h'f63c7a4d...f0e7186b'
+      ])>>
+    },
+  },
+  / payload     / h'0167c57c...deeed6d4',
+  / signature   / h'e53796bb...9fe6369f'
+])    

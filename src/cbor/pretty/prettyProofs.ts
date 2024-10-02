@@ -7,24 +7,24 @@ import { ellideBytes } from './ellideBytes'
 import { rfc9162_sha256_proof_types, transparency } from '../../drafts/draft-ietf-cose-merkle-tree-proofs'
 import { indentBlock } from './indentBlock'
 
-export const prettyInclusionProof = (bytes: ArrayBuffer) => {
-  const [size, index, path] = cbor.decode(bytes)
+export const prettyInclusionProof = (proof: ArrayBuffer | [number, number, Buffer[]]) => {
+  const [size, index, path] = Array.isArray(proof) ? proof : cbor.decode(proof)
   return indentBlock(`<<[
   / size / ${size}, / leaf / ${index},
   / inclusion path / 
-${path.map((p: ArrayBuffer) => {
+${path.length === 0 ? '  []' : path.map((p: ArrayBuffer) => {
     return '  ' + ellideBytes(p)
   }).join(',\n')}
 ]>>`, '  ')
 }
 
-export const prettyConsistencyProof = (bytes: ArrayBuffer) => {
-  const [size1, size2, path] = cbor.decode(bytes)
+export const prettyConsistencyProof = (proof: ArrayBuffer | [number, number, Buffer[]]) => {
+  const [size1, size2, path] = Array.isArray(proof) ? proof : cbor.decode(proof)
 
   return indentBlock(`<<[
   / old / ${size1}, / new / ${size2},
   / consistency path / 
-${path.map((p: ArrayBuffer) => {
+${path.length === 0 ? '  []' : path.map((p: ArrayBuffer) => {
     return '  ' + ellideBytes(p)
   }).join(',\n')}
 ]>>`, '  ')

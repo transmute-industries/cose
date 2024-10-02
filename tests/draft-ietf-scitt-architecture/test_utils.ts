@@ -2,7 +2,7 @@ import crypto from 'crypto'
 import sqlite from 'better-sqlite3'
 import * as cose from '../../src'
 type create_transparency_params = {
-  notary: string
+  website: string
   database: string
 }
 
@@ -36,7 +36,7 @@ export const create_software_producer = async ({ website, product }: { website: 
   return { website, product, signer, verifier, kid: publicKeyJwk.kid }
 }
 
-export const create_transparency_service = async ({ notary, database }: create_transparency_params) => {
+export const create_transparency_service = async ({ website, database }: create_transparency_params) => {
   const db = new sqlite(database);
   db.prepare(`
     CREATE TABLE IF NOT EXISTS tiles 
@@ -132,7 +132,7 @@ export const create_transparency_service = async ({ notary, database }: create_t
         [cose.draft_headers.verifiable_data_structure, cose.verifiable_data_structures.rfc9162_sha256],
         [cose.header.cwt_claims, cose.CWTClaims([
           // TODO: IANA registry for CWT Claims with types.
-          [1, notary], // issuer notary
+          [1, website], // issuer notary
           // receipt subject is statement subject.
           // ... could be receipts have different subject id
           [2, signed_statement_claims.get(2)]
@@ -148,7 +148,7 @@ export const create_transparency_service = async ({ notary, database }: create_t
   }
 
   return {
-    notary,
+    website,
     db,
     signer,
     verifier,
