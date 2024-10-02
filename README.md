@@ -21,140 +21,101 @@
 npm install '@transmute/cose'
 ```
 
-```ts
-import * as cose from "@transmute/cose";
-```
-
 ```js
 const cose = require("@transmute/cose");
 ```
 
-### SCITT Receipts
-
 ```ts
-const issuerSecretKeyJwk = await cose.key.generate<cose.SecretKeyJwk>(
+import * as cose from "@transmute/cose";
+
+const private_key = await cose.crypto.key.generate<
   "ES256",
   "application/jwk+json"
-);
-const issuerPublicKeyJwk = await cose.key.publicFromPrivate<cose.PublicKeyJwk>(
-  issuerSecretKeyJwk
-);
+>({
+  type: "application/jwk+json",
+  algorithm: "ES256",
+});
 
-const notarySecretKeyJwk = await cose.key.generate<cose.SecretKeyJwk>(
-  "ES256",
-  "application/jwk+json"
-);
-const notaryPublicKeyJwk = await cose.key.publicFromPrivate<cose.PublicKeyJwk>(
-  notarySecretKeyJwk
-);
+const public_key = cose.public_from_private({
+  key: private_key,
+  type: "application/jwk+json",
+});
 
-const issuer = cose.detached.signer({
-  remote: cose.crypto.signer({
-    privateKeyJwk: issuerSecretKeyJwk,
-  }),
-});
-const notary = cose.detached.signer({
-  remote: cose.crypto.signer({
-    privateKeyJwk: notarySecretKeyJwk,
-  }),
-});
-const content = fs.readFileSync("./examples/image.png");
-const signatureForImage = await issuer.sign({
-  protectedHeader: cose.ProtectedHeader([
-    [cose.Protected.Alg, cose.Signature.ES256], // signing algorithm ES256
-    [cose.Protected.ContentType, "image/png"], // content type image/png
-    [cose.Protected.Kid, issuerPublicKeyJwk.kid], // issuer key identifier
-  ]),
-  payload: content,
-});
-const transparencyLogContainingImageSignatures = [
-  await cose.receipt.leaf(signatureForImage),
-];
-const receiptForImageSignature = await cose.receipt.inclusion.issue({
-  protectedHeader: cose.ProtectedHeader([
-    [cose.Protected.Alg, cose.Signature.ES256],
-    [
-      cose.Protected.VerifiableDataStructure,
-      cose.VerifiableDataStructures["RFC9162-Binary-Merkle-Tree"],
-    ],
-    [cose.Protected.Kid, notaryPublicKeyJwk.kid],
-  ]),
-  entry: 0,
-  entries: transparencyLogContainingImageSignatures,
-  signer: notary,
-});
-const transparentSignature = await cose.receipt.add(
-  signatureForImage,
-  receiptForImageSignature
-);
-const resolve = async (
-  coseSign1: cose.CoseSign1Bytes
-): Promise<cose.PublicKeyJwk> => {
-  const { tag, value } = cose.cbor.decodeFirstSync(coseSign1);
-  if (tag !== cose.COSE_Sign1) {
-    throw new Error("Only tagged cose sign 1 are supported");
-  }
-  const [protectedHeaderBytes] = value;
-  const protectedHeaderMap = cose.cbor.decodeFirstSync(protectedHeaderBytes);
-  const kid = protectedHeaderMap.get(cose.Protected.Kid);
-  if (kid === issuerPublicKeyJwk.kid) {
-    return issuerPublicKeyJwk;
-  }
-  if (kid === notaryPublicKeyJwk.kid) {
-    return notaryPublicKeyJwk;
-  }
-  throw new Error("No verification key found in trust store.");
-};
-const verifier = await cose.receipt.verifier({
-  resolve,
-});
-const verified = await verifier.verify({
-  coseSign1: transparentSignature,
-  payload: content,
-});
+// see tests for current APIs
 ```
 
-### HPKE
+### Transparency
 
-```ts
-const message = "💀 My lungs taste the air of Time Blown past falling sands ⌛";
-const plaintext = new TextEncoder().encode(message);
-const encryptionKeys = {
-  keys: [
-    {
-      kid: "meriadoc.brandybuck@buckland.example",
-      alg: "HPKE-Base-P256-SHA256-AES128GCM",
-      kty: "EC",
-      crv: "P-256",
-      x: "Ze2loSV3wrroKUN_4zhwGhCqo3Xhu1td4QjeQ5wIVR0",
-      y: "HlLtdXARY_f55A3fnzQbPcm6hgr34Mp8p-nuzQCE0Zw",
+```edn
+/ cose-sign1 / 18([
+  / protected   / <<{
+    / key / 4 : "vCl7UcS0ZZY99VpRthDc-0iUjLdfLtnmFqLJ2-Tt8N4",
+    / algorithm / 1 : -7,  # ES256
+    / hash  / -6800 : -16, # SHA-256
+    / content  / -6802 : "application/spdx+json",
+    / location / -6801 : "https://cloud.example/sbom/42",
+    / claims / 15 : {
+      / issuer  / 1 : "https://green.example",
+      / subject / 2 : "https://green.example/cli@v1.2.3",
     },
-  ],
-};
-const decryptionKeys = {
-  keys: [
-    {
-      kid: "meriadoc.brandybuck@buckland.example",
-      alg: "HPKE-Base-P256-SHA256-AES128GCM",
-      kty: "EC",
-      crv: "P-256",
-      x: "Ze2loSV3wrroKUN_4zhwGhCqo3Xhu1td4QjeQ5wIVR0",
-      y: "HlLtdXARY_f55A3fnzQbPcm6hgr34Mp8p-nuzQCE0Zw",
-      d: "r_kHyZ-a06rmxM3yESK84r1otSg-aQcVStkRhA-iCM8",
+  }>>,
+  / unprotected / {
+    / receipts / 394 : {
+      <</ cose-sign1 / 18([
+        / protected   / <<{
+          / key / 4 : "mxA4KiOkQFZ-dkLebSo3mLOEPR7rN8XtxkJe45xuyJk",
+          / algorithm / 1 : -7,  # ES256
+          / notary    / 395 : 1, # RFC9162 SHA-256
+          / claims / 15 : {
+            / issuer  / 1 : "https://blue.example",
+            / subject / 2 : "https://green.example/cli@v1.2.3",
+          },
+        }>>,
+        / unprotected / {
+          / proofs / 396 : {
+            / inclusion / -1 : [
+              <<[
+                / size / 9, / leaf / 8,
+                / inclusion path /
+                h'7558a95f...e02e35d6'
+              ]>>
+            ],
+          },
+        },
+        / payload     / null,
+        / signature   / h'02d227ed...ccd3774f'
+      ])>>,
+      <</ cose-sign1 / 18([
+        / protected   / <<{
+          / key / 4 : "ajOkeBTJou_wPrlExLMw7L9OTCD5ZIOBYc-O6LESe9c",
+          / algorithm / 1 : -7,  # ES256
+          / notary    / 395 : 1, # RFC9162 SHA-256
+          / claims / 15 : {
+            / issuer  / 1 : "https://orange.example",
+            / subject / 2 : "https://green.example/cli@v1.2.3",
+          },
+        }>>,
+        / unprotected / {
+          / proofs / 396 : {
+            / inclusion / -1 : [
+              <<[
+                / size / 6, / leaf / 5,
+                / inclusion path /
+                h'9352f974...4ffa7ce0',
+                h'54806f32...f007ea06'
+              ]>>
+            ],
+          },
+        },
+        / payload     / null,
+        / signature   / h'36581f38...a5581960'
+      ])>>
     },
-  ],
-};
-const ciphertext = await cose.encrypt.direct({
-  protectedHeader: ProtectedHeader([
-    [Protected.Alg, Direct["HPKE-Base-P256-SHA256-AES128GCM"]],
-  ]),
-  plaintext,
-  recipients: encryptionKeys,
-});
-const decrypted = await cose.decrypt.direct({
-  ciphertext,
-  recipients: decryptionKeys,
-});
+  },
+  / payload     / h'0167c57c...deeed6d4',
+  / signature   / h'2544f2ed...5840893b'
+])
+
 ```
 
 ### COSE RFCs
@@ -166,11 +127,12 @@ const decrypted = await cose.decrypt.direct({
 ### COSE Drafts
 
 - [COSE Receipts](https://datatracker.ietf.org/doc/draft-ietf-cose-merkle-tree-proofs/)
+- [COSE Hash Envelope](https://datatracker.ietf.org/doc/draft-ietf-cose-hash-envelope/)
 - [COSE HPKE](https://datatracker.ietf.org/doc/draft-ietf-cose-hpke/)
 
 ### SCITT Drafts
 
-- [An Architecture for Trustworthy and Transparent Digital Supply Chains](https://datatracker.ietf.org/doc/draft-ietf-scitt-architecture/)
+- [SCITT Architecture](https://datatracker.ietf.org/doc/draft-ietf-scitt-architecture/)
 
 ## Develop
 
