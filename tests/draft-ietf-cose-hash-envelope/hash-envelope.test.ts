@@ -31,10 +31,10 @@ it('hash envelope', async () => {
       ]),
       payload: Buffer.from('🔥 not a real sbom')
     })
-  fs.writeFileSync('./tests/draft-ietf-cose-hash-envelope/hash-envelope.cbor', signature)
+  // fs.writeFileSync('./tests/draft-ietf-cose-hash-envelope/hash-envelope.cbor', signature)
   const input = fs.readFileSync('./tests/draft-ietf-cose-hash-envelope/hash-envelope.cbor')
   const diag = await cose.cbor.diag(input, "application/cose")
-  fs.writeFileSync('./tests/draft-ietf-cose-hash-envelope/hash-envelope.diag', diag)
+  // fs.writeFileSync('./tests/draft-ietf-cose-hash-envelope/hash-envelope.diag', diag)
   const output = fs.readFileSync('./tests/draft-ietf-cose-hash-envelope/hash-envelope.diag')
   expect(diag).toBe(output.toString())
 })
