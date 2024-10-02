@@ -6,6 +6,7 @@ export * from './encode_consistency_proof'
 export * from './decode_consistency_proof'
 
 export * from './add_receipt'
+export * from './prepare_for_inclusion'
 
 export const verifiable_data_structures = {
   rfc9162_sha256: 1

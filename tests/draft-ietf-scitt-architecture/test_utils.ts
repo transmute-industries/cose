@@ -32,7 +32,7 @@ export const create_software_producer = async ({ website, product }: { website: 
     })
 
 
-  return { website, product, signer, verifier, kid: publicKeyJwk.kid }
+  return { website, product, signer, verifier, public_key: publicKeyJwk }
 }
 
 export const create_transparency_service = async ({ website, database }: create_transparency_params) => {
@@ -68,13 +68,16 @@ export const create_transparency_service = async ({ website, database }: create_
   const register_signed_statement = async (signed_statement: Uint8Array) => {
     // registration policy goes here...
     // for this test, we accept everything
+
+    const record = await cose.prepare_for_inclusion(signed_statement)
+    log.write_record(record)
+
     const root = log.root()
     const index = log.size()
-    log.write_record(signed_statement)
     const decoded = cose.cbor.decode(signed_statement)
     const signed_statement_header = cose.cbor.decode(decoded.value[0])
     const signed_statement_claims = signed_statement_header.get(cose.header.cwt_claims)
-    const inclusion_proof = log.inclusion_proof(index + 1, index)
+    const inclusion_proof = log.inclusion_proof(index, index - 1)
     return signer.sign({
       protectedHeader: cose.ProtectedHeader([
         [cose.header.kid, publicKeyJwk.kid],
@@ -103,7 +106,49 @@ export const create_transparency_service = async ({ website, database }: create_
     signer,
     verifier,
     log,
-    register_signed_statement
+    register_signed_statement,
+    public_key: publicKeyJwk
   }
 
+}
+
+export const verify_transparent_statement = async (statement_hash: Uint8Array, signature: Uint8Array, config: any) => {
+  // first, we verify the signed statement
+  const verifier = cose.detached.verifier(config)
+  const verified_statement = await verifier.verify({
+    coseSign1: signature,
+    payload: statement_hash
+  })
+  const decoded_signed_statement = cose.cbor.decode(signature)
+  const signed_statement_claims = cose.cbor.decode(decoded_signed_statement.value[0]).get(cose.header.cwt_claims)
+  const result = {
+    issuer: signed_statement_claims.get(cose.cwt_claims.iss),
+    subject: signed_statement_claims.get(cose.cwt_claims.sub),
+    verified_statement_hash: cose.to_hex(verified_statement),
+    receipts: []
+  } as Record<string, any>
+  const decoded_signature = cose.cbor.decode(signature)
+  const receipts = decoded_signature.value[1].get(cose.draft_headers.receipts)
+  // next verify each receipt
+  for (const receipt of receipts) {
+    const decoded_receipt = cose.cbor.decode(receipt)
+    const proofs = decoded_receipt.value[1].get(cose.draft_headers.verifiable_data_proofs)
+    // first proof of inclusion only
+    const [[size, index, inclusion_path]] = proofs.get(cose.rfc9162_sha256_proof_types.inclusion)
+    // we need to remove receipts in order to compute leaf hash
+    const record = await cose.prepare_for_inclusion(signature)
+    const record_hash = config.tree_hasher.hash_leaf(record)
+    const root = cose.root_from_record_proof(config.tree_hasher, inclusion_path, size, index, record_hash)
+    const verified_root = await verifier.verify({
+      coseSign1: receipt,
+      payload: Buffer.from(root)
+    })
+    const receipt_claims = cose.cbor.decode(decoded_receipt.value[0]).get(cose.header.cwt_claims)
+    result.receipts.push({
+      issuer: receipt_claims.get(cose.cwt_claims.iss),
+      subject: receipt_claims.get(cose.cwt_claims.sub),
+      verified_root: cose.to_hex(verified_root)
+    })
+  }
+  return result
 }
