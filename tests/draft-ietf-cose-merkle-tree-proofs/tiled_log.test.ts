@@ -1,7 +1,8 @@
 import fs from 'fs'
 import * as cose from '../../src';
+import { create_sqlite_log } from './test_log';
 
-import { log } from './test_log';
+const { log } = create_sqlite_log("./tests/draft-ietf-cose-merkle-tree-proofs/transparency.db")
 
 it("cose receipts from a tiled transparency log", async () => {
   const encoder = new TextEncoder()

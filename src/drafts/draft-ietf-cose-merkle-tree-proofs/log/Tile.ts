@@ -35,9 +35,16 @@ export type ConsistencyProof = [
 export type TileLogParameters = {
   tile_height: number
   hash_size: number
-  hash_function: (bytes: Uint8Array) => Uint8Array
+  read_tree_size: () => number,
+  update_tree_size: (new_tree_size: number) => void
+
+  read_tree_root: () => Uint8Array | null,
+  update_tree_root: (new_root: Uint8Array) => void
+
   read_tile: (tile: string) => Uint8Array
   update_tiles: (tile_path: string, start: number, end: number, stored_hash: Uint8Array) => Uint8Array | null
+
+  hash_function: (bytes: Uint8Array) => Uint8Array
 }
 
 
@@ -658,8 +665,16 @@ export class TileHashReader implements HashReader {
 export class TileLog implements TileStorage, HashReader {
   public tree_hasher: TreeHash
   public thr: TileHashReader
-  public tree_size = 0
+
   public tree_root: Uint8Array
+
+  public read_tree_size
+  public update_tree_size
+
+  public read_tree_root
+  public update_tree_root
+
+
   public read_tile
   public update_tiles
   public tile_height: number
@@ -669,9 +684,20 @@ export class TileLog implements TileStorage, HashReader {
     this.tile_height = config.tile_height
     this.tree_hasher = new TreeHash(config.hash_function, config.hash_size)
     this.tree_root = this.tree_hasher.empty_root()
-    this.thr = new TileHashReader(this.tree_size, this.tree_root, this, this.tree_hasher,)
+
+    this.read_tree_size = config.read_tree_size
+    this.update_tree_size = config.update_tree_size
+
+    this.read_tree_root = config.read_tree_root
+    this.update_tree_root = config.update_tree_root
+
+
     this.read_tile = config.read_tile
     this.update_tiles = config.update_tiles
+
+
+
+    this.thr = new TileHashReader(this.read_tree_size(), this.tree_root, this, this.tree_hasher,)
   }
   record_hash(data: Uint8Array) {
     return this.tree_hasher.hash_leaf(data)
@@ -727,13 +753,16 @@ export class TileLog implements TileStorage, HashReader {
     })
   }
   size() {
-    return this.tree_size
+    return this.read_tree_size()
   }
   root() {
-    return this.root_at(this.tree_size)
+    return this.root_at(this.size())
   }
   root_at(tree_size: number) {
-    return tree_hash(this.tree_hasher, tree_size, this)
+    if (tree_size === 0) {
+      return new Uint8Array(this.tree_hasher.empty_root())
+    }
+    return new Uint8Array(tree_hash(this.tree_hasher, tree_size, this))
   }
   write_record_hashes = (record_hashes: Uint8Array[]) => {
     for (const record_hash of record_hashes) {
@@ -753,7 +782,7 @@ export class TileLog implements TileStorage, HashReader {
         }
         storage_id++
       }
-      this.tree_size++;
+      this.update_tree_size(record_index + 1)
     }
   }
   write_record = (record: Uint8Array) => {

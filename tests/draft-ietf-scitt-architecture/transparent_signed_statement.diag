@@ -1,6 +1,6 @@
 / cose-sign1 / 18([
   / protected   / <<{
-    / key / 4 : "1n4tRO6u2tP94w4AZP0jlHgLe8vTwV8T7dvQrRJh8xc",
+    / key / 4 : "i2vjNrF0wkROkZbKP03J04CxC2EuvQK09baL1aC-v5c",
     / algorithm / 1 : -7,  # ES256
     / hash  / -6800 : -16, # SHA-256
     / content  / -6802 : "application/spdx+json",
@@ -14,7 +14,7 @@
     / receipts / 394 : {
       <</ cose-sign1 / 18([
         / protected   / <<{
-          / key / 4 : "LB_22009wgfJbcgm3lmWMXpRzy23pSfiwQ0SOcAzHfY",
+          / key / 4 : "3hfEsSAdSlRBH3d_sWMySQWbcAumg2p-pK6TMysa3xY",
           / algorithm / 1 : -7,  # ES256
           / notary    / 395 : 1, # RFC9162 SHA-256
           / claims / 15 : {
@@ -26,19 +26,19 @@
           / proofs / 396 : {
             / inclusion / -1 : [
               <<[
-                / size / 1, / leaf / 0,
+                / size / 2, / leaf / 1,
                 / inclusion path / 
-                []
+                h'bf36fd16...50175265'
               ]>>
             ],
           },
         },
         / payload     / null,
-        / signature   / h'1086da6a...8b76135a'
+        / signature   / h'bcba332f...ae37605e'
       ])>>,
       <</ cose-sign1 / 18([
         / protected   / <<{
-          / key / 4 : "cPwF7-rjnmHpwbgkh6-q7-cdZYbxwYwJkwfJVCs-UPk",
+          / key / 4 : "yUg4tfWU8mwhsz3hlxxsiw24-KhpCjubrvCN73NPPBY",
           / algorithm / 1 : -7,  # ES256
           / notary    / 395 : 1, # RFC9162 SHA-256
           / claims / 15 : {
@@ -50,18 +50,18 @@
           / proofs / 396 : {
             / inclusion / -1 : [
               <<[
-                / size / 1, / leaf / 0,
+                / size / 2, / leaf / 1,
                 / inclusion path / 
-                []
+                h'c26dc3a0...4020445d'
               ]>>
             ],
           },
         },
         / payload     / null,
-        / signature   / h'f63c7a4d...f0e7186b'
+        / signature   / h'135a0279...c402c1c1'
       ])>>
     },
   },
   / payload     / h'0167c57c...deeed6d4',
-  / signature   / h'e53796bb...9fe6369f'
+  / signature   / h'c741bdbb...f452a0ce'
 ])    

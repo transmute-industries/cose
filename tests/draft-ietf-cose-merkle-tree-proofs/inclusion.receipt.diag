@@ -1,7 +1,7 @@
 / cose-sign1 / 18([
   / protected   / <<{
     / algorithm / 1 : -7,  # ES256
-    / notarized / 395 : 1, # RFC9162 SHA-256
+    / notary    / 395 : 1, # RFC9162 SHA-256
   }>>,
   / unprotected / {
     / proofs / 396 : {
@@ -17,5 +17,5 @@
     },
   },
   / payload     / null,
-  / signature   / h'40da9c62...4f182621'
+  / signature   / h'de24f0cc...9a5ade89'
 ])    
