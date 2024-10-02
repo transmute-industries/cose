@@ -42,7 +42,7 @@ it('integration test', async () => {
   const transparent_statement = await cose.add_receipt(signed_statement, blue_receipt)
   const orange_receipt = await orange_notary.register_signed_statement(transparent_statement)
   const signed_statement_with_multiple_receipts = await cose.add_receipt(transparent_statement, orange_receipt)
-  fs.writeFileSync('./tests/draft-ietf-scitt-architecture/transparent_signed_statement.diag', await cose.cbor.diag(signed_statement_with_multiple_receipts, "application/cose"))
+  // fs.writeFileSync('./tests/draft-ietf-scitt-architecture/transparent_signed_statement.diag', await cose.cbor.diag(signed_statement_with_multiple_receipts, "application/cose"))
 
   const statement_hash = new Uint8Array(await (await cose.crypto.subtle()).digest("SHA-256", statement))
   const verification = await verify_transparent_statement(statement_hash, signed_statement_with_multiple_receipts, {
@@ -69,5 +69,5 @@ it('integration test', async () => {
       }
     }
   })
-  fs.writeFileSync('./tests/draft-ietf-scitt-architecture/transparent_signed_statement.verification.json', JSON.stringify(verification, null, 2))
+  // fs.writeFileSync('./tests/draft-ietf-scitt-architecture/transparent_signed_statement.verification.json', JSON.stringify(verification, null, 2))
 })
