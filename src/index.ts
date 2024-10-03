@@ -3,29 +3,26 @@
 
 
 
-export * from './cose/algorithms'
-export * from './cose/header-parameters'
-export * from './cose/key-common-parameters'
+import * as cbor from './cbor'
 
-import * as key from './cose/key'
-import * as attached from './cose/attached'
-import * as detached from './cose/detached'
+import * as crypto from './crypto'
 
-export * from './cose/sign1'
-export * from './x509'
-
-export * from './cose/Params'
+export * from './drafts/draft-ietf-cose-merkle-tree-proofs'
+export * from './drafts/draft-ietf-cose-hash-envelope'
+export * from './drafts/draft-ietf-jose-fully-specified-algorithms'
 
 // https://github.com/dajiaji/hpke-js/issues/302
 // this issue also effect vercel ncc
 // a better fix would be to move hpke stuff to its won package.
 // export * from './cose/encrypt'
 
-import * as cbor from './cbor'
+export * from './iana/assignments/cbor'
+export * from './iana/assignments/cose'
+export * from './iana/assignments/cwt'
+export * from './iana/assignments/jose'
+export * from './iana/requested/cose'
+export * from './cose'
+export * from './x509'
+export * from './desugar'
 
-import * as receipt from './cose/receipt'
-
-
-import * as crypto from './crypto'
-
-export { crypto, cbor, key, attached, detached, receipt }
+export { crypto, cbor }

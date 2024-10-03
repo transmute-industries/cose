@@ -1,18 +1,27 @@
 
-import { decodeFirst, decodeFirstSync, encode, EMPTY_BUFFER } from '../../cbor'
-import { RequestCoseSign1Verifier, RequestCoseSign1Verify } from './types'
+import { decodeFirst, decodeFirstSync, encode, EMPTY_BUFFER, toArrayBuffer } from '../../cbor'
 
-import { DecodedToBeSigned, ProtectedHeaderMap } from './types'
+
+
 import rawVerifier from '../../crypto/verifier'
 
-import { iana } from '../../iana'
-import { Protected } from '../Params'
+import { HeaderMap } from '../../desugar'
 
-const verifier = ({ resolver }: RequestCoseSign1Verifier) => {
+import * as cose from '../../iana/assignments/cose'
+import { algorithms_to_labels } from '../../iana/requested/cose'
+
+const verifier = ({ resolver }: {
+  resolver: {
+    resolve: (signature: Uint8Array) => Promise<any>
+  }
+}) => {
   return {
-    verify: async ({ coseSign1, externalAAD }: RequestCoseSign1Verify): Promise<ArrayBuffer> => {
+    verify: async ({ coseSign1, externalAAD }: {
+      coseSign1: Uint8Array,
+      externalAAD?: Uint8Array
+    }): Promise<Uint8Array> => {
       const publicKeyJwk = await resolver.resolve(coseSign1)
-      const algInPublicKey = parseInt(`${iana['COSE Algorithms'].getByName(`${publicKeyJwk.alg}`)?.Value}`, 10)
+      const algInPublicKey = algorithms_to_labels.get(publicKeyJwk.alg as string)
       const ecdsa = rawVerifier({ publicKeyJwk })
       const obj = await decodeFirst(coseSign1);
       const signatureStructure = obj.value;
@@ -24,20 +33,21 @@ const verifier = ({ resolver }: RequestCoseSign1Verifier) => {
       }
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const [protectedHeaderBytes, _, payload, signature] = signatureStructure;
-      const protectedHeaderMap: ProtectedHeaderMap = (!protectedHeaderBytes.length) ? new Map() : decodeFirstSync(protectedHeaderBytes);
-      const algInHeader = protectedHeaderMap.get(Protected.Alg)
+      const protectedHeaderMap: HeaderMap = (!protectedHeaderBytes.length) ? new Map() : decodeFirstSync(protectedHeaderBytes);
+      const algInHeader = protectedHeaderMap.get(cose.header.alg)
       if (algInHeader !== algInPublicKey) {
         throw new Error('Verification key does not support algorithm: ' + algInHeader);
       }
       if (!signature) {
         throw new Error('No signature to verify');
       }
-      const decodedToBeSigned = [
+      // be careful with Uint8Array near cbor encode... because of aggresive tagging
+      const decodedToBeSigned: [string, ArrayBuffer, ArrayBuffer, ArrayBuffer] = [
         'Signature1',
-        protectedHeaderBytes,
-        externalAAD || EMPTY_BUFFER,
-        payload
-      ] as DecodedToBeSigned
+        toArrayBuffer(protectedHeaderBytes),
+        toArrayBuffer(externalAAD || EMPTY_BUFFER),
+        toArrayBuffer(payload)
+      ]
       const encodedToBeSigned = encode(decodedToBeSigned);
       await ecdsa.verify(encodedToBeSigned, signature)
       return payload;

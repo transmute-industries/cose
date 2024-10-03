@@ -1,6 +1,6 @@
 
 
-import { COSE_Encrypt0, Direct, Protected, Unprotected, UnprotectedHeader } from '../../Params'
+import { COSE_Encrypt0, Direct, Protected, UnprotectedHeader } from '../../Params'
 import { RequestDirectEncryption, RequestDirectDecryption } from '../types'
 import { Tagged, decodeFirst, encodeAsync } from "cbor-web"
 
@@ -13,7 +13,7 @@ export const encryptDirect = async (req: RequestDirectEncryption) => {
   if (req.unprotectedHeader === undefined) {
     req.unprotectedHeader = UnprotectedHeader([])
   }
-  const alg = req.protectedHeader.get(Protected.Alg)
+  const alg = req.protectedHeader.get(cose.header.alg)
   if (alg !== Direct['HPKE-Base-P256-SHA256-AES128GCM']) {
     throw new Error('Only alg 35 is supported')
   }

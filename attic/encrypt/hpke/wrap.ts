@@ -1,6 +1,6 @@
 
 import { createAAD } from '../utils'
-import { COSE_Encrypt, Protected, Unprotected, UnprotectedHeader } from '../../Params'
+import { COSE_Encrypt, Protected, UnprotectedHeader } from '../../Params'
 import { RequestWrapDecryption, RequestWrapEncryption, } from '../types'
 import { EMPTY_BUFFER } from "../../../cbor"
 import { Tagged, decodeFirst, encodeAsync } from "cbor-web"
@@ -106,6 +106,6 @@ export const decryptWrap = async (req: RequestWrapDecryption) => {
   const externalAad = req.aad ? toArrayBuffer(req.aad) : EMPTY_BUFFER
   const aad = await createAAD(protectedHeader, 'Encrypt', externalAad)
   const decodedProtectedHeader = await decodeFirst(protectedHeader)
-  const alg = decodedProtectedHeader.get(Protected.Alg)
+  const alg = decodedProtectedHeader.get(cose.header.alg)
   return aes.decrypt(alg, ciphertext, new Uint8Array(iv), new Uint8Array(aad), new Uint8Array(contentEncryptionKey))
 }

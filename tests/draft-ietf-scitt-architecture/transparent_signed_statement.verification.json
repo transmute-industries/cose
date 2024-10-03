@@ -1,0 +1,17 @@
+{
+  "issuer": "https://green.example",
+  "subject": "https://green.example/cli@v1.2.3",
+  "verified_statement_hash": "0167c57c4ee2834522223a844d06738098140dddb19b3bd41fef5144deeed6d4",
+  "receipts": [
+    {
+      "issuer": "https://blue.example",
+      "subject": "https://green.example/cli@v1.2.3",
+      "verified_root": "9ad73869fce7428336527df01985be25e5d65dd0b2e87ea7e8b394fad9115860"
+    },
+    {
+      "issuer": "https://orange.example",
+      "subject": "https://green.example/cli@v1.2.3",
+      "verified_root": "5095252cae232cc41f3e4ff00cec59f5c1b25c494222d02c611ad1e36f7c081a"
+    }
+  ]
+}

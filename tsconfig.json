@@ -1,8 +1,9 @@
 {
   "exclude": [
-    "test",
+    "tests",
     "attic",
-    "examples"
+    "examples",
+    "scripts"
   ],
   "compilerOptions": {
     /* Visit https://aka.ms/tsconfig to read more about this file */

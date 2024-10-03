@@ -1,5 +1,5 @@
 
-import { convertCoseKeyToJsonWebKey, convertJsonWebKeyToCoseKey, generate, publicFromPrivate } from "../key"
+import { cose_key_to_web_key, convertJsonWebKeyToCoseKey, generate, publicFromPrivate } from "../key"
 
 import { Tagged, decode, decodeFirst, encodeAsync } from "cbor-web"
 
@@ -39,7 +39,7 @@ export const encrypt = async (req: RequestDirectEncryption) => {
   if (recipientPublicKeyJwk.alg === hpke.primaryAlgorithm.label) {
     return hpke.encrypt.direct(req)
   }
-  const alg = req.protectedHeader.get(Protected.Alg)
+  const alg = req.protectedHeader.get(cose.header.alg)
   const protectedHeader = await encodeAsync(req.protectedHeader)
   const unprotectedHeader = req.unprotectedHeader;
   const directAgreementAlgorithm = getCoseAlgFromRecipientJwk(recipientPublicKeyJwk)
@@ -88,16 +88,16 @@ export const decrypt = async (req: RequestDirectDecryption) => {
     throw new Error('Expected recipient cipher text length to the be zero')
   }
   const decodedRecipientProtectedHeader = decode(recipientProtectedHeader)
-  const recipientAlgorithm = decodedRecipientProtectedHeader.get(Protected.Alg)
+  const recipientAlgorithm = decodedRecipientProtectedHeader.get(cose.header.alg)
   const epk = recipientUnprotectedHeader.get(Unprotected.Epk)
   // ensure the epk has the algorithm that is set in the protected header
   epk.set(Epk.Alg, recipientAlgorithm)
-  const senderPublicKeyJwk = await convertCoseKeyToJsonWebKey(epk)
+  const senderPublicKeyJwk = await cose_key_to_web_key(epk)
   const cek = await ecdh.deriveKey(protectedHeader, recipientProtectedHeader, senderPublicKeyJwk, receiverPrivateKeyJwk)
   const externalAad = req.aad ? toArrayBuffer(req.aad) : EMPTY_BUFFER
   const aad = await createAAD(protectedHeader, 'Encrypt', externalAad)
   const iv = unprotectedHeader.get(Unprotected.Iv)
   const decodedProtectedHeader = decode(protectedHeader)
-  const alg = decodedProtectedHeader.get(Protected.Alg)
+  const alg = decodedProtectedHeader.get(cose.header.alg)
   return aes.decrypt(alg, ciphertext, new Uint8Array(iv), new Uint8Array(aad), new Uint8Array(cek))
 }

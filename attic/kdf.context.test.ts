@@ -41,7 +41,7 @@ const decryptionKeys = {
 it('direct with party info', async () => {
   const ciphertext = await encrypt.direct({
     protectedHeader: ProtectedHeader([
-      [Protected.Alg, Direct['HPKE-Base-P256-SHA256-AES128GCM']],
+      [cose.header.alg, Direct['HPKE-Base-P256-SHA256-AES128GCM']],
       [Protected.PartyUIdentity, Buffer.from(new TextEncoder().encode('did:example:party-u'))],
       [Protected.PartyVIdentity, Buffer.from(new TextEncoder().encode('did:example:party-v'))]
     ]),

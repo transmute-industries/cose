@@ -41,7 +41,7 @@ const decryptionKeys = {
 it('wrap', async () => {
   const ciphertext = await encrypt.wrap({
     protectedHeader: ProtectedHeader([
-      [Protected.Alg, Aead.A128GCM],
+      [cose.header.alg, Aead.A128GCM],
     ]),
     unprotectedHeader: UnprotectedHeader([]),
     plaintext,
@@ -60,7 +60,7 @@ it('wrap', async () => {
 it('direct', async () => {
   const ciphertext = await encrypt.direct({
     protectedHeader: ProtectedHeader([
-      [Protected.Alg, Direct['HPKE-Base-P256-SHA256-AES128GCM']],
+      [cose.header.alg, Direct['HPKE-Base-P256-SHA256-AES128GCM']],
     ]),
     unprotectedHeader: UnprotectedHeader([]),
     plaintext,

@@ -1,5 +1,11 @@
 import signer from "./signer";
-
 import verifier from "./verifier";
+import subtle from "./subtle";
 
-export { signer, verifier }
+import * as key from './key'
+
+import * as web from './web'
+
+export { signer, verifier, key, subtle, web }
+
+
