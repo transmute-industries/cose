@@ -11,6 +11,7 @@ import { web_key_to_cose_key } from './web_key_to_cose_key'
 import { cose_key_to_web_key } from './cose_key_to_web_key'
 import { public_from_private } from './public_from_private'
 import { web_key_thumbprint } from './thumbprint'
+import { toArrayBuffer } from '../../cbor'
 
 export { web_key_to_cose_key, cose_key_to_web_key, public_from_private }
 
@@ -190,11 +191,11 @@ export const parse = <
 }
 
 
-const _generate = async ({ id, type, algorithm, extractable }: request_crypto_key): Promise<Buffer> => {
+const _generate = async ({ id, type, algorithm, extractable }: request_crypto_key): Promise<Uint8Array> => {
   switch (type) {
     case 'application/jwk+json': {
       const { privateKey } = await generate_web_key({ kid: id, alg: algorithm, ext: extractable || true })
-      return Buffer.from(encoder.encode(JSON.stringify(privateKey)))
+      return encoder.encode(JSON.stringify(privateKey))
     }
     case 'application/cose-key': {
       const { privateKey } = await generate_web_key({ kid: id, alg: algorithm, ext: extractable || true })
@@ -229,7 +230,7 @@ export const convert = async ({ key, from, to }: { key: Uint8Array, from: crypto
       switch (to) {
         case 'application/cose-key': {
           const k = await web_key_to_cose_key(JSON.parse(decoder.decode(key)))
-          return cbor.encode(k)
+          return new Uint8Array(cbor.encode(k))
         }
         default: {
           throw new Error('Unknown key: ' + from)
@@ -249,10 +250,10 @@ export const serialize = <
   cty extends crypto_key_type
 >({ key, type }: { key: fully_specified_cose_key<alg> | fully_specified_web_key<alg>, type: cty }) => {
   if (type === 'application/jwk+json') {
-    return Buffer.from(encoder.encode(JSON.stringify(format_web_key(key as JWK), null, 2)))
+    return new Uint8Array(encoder.encode(JSON.stringify(format_web_key(key as JWK), null, 2)))
   }
   if (type === 'application/cose-key') {
-    return cbor.encode(key)
+    return new Uint8Array(cbor.encode(key))
   }
   throw new Error('Cannot serialize to unsupported media type: ' + type)
 }

@@ -6,7 +6,7 @@ import { prettyPayload } from './prettyPayload'
 
 import { ellideBytes } from './ellideBytes'
 
-export const prettyCoseSign1 = (data: Buffer) => {
+export const prettyCoseSign1 = (data: ArrayBuffer) => {
   const decoded = cbor.decode(data)
   const [encodedProtected, decodedUnprotected, encodedPayload, signature] = decoded.value
   const decodedProtected = cbor.decode(encodedProtected)

@@ -3,6 +3,7 @@ import { base64url } from 'jose'
 import { curve_to_label, ec2_params_to_labels, key_type_to_label } from '../../iana/assignments/cose'
 import { algorithms_to_labels } from '../../iana/requested/cose'
 import { jose_key_type, ec_web_key, web_key_type } from '../../iana/assignments/jose'
+import { toArrayBuffer } from '../../cbor'
 
 export const web_key_to_cose_key = async <T>(jwk: web_key_type): Promise<T> => {
   const coseKey = new Map();
@@ -33,7 +34,7 @@ export const web_key_to_cose_key = async <T>(jwk: web_key_type): Promise<T> => {
           case ec_web_key.y:
           case ec_web_key.d: {
             // todo check lengths based on curves
-            coseKey.set(ec2_params_to_labels.get(key), Buffer.from(base64url.decode(value as string)))
+            coseKey.set(ec2_params_to_labels.get(key), toArrayBuffer(base64url.decode(value as string)))
             break;
           }
           default: {
