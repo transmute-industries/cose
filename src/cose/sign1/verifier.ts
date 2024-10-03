@@ -1,6 +1,6 @@
 
 import { decodeFirst, decodeFirstSync, encode, EMPTY_BUFFER } from '../../cbor'
-import { RequestCoseSign1Verifier, RequestCoseSign1Verify } from './types'
+
 
 import { DecodedToBeSigned } from './types'
 import rawVerifier from '../../crypto/verifier'
@@ -10,9 +10,16 @@ import { HeaderMap } from '../../desugar'
 import * as cose from '../../iana/assignments/cose'
 import { algorithms_to_labels } from '../../iana/requested/cose'
 
-const verifier = ({ resolver }: RequestCoseSign1Verifier) => {
+const verifier = ({ resolver }: {
+  resolver: {
+    resolve: (signature: Uint8Array) => Promise<any>
+  }
+}) => {
   return {
-    verify: async ({ coseSign1, externalAAD }: RequestCoseSign1Verify): Promise<ArrayBuffer> => {
+    verify: async ({ coseSign1, externalAAD }: {
+      coseSign1: Uint8Array,
+      externalAAD?: ArrayBuffer
+    }): Promise<Uint8Array> => {
       const publicKeyJwk = await resolver.resolve(coseSign1)
       const algInPublicKey = algorithms_to_labels.get(publicKeyJwk.alg as string)
       const ecdsa = rawVerifier({ publicKeyJwk })

@@ -44,7 +44,7 @@ export const signer = ({ key, algorithm }: { key: CryptoKey, algorithm: WebCrypt
 
 export const verifier = ({ key, algorithm }: { key: CryptoKey, algorithm: WebCryptoCoseAlgorithm }) => {
   return {
-    verify: async (toBeSigned: ArrayBuffer, signature: ArrayBuffer): Promise<ArrayBuffer> => {
+    verify: async (toBeSigned: Uint8Array, signature: Uint8Array): Promise<Uint8Array> => {
       return subtle().then(async (subtle) => {
         const verified = await subtle.verify(
           webCryptoKeyParamsByCoseAlgorithm[algorithm],

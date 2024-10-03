@@ -11,7 +11,7 @@ const verifier = ({ publicKeyJwk }: { publicKeyJwk: JWK }) => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { alg, ...withoutAlg } = publicKeyJwk
   return {
-    verify: async (toBeSigned: ArrayBuffer, signature: ArrayBuffer): Promise<ArrayBuffer> => {
+    verify: async (toBeSigned: Uint8Array, signature: Uint8Array): Promise<Uint8Array> => {
       const subtle = await subtleCryptoProvider()
       const verificationKey = await subtle.importKey(
         "jwk",

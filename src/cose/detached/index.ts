@@ -29,12 +29,18 @@ export const signer = ({ remote }: {
   }
 }
 
-export const verifier = ({ resolver }: sign1.RequestCoseSign1Verifier) => {
+
+
+export const verifier = ({ resolver }: {
+  resolver: {
+    resolve: (signature: Uint8Array) => Promise<any>
+  }
+}) => {
   const verifier = sign1.verifier({ resolver })
   return {
-    verify: async (req: sign1.RequestCoseSign1VerifyDetached) => {
-      const decoded = decodeFirstSync(req.coseSign1)
-      const payloadBuffer = toArrayBuffer(req.payload);
+    verify: async ({ coseSign1, payload }: { coseSign1: Uint8Array, payload: Uint8Array }) => {
+      const decoded = decodeFirstSync(coseSign1)
+      const payloadBuffer = toArrayBuffer(payload);
       decoded.value[2] = payloadBuffer
       const attached = await encodeAsync(new Tagged(tag.COSE_Sign1, decoded.value), { canonical: true })
       return new Uint8Array(await verifier.verify({ coseSign1: attached }))

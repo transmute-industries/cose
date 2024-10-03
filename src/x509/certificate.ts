@@ -11,7 +11,6 @@ import { labels_to_algorithms } from '../iana/requested/cose';
 import { web_key_type } from '../iana/assignments/jose';
 import { webCryptoKeyParamsByCoseAlgorithm, WebCryptoCoseAlgorithm } from '../crypto/web';
 
-import { RequestCoseSign1DectachedVerify } from '../../src/cose/sign1/types';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 const nodeCrypto = import('crypto').catch(() => { })
@@ -26,14 +25,6 @@ const provide = async () => {
   }
 }
 
-export type RequestRootCertificate = {
-  alg: WebCryptoCoseAlgorithm
-  sub: string
-  iss: string
-  nbf: string
-  exp: string
-  serial: string
-}
 
 // https://datatracker.ietf.org/doc/html/rfc9360#section-2-5.6.1
 const thumbprint = async (cert: string): Promise<[number, ArrayBuffer]> => {
@@ -41,9 +32,15 @@ const thumbprint = async (cert: string): Promise<[number, ArrayBuffer]> => {
   return [cose.algorithm.sha_256, await current.getThumbprint('SHA-256')]
 }
 
-export type RootCertificateResponse = { public: string, private: string }
 
-const root = async (req: RequestRootCertificate): Promise<RootCertificateResponse> => {
+const root = async (req: {
+  alg: WebCryptoCoseAlgorithm
+  sub: string
+  iss: string
+  nbf: string
+  exp: string
+  serial: string
+}): Promise<{ public: string, private: string }> => {
   const crypto = await provide()
   x509.cryptoProvider.set(crypto);
   const extensions: x509.JsonGeneralNames = []
@@ -80,18 +77,17 @@ const pkcs8Signer = async ({ alg, privateKeyPKCS8 }: { alg: number, privateKeyPK
   })
 }
 
-export type RequestCertificateVerifier = {
+
+
+const verifier = ({ resolver }: {
   resolver: {
     resolve: (signature: ArrayBuffer) => Promise<web_key_type>
   }
-}
-
-
-const verifier = ({ resolver }: RequestCertificateVerifier) => {
+}) => {
   return {
-    verify: async (req: RequestCoseSign1DectachedVerify) => {
+    verify: async ({ coseSign1, payload }: { coseSign1: Uint8Array, payload: Uint8Array }) => {
       const verifier = detached.verifier({ resolver })
-      return verifier.verify(req)
+      return verifier.verify({ coseSign1, payload })
     }
   }
 }
