@@ -1499,51 +1499,51 @@ export enum walnutdsa {
 
 
 export type any_cose_key = Map<any, any> & {
-  get(k: cose_key.kid): Buffer
+  get(k: cose_key.kid): ArrayBuffer
   get(k: cose_key.alg): string | number
   get(k: cose_key.key_ops): [ (string|number)]
-  get(k: cose_key.base_iv): Buffer
+  get(k: cose_key.base_iv): ArrayBuffer
 }
 
 export type okp_key = any_cose_key & {
   get(k: okp.kty): cose_key_type.okp
   get(k: okp.crv): okp_curves
-  get(k: okp.x): Buffer
-  get(k: okp.d): Buffer
+  get(k: okp.x): ArrayBuffer
+  get(k: okp.d): ArrayBuffer
 }
 
 export type ec2_key = any_cose_key & {
   get(k: ec2.kty): cose_key_type.ec2
   get(k: ec2.crv): ec2_curves
-  get(k: ec2.x): Buffer
-  get(k: ec2.y): Buffer | boolean
-  get(k: ec2.d): Buffer
+  get(k: ec2.x): ArrayBuffer
+  get(k: ec2.y): ArrayBuffer | boolean
+  get(k: ec2.d): ArrayBuffer
 }
 
 export type rsa_key = any_cose_key & {
   get(k: rsa.kty): cose_key_type.rsa
-  get(k: rsa.n): Buffer
-  get(k: rsa.e): Buffer
-  get(k: rsa.d): Buffer
-  get(k: rsa.p): Buffer
-  get(k: rsa.q): Buffer
-  get(k: rsa.dp): Buffer
-  get(k: rsa.dq): Buffer
-  get(k: rsa.qinv): Buffer
+  get(k: rsa.n): ArrayBuffer
+  get(k: rsa.e): ArrayBuffer
+  get(k: rsa.d): ArrayBuffer
+  get(k: rsa.p): ArrayBuffer
+  get(k: rsa.q): ArrayBuffer
+  get(k: rsa.dp): ArrayBuffer
+  get(k: rsa.dq): ArrayBuffer
+  get(k: rsa.qinv): ArrayBuffer
   get(k: rsa.other): Array<any>
-  get(k: rsa.r_i): Buffer
-  get(k: rsa.d_i): Buffer
-  get(k: rsa.t_i): Buffer
+  get(k: rsa.r_i): ArrayBuffer
+  get(k: rsa.d_i): ArrayBuffer
+  get(k: rsa.t_i): ArrayBuffer
 }
 
 export type symmetric_key = any_cose_key & {
   get(k: symmetric.kty): cose_key_type.symmetric
-  get(k: symmetric.k): Buffer
+  get(k: symmetric.k): ArrayBuffer
 }
 
 export type hss_lms_key = any_cose_key & {
   get(k: hss_lms.kty): cose_key_type.hss_lms
-  get(k: hss_lms.pub): Buffer
+  get(k: hss_lms.pub): ArrayBuffer
 }
 
 export type walnutdsa_key = any_cose_key & {

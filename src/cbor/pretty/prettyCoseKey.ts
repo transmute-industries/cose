@@ -5,7 +5,7 @@ import { ellideBytes } from './ellideBytes'
 
 import { ec2_key, cose_key, cose_key_type, ec2, any_cose_key } from '../../iana/assignments/cose'
 
-export const prettyCoseKey = (data: Buffer) => {
+export const prettyCoseKey = (data: ArrayBuffer) => {
     const decoded = cbor.decode(data) as any_cose_key
     const kty = decoded.get(cose_key.kty as any) as any
     if (kty === cose_key_type.ec2) {

@@ -17,7 +17,7 @@ const cddlToType = (cddl: string) => {
     return cddl
       .replace(/\//g, '|')
       .replace(/tstr/g, 'string')
-      .replace(/bstr/g, 'Buffer')
+      .replace(/bstr/g, 'ArrayBuffer')
       .replace(/uint/g, 'number')
       .replace(/int/g, 'number')
       .replace(/bool/g, 'boolean')
