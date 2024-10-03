@@ -13,11 +13,11 @@ export const signer = async ({ key, algorithm }: { key: web_key_type | any_cose_
     privateKey = await crypto.web.web_key_to_crypto_key(key, ['sign'])
   }
   if (privateKey === undefined) {
-    throw new Error('Unsupported key')
+    privateKey = key
   }
   return crypto.web
     .signer({
-      key: privateKey,
+      key: privateKey as CryptoKey,
       algorithm
     })
 }
