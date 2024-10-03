@@ -6,7 +6,7 @@ import subtleCryptoProvider from "../../crypto/subtle";
 import * as cose from '../../iana/assignments/cose'
 import { web_key_type } from "../../iana/assignments/jose";
 
-export type cose_key_thumbprint = ArrayBuffer
+export type cose_key_thumbprint = Uint8Array
 export type cose_key_thumbprint_base_encoded = string
 export type cose_key_thumbprint_uri = `urn:ietf:params:oauth:ckt:sha-256:${cose_key_thumbprint_base_encoded}`
 
@@ -27,8 +27,8 @@ const cose_key_thumbprint = async (coseKey: cose.any_cose_key): Promise<cose_key
   }
   const encoded = encodeCanonical(onlyRequiredMap)
   const subtle = await subtleCryptoProvider()
-  const digest = subtle.digest("SHA-256", encoded)
-  return digest
+  const digest = await subtle.digest("SHA-256", encoded)
+  return new Uint8Array(digest)
 }
 
 export const cose_key_thumbprint_uri = async (coseKey: cose.any_cose_key): Promise<cose_key_thumbprint_uri> => {

@@ -32,7 +32,7 @@ it('sign and verify with x5t and key resolver', async () => {
     ]),
     payload: content
   })
-  const certificateFromThumbprint = async (coseSign1: ArrayBuffer): Promise<web_key_type> => {
+  const certificateFromThumbprint = async (coseSign1: Uint8Array): Promise<web_key_type> => {
     const { tag, value } = cose.cbor.decodeFirstSync(coseSign1)
     if (tag !== cose.tag.COSE_Sign1) {
       throw new Error('Only tagged cose sign 1 are supported')

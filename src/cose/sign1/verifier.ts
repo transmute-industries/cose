@@ -1,8 +1,8 @@
 
-import { decodeFirst, decodeFirstSync, encode, EMPTY_BUFFER } from '../../cbor'
+import { decodeFirst, decodeFirstSync, encode, EMPTY_BUFFER, toArrayBuffer } from '../../cbor'
 
 
-import { DecodedToBeSigned } from './types'
+
 import rawVerifier from '../../crypto/verifier'
 
 import { HeaderMap } from '../../desugar'
@@ -18,7 +18,7 @@ const verifier = ({ resolver }: {
   return {
     verify: async ({ coseSign1, externalAAD }: {
       coseSign1: Uint8Array,
-      externalAAD?: ArrayBuffer
+      externalAAD?: Uint8Array
     }): Promise<Uint8Array> => {
       const publicKeyJwk = await resolver.resolve(coseSign1)
       const algInPublicKey = algorithms_to_labels.get(publicKeyJwk.alg as string)
@@ -41,12 +41,13 @@ const verifier = ({ resolver }: {
       if (!signature) {
         throw new Error('No signature to verify');
       }
-      const decodedToBeSigned = [
+      // be careful with Uint8Array near cbor encode... because of aggresive tagging
+      const decodedToBeSigned: [string, ArrayBuffer, ArrayBuffer, ArrayBuffer] = [
         'Signature1',
-        protectedHeaderBytes,
-        externalAAD || EMPTY_BUFFER,
-        payload
-      ] as DecodedToBeSigned
+        toArrayBuffer(protectedHeaderBytes),
+        toArrayBuffer(externalAAD || EMPTY_BUFFER),
+        toArrayBuffer(payload)
+      ]
       const encodedToBeSigned = encode(decodedToBeSigned);
       await ecdsa.verify(encodedToBeSigned, signature)
       return payload;

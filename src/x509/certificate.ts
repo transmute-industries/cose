@@ -27,9 +27,9 @@ const provide = async () => {
 
 
 // https://datatracker.ietf.org/doc/html/rfc9360#section-2-5.6.1
-const thumbprint = async (cert: string): Promise<[number, ArrayBuffer]> => {
+const thumbprint = async (cert: string): Promise<[number, Uint8Array]> => {
   const current = new x509.X509Certificate(cert)
-  return [cose.algorithm.sha_256, await current.getThumbprint('SHA-256')]
+  return [cose.algorithm.sha_256, new Uint8Array(await current.getThumbprint('SHA-256'))]
 }
 
 
@@ -81,7 +81,7 @@ const pkcs8Signer = async ({ alg, privateKeyPKCS8 }: { alg: number, privateKeyPK
 
 const verifier = ({ resolver }: {
   resolver: {
-    resolve: (signature: ArrayBuffer) => Promise<web_key_type>
+    resolve: (signature: Uint8Array) => Promise<web_key_type>
   }
 }) => {
   return {
