@@ -1,9 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { JWK } from 'jose'
 
-import { toArrayBuffer } from '../cbor'
-
-
 import subtleCryptoProvider from './subtle'
 
 import getDigestFromVerificationKey from '../cose/sign1/getDigestFromVerificationKey'
@@ -12,7 +9,7 @@ const signer = ({ privateKeyJwk }: { privateKeyJwk: JWK | any }) => {
   const digest = getDigestFromVerificationKey(`${privateKeyJwk.alg}`)
   const { alg, ...withoutAlg } = privateKeyJwk
   return {
-    sign: async (toBeSigned: ArrayBuffer): Promise<ArrayBuffer> => {
+    sign: async (toBeSigned: Uint8Array): Promise<Uint8Array> => {
       const subtle = await subtleCryptoProvider()
       const signingKey = await subtle.importKey(
         "jwk",
@@ -33,7 +30,7 @@ const signer = ({ privateKeyJwk }: { privateKeyJwk: JWK | any }) => {
         toBeSigned,
       );
 
-      return toArrayBuffer(signature);
+      return new Uint8Array(signature);
     }
   }
 }

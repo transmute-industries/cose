@@ -30,13 +30,13 @@ export type WebCryptoCoseAlgorithm = keyof typeof webCryptoKeyParamsByCoseAlgori
 
 export const signer = ({ key, algorithm }: { key: CryptoKey, algorithm: WebCryptoCoseAlgorithm }) => {
   return {
-    sign: async (toBeSigned: ArrayBuffer): Promise<ArrayBuffer> => {
-      return subtle().then((subtle) => {
-        return subtle.sign(
+    sign: async (toBeSigned: Uint8Array): Promise<Uint8Array> => {
+      return subtle().then(async (subtle) => {
+        return new Uint8Array(await subtle.sign(
           webCryptoKeyParamsByCoseAlgorithm[algorithm],
           key,
           toBeSigned,
-        )
+        ))
       })
     }
   }
