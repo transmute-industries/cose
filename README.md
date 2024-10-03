@@ -29,24 +29,7 @@ const cose = require("@transmute/cose");
 import * as cose from "@transmute/cose";
 ```
 
-### Key Generation
-
-```ts
-const private_key = await cose.crypto.key.generate<
-  "ES256",
-  "application/jwk+json"
->({
-  type: "application/jwk+json",
-  algorithm: "ES256",
-});
-
-const public_key = cose.public_from_private({
-  key: private_key,
-  type: "application/jwk+json",
-});
-
-// see tests for current APIs
-```
+## Examples
 
 ### COSE Receipts & Signature Transparency
 
