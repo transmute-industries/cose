@@ -6,6 +6,8 @@ import { CCFInclusionProof } from './types'
 import { decodeCCFInclusionProof } from './types'
 import { computeCCFRoot } from './ccf_proof'
 import { validateCCFInclusionProof } from './ccf_proof'
+import { DynamicTrustStore, jwkToCoseKey } from './dynamic_trust_store'
+import * as cose from '../../index'
 
 /**
  * Verifies a CCF inclusion receipt according to the draft algorithm:
@@ -21,7 +23,7 @@ import { validateCCFInclusionProof } from './ccf_proof'
 export async function verifyCCFInclusionReceipt(
     inclusionReceipt: Uint8Array,
     hashFunction: (data: Uint8Array) => Uint8Array,
-    verifier: any // COSE verifier interface
+    verifier?: any // Optional COSE verifier interface
 ): Promise<boolean> {
     try {
         // Decode the COSE Sign1 structure
@@ -43,12 +45,6 @@ export async function verifyCCFInclusionReceipt(
             throw new Error(`Invalid verifiable data structure: expected 2 (CCF), got ${vds}`)
         }
 
-        // Check for label header (must be -1 for inclusion proof)
-        const label = protectedHeader.get(draft_headers.verifiable_data_proofs)
-        if (label !== -1) {
-            throw new Error(`Invalid proof type: expected -1 (inclusion), got ${label}`)
-        }
-
         // Extract inclusion proof from unprotected header
         const proofs = unprotectedHeader.get(draft_headers.verifiable_data_proofs)
         if (!proofs || !proofs.get(-1)) {
@@ -56,7 +52,35 @@ export async function verifyCCFInclusionReceipt(
         }
 
         const proofData = proofs.get(-1)[0] // Get first inclusion proof
-        const proof = decodeCCFInclusionProof(proofData)
+        // Debug output for proofData
+        console.log('[DEBUG] proofData type:', typeof proofData, Array.isArray(proofData) ? 'Array' : proofData && proofData.constructor && proofData.constructor.name)
+        if (proofData instanceof Uint8Array) {
+            console.log('[DEBUG] proofData (Uint8Array):', Buffer.from(proofData).toString('hex').slice(0, 64) + '...')
+            try {
+                const decodedProof = cbor.decode(proofData)
+                console.log('[DEBUG] proofData CBOR-decoded:', decodedProof)
+            } catch (e) {
+                const err = e instanceof Error ? e : new Error(String(e));
+                console.log('[DEBUG] proofData CBOR decode error:', err.message)
+            }
+        } else {
+            console.log('[DEBUG] proofData (raw):', proofData)
+        }
+
+        // Fix: decode if buffer and decodes to expected structure, else pass as-is
+        let proof: CCFInclusionProof
+        if (proofData instanceof Uint8Array) {
+            try {
+                proof = decodeCCFInclusionProof(proofData)
+            } catch (e) {
+                const err = e instanceof Error ? e : new Error(String(e));
+                console.log('[DEBUG] decodeCCFInclusionProof error:', err.message)
+                // Try using as already-decoded
+                proof = proofData as any
+            }
+        } else {
+            proof = proofData as any // already decoded
+        }
 
         // Validate the proof structure
         if (!validateCCFInclusionProof(proof)) {
@@ -66,15 +90,58 @@ export async function verifyCCFInclusionReceipt(
         // Compute the root from the proof
         const computedRoot = computeCCFRoot(proof, hashFunction)
 
+        // If no verifier provided, create one using dynamic trust store
+        if (!verifier) {
+            const trustStore = new DynamicTrustStore()
+            const publicKeyJwk = await trustStore.getKey(inclusionReceipt)
+
+            verifier = cose.detached.verifier({
+                resolver: {
+                    resolve: async () => {
+                        return jwkToCoseKey(publicKeyJwk)
+                    }
+                }
+            })
+        }
+
         // Verify the COSE signature using the computed root as payload
         const verificationResult = await verifier.verify({
-            signature: inclusionReceipt,
+            coseSign1: inclusionReceipt,
             payload: computedRoot
         })
 
         return verificationResult
     } catch (error) {
         console.error('CCF inclusion receipt verification failed:', error)
+        return false
+    }
+}
+
+/**
+ * Verifies a CCF receipt with a custom trust store
+ */
+export async function verifyCCFReceiptWithTrustStore(
+    inclusionReceipt: Uint8Array,
+    hashFunction: (data: Uint8Array) => Uint8Array,
+    trustStore: DynamicTrustStore
+): Promise<boolean> {
+    try {
+        // Get the public key from the trust store
+        const publicKeyJwk = await trustStore.getKey(inclusionReceipt)
+
+        // Create verifier with the retrieved key
+        const verifier = cose.detached.verifier({
+            resolver: {
+                resolve: async () => {
+                    return jwkToCoseKey(publicKeyJwk)
+                }
+            }
+        })
+
+        // Use the existing verification logic
+        return await verifyCCFInclusionReceipt(inclusionReceipt, hashFunction, verifier)
+    } catch (error) {
+        console.error('CCF receipt verification with trust store failed:', error)
         return false
     }
 }

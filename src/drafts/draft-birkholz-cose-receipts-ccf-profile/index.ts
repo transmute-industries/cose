@@ -2,6 +2,7 @@ export * from './types'
 export * from './ccf_leaf'
 export * from './ccf_proof'
 export * from './ccf_verifier'
+export * from './dynamic_trust_store'
 
 export const ccf_verifiable_data_structures = {
     ccf_ledger_sha256: 2

@@ -73,11 +73,54 @@ export function encodeCCFInclusionProof(proof: CCFInclusionProof): Uint8Array {
 }
 
 // CBOR decoding for CCF Inclusion Proof
-export function decodeCCFInclusionProof(data: Uint8Array): CCFInclusionProof {
-    const decoded = cbor.decode(data)
-    const value = getDecodedValue(decoded)
+export function decodeCCFInclusionProof(data: Uint8Array | Map<any, any>): CCFInclusionProof {
+    let value: any
+    if (data instanceof Uint8Array) {
+        const decoded = cbor.decode(data)
+        value = getDecodedValue(decoded)
+    } else if (data instanceof Map) {
+        value = data
+    } else {
+        throw new Error('decodeCCFInclusionProof: input must be Uint8Array or Map')
+    }
+    // Diagnostics
+    const leafRaw = value.get(1)
+    const pathRaw = value.get(2)
+    console.log('[DEBUG] decodeCCFInclusionProof leafRaw:', leafRaw)
+    console.log('[DEBUG] decodeCCFInclusionProof pathRaw:', pathRaw)
+    // Robust decoding
+    let leaf: CCFLeaf
+    if (leafRaw instanceof Uint8Array) {
+        leaf = decodeCCFLeaf(leafRaw)
+    } else if (Array.isArray(leafRaw)) {
+        // Already decoded array
+        leaf = {
+            internal_transaction_hash: leafRaw[0],
+            internal_evidence: leafRaw[1],
+            data_hash: leafRaw[2]
+        }
+    } else {
+        throw new Error('decodeCCFInclusionProof: unexpected leaf format')
+    }
+    let path: CCFProofElement[]
+    if (Array.isArray(pathRaw)) {
+        path = pathRaw.map((element: any) => {
+            if (element instanceof Uint8Array) {
+                return decodeCCFProofElement(element)
+            } else if (Array.isArray(element)) {
+                return {
+                    left: element[0],
+                    hash: element[1]
+                }
+            } else {
+                throw new Error('decodeCCFInclusionProof: unexpected path element format')
+            }
+        })
+    } else {
+        throw new Error('decodeCCFInclusionProof: unexpected path format')
+    }
     return {
-        leaf: decodeCCFLeaf(value.get(1)),
-        path: value.get(2).map((element: Uint8Array) => decodeCCFProofElement(element))
+        leaf,
+        path
     }
 } 
