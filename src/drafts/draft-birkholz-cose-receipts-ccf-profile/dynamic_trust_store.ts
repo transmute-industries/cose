@@ -37,17 +37,14 @@ export interface TrustStoreClient {
 export class DefaultTrustStoreClient implements TrustStoreClient {
     async getJWKS(issuer: string): Promise<JWKS> {
         try {
-            console.log('[DEBUG] getJWKS - original issuer:', issuer)
             // Patch: prepend https:// if issuer is just a hostname
             let base = issuer
             if (!/^https?:\/\//i.test(base)) {
                 base = 'https://' + base
             }
-            console.log('[DEBUG] getJWKS - base URL:', base)
             // Construct the JWKS URL from the issuer
             // For CCF services, the JWKS is typically available at /.well-known/jwks.json
             const jwksUrl = new URL('/.well-known/jwks.json', base)
-            console.log('[DEBUG] getJWKS - JWKS URL:', jwksUrl.toString())
 
             const response = await fetch(jwksUrl.toString())
             if (!response.ok) {
@@ -130,10 +127,6 @@ export class DynamicTrustStore {
             const keyId = protectedHeader.get(cose.header.kid)
             const cwtClaims = protectedHeader.get(cose.header.cwt_claims)
             const issuer = cwtClaims.get(cose.cwt_claims.iss)
-
-            console.log('[DEBUG] parseReceipt - keyId:', keyId)
-            console.log('[DEBUG] parseReceipt - issuer:', issuer)
-            console.log('[DEBUG] parseReceipt - cwtClaims keys:', Array.from(cwtClaims.keys()))
 
             if (!keyId || !issuer) {
                 throw new Error('Missing key ID or issuer in receipt')

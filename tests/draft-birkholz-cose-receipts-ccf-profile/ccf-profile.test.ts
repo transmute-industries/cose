@@ -168,8 +168,21 @@ describe('CCF Profile Implementation', () => {
                 payload: statement
             })
 
-            // Create CCF proof
-            ccfProof = createTestCCFProof()
+            // Create CCF proof with proper data_hash matching the signed statement
+            const hashFunction = createHashFunction()
+            const signedStatementHash = hashFunction(signedStatement)
+
+            ccfProof = {
+                leaf: {
+                    internal_transaction_hash: new Uint8Array(32).fill(1),
+                    internal_evidence: 'test-evidence',
+                    data_hash: signedStatementHash  // Use actual signed statement hash
+                },
+                path: [
+                    { left: true, hash: new Uint8Array(32).fill(3) },
+                    { left: false, hash: new Uint8Array(32).fill(4) }
+                ]
+            }
 
             // Create CCF receipt
             ccfReceipt = await cose.createCCFInclusionReceipt(
@@ -270,6 +283,10 @@ describe('CCF Profile Implementation', () => {
         it('should handle multiple receipts in transparent statement', async () => {
             // Test multiple receipts from different transparency services
 
+            // Compute signed statement hash for proper CCF proof
+            const hashFunction = createHashFunction()
+            const signedStatementHash = hashFunction(signedStatement)
+
             // Create second transparency service (simplified setup)
             const secondServiceKey = await cose.crypto.key.generate<'ES256', 'application/jwk+json'>({
                 type: 'application/jwk+json',
@@ -287,9 +304,21 @@ describe('CCF Profile Implementation', () => {
                 }
             })
 
-            // Create and add second receipt
+            // Create and add second receipt with proper data_hash
+            const secondProof = {
+                leaf: {
+                    internal_transaction_hash: new Uint8Array(32).fill(1),
+                    internal_evidence: 'test-evidence',
+                    data_hash: signedStatementHash  // Use actual signed statement hash
+                },
+                path: [
+                    { left: true, hash: new Uint8Array(32).fill(3) },
+                    { left: false, hash: new Uint8Array(32).fill(4) }
+                ]
+            }
+
             const secondReceipt = await cose.createCCFInclusionReceipt(
-                createTestCCFProof(),
+                secondProof,
                 secondServiceSigner,
                 createHashFunction(),
                 secondServiceKey,

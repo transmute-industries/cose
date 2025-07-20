@@ -34,7 +34,7 @@ export async function fetchTransparencyConfiguration(issuer: string): Promise<Tr
         base = 'https://' + base
     }
     const configUrl = new URL('/.well-known/scitt/transparency-configuration', base)
-    console.log('[SCRAPI] Fetching transparency configuration:', configUrl.toString())
+    // Fetch transparency configuration
 
     try {
         // Try with relaxed TLS settings for test environments
@@ -54,20 +54,17 @@ export async function fetchTransparencyConfiguration(issuer: string): Promise<Tr
         let config: TransparencyConfiguration
 
         if (contentType.includes('cbor') || contentType.includes('application/cbor')) {
-            console.log('[SCRAPI] Parsing CBOR response')
             const buffer = await res.arrayBuffer()
             const decoded = cbor.decode(new Uint8Array(buffer))
             config = decoded as TransparencyConfiguration
         } else {
             // Try parsing as CBOR first (since CCF returns CBOR without proper content-type)
-            console.log('[SCRAPI] Attempting CBOR parsing (default for CCF services)')
             const buffer = await res.arrayBuffer()
             try {
                 const decoded = cbor.decode(new Uint8Array(buffer))
                 config = decoded as TransparencyConfiguration
             } catch (cborError) {
                 // Fallback to JSON if CBOR fails
-                console.log('[SCRAPI] CBOR parsing failed, trying JSON fallback')
                 const text = new TextDecoder().decode(buffer)
                 config = JSON.parse(text)
             }
