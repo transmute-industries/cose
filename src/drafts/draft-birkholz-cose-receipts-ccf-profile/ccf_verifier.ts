@@ -125,22 +125,12 @@ export async function verifyCCFReceiptCore(
                 }
             }
 
-            // Verify COSE signature - try computed root first, then empty payload for legacy tests
+            // Verify COSE signature using computed Merkle root as payload (Microsoft CCF standard)
             try {
-                let result
-                try {
-                    // Primary approach: computed root as payload (real CCF receipts)
-                    result = await verifier.verify({
-                        coseSign1: inclusionReceipt,
-                        payload: accumulator  // Use computed Merkle root as payload
-                    })
-                } catch (rootPayloadError) {
-                    // Fallback: empty payload (legacy test CCF receipts)
-                    result = await verifier.verify({
-                        coseSign1: inclusionReceipt,
-                        payload: new Uint8Array(0)  // Empty payload for legacy test compatibility
-                    })
-                }
+                const result = await verifier.verify({
+                    coseSign1: inclusionReceipt,
+                    payload: accumulator  // Use computed Merkle root as payload
+                })
 
                 const verified = result !== undefined
                 if (!verified) {
@@ -285,7 +275,7 @@ export async function createCCFInclusionReceipt(
                 [-1, [proofData]]
             ])]
         ]),
-        payload: new Uint8Array(0) // Empty payload for test compatibility
+        payload: root // Use computed Merkle root as payload (Microsoft CCF standard)
     })
 
     return receipt

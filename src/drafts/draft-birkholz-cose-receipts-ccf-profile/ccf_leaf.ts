@@ -29,7 +29,7 @@ export function createCCFLeafHash(
     offset += evidenceHash.length
     concatenated.set(leaf.data_hash, offset)
 
-    return concatenated
+    return hashFunction(concatenated)
 }
 
 /**
