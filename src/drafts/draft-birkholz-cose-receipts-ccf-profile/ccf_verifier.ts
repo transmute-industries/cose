@@ -1,120 +1,180 @@
 import * as cbor from '../../cbor'
+import * as cose from '../../cose'
+import crypto from 'crypto'
+import { algorithm, header } from '../../iana/assignments/cose'
+import { cwt_claims } from '../../iana/assignments/cwt'
 import { draft_headers } from '../../iana/requested/cose'
-import { header, algorithm } from '../../iana/assignments/cose'
-import { ProtectedHeader, UnprotectedHeader } from '../../desugar'
-import { CCFInclusionProof } from './types'
-import { decodeCCFInclusionProof } from './types'
-import { computeCCFRoot } from './ccf_proof'
-import { validateCCFInclusionProof } from './ccf_proof'
+import { CCFInclusionProof, decodeCCFInclusionProof } from './types'
+import { validateCCFInclusionProof, computeCCFRoot } from './ccf_proof'
 import { DynamicTrustStore, jwkToCoseKey } from './dynamic_trust_store'
-import * as cose from '../../index'
+import { ProtectedHeader, UnprotectedHeader } from '../../desugar'
 
 /**
- * Verifies a CCF inclusion receipt according to the draft algorithm:
- * 
- * verify_inclusion_receipt(inclusion_receipt):
- *   let label = INCLUSION_PROOF_LABEL
- *   assert(label in inclusion_receipt.unprotected_header)
- *   let proof = inclusion_receipt.unprotected_header[label]
- *   assert(inclusion_receipt.payload == nil)
- *   let payload = compute_root(proof)
- *   return verify_cose(inclusion_receipt, payload)
+ * CCF inclusion receipt verification per draft-birkholz-cose-receipts-ccf-profile
  */
 export async function verifyCCFInclusionReceipt(
     inclusionReceipt: Uint8Array,
     hashFunction: (data: Uint8Array) => Uint8Array,
-    verifier?: any // Optional COSE verifier interface
+    verifier?: any, // Optional COSE verifier interface
+    signedStatement?: Uint8Array // The signed statement for claim verification
+): Promise<boolean> {
+    if (!signedStatement) {
+        throw new Error('Signed statement is required for CCF receipt verification')
+    }
+
+    console.log('🚀 Using CCF verification')
+    const signedStatementHash = hashFunction(signedStatement)
+    return await verifyCCFReceiptCore(inclusionReceipt, hashFunction, verifier, signedStatementHash)
+}
+
+
+
+/**
+ * Core CCF verification using computed Merkle root as payload
+ * Implements the CCF verification standard per draft specification
+ */
+export async function verifyCCFReceiptCore(
+    inclusionReceipt: Uint8Array,
+    hashFunction: (data: Uint8Array) => Uint8Array,
+    verifier: any,
+    claimDigest: Uint8Array  // The signed statement hash for leaf verification
 ): Promise<boolean> {
     try {
-        // Decode the COSE Sign1 structure
-        const decoded = cbor.decode(inclusionReceipt)
-
-        // Extract protected and unprotected headers
-        const protectedHeader = cbor.decode(decoded.value[0])
-        const unprotectedHeader = decoded.value[1]
-        const payload = decoded.value[2]
-
-        // Check that payload is null (detached signature)
-        if (payload !== null) {
-            throw new Error('CCF inclusion receipt must have detached payload')
+        // Decode the receipt
+        const receiptDecoded = cbor.decode(inclusionReceipt)
+        if (!receiptDecoded.value || !Array.isArray(receiptDecoded.value) || receiptDecoded.value.length !== 4) {
+            throw new Error('Invalid COSE_Sign1 receipt structure')
         }
 
-        // Check for verifiable-data-structure header (must be 2 for CCF)
+        const [protectedBytes, unprotectedHeaders, payload, signature] = receiptDecoded.value
+
+        // Validate verifiable data structure (must be 2 for CCF)
+        const protectedHeader = cbor.decode(protectedBytes)
         const vds = protectedHeader.get(draft_headers.verifiable_data_structure)
         if (vds !== 2) {
             throw new Error(`Invalid verifiable data structure: expected 2 (CCF), got ${vds}`)
         }
 
-        // Extract inclusion proof from unprotected header
-        const proofs = unprotectedHeader.get(draft_headers.verifiable_data_proofs)
-        if (!proofs || !proofs.get(-1)) {
-            throw new Error('Missing inclusion proof in unprotected header')
+        // Extract inclusion proofs from unprotected headers
+        const proof = unprotectedHeaders.get(draft_headers.verifiable_data_proofs)
+        if (!proof) {
+            throw new Error('Verifiable data proof is required')
         }
 
-        const proofData = proofs.get(-1)[0] // Get first inclusion proof
-        // Debug output for proofData
-        console.log('[DEBUG] proofData type:', typeof proofData, Array.isArray(proofData) ? 'Array' : proofData && proofData.constructor && proofData.constructor.name)
-        if (proofData instanceof Uint8Array) {
-            console.log('[DEBUG] proofData (Uint8Array):', Buffer.from(proofData).toString('hex').slice(0, 64) + '...')
-            try {
-                const decodedProof = cbor.decode(proofData)
-                console.log('[DEBUG] proofData CBOR-decoded:', decodedProof)
-            } catch (e) {
-                const err = e instanceof Error ? e : new Error(String(e));
-                console.log('[DEBUG] proofData CBOR decode error:', err.message)
+        const inclusionProofs = proof.get(-1) // COSE_RECEIPT_INCLUSION_PROOF_LABEL
+        if (!inclusionProofs || !Array.isArray(inclusionProofs)) {
+            throw new Error('Inclusion proof is required')
+        }
+
+        // Process each inclusion proof
+        for (let i = 0; i < inclusionProofs.length; i++) {
+            const inclusionProof = inclusionProofs[i]
+
+            if (!(inclusionProof instanceof Uint8Array)) {
+                throw new Error('Inclusion proof must be bytes')
             }
-        } else {
-            console.log('[DEBUG] proofData (raw):', proofData)
-        }
 
-        // Fix: decode if buffer and decodes to expected structure, else pass as-is
-        let proof: CCFInclusionProof
-        if (proofData instanceof Uint8Array) {
-            try {
-                proof = decodeCCFInclusionProof(proofData)
-            } catch (e) {
-                const err = e instanceof Error ? e : new Error(String(e));
-                console.log('[DEBUG] decodeCCFInclusionProof error:', err.message)
-                // Try using as already-decoded
-                proof = proofData as any
+            // Decode the CBOR proof
+            const proofDecoded = cbor.decode(inclusionProof)
+            if (!proofDecoded || typeof proofDecoded !== 'object') {
+                throw new Error('Invalid proof structure')
             }
-        } else {
-            proof = proofData as any // already decoded
-        }
 
-        // Validate the proof structure
-        if (!validateCCFInclusionProof(proof)) {
-            throw new Error('Invalid CCF inclusion proof structure')
-        }
+            // Extract leaf (CCF_PROOF_LEAF_LABEL = 1) - handle Map structure
+            let leaf
+            if (proofDecoded instanceof Map) {
+                leaf = proofDecoded.get(1)
+            } else {
+                leaf = proofDecoded[1]
+            }
 
-        // Compute the root from the proof
-        const computedRoot = computeCCFRoot(proof, hashFunction)
+            if (!leaf || !Array.isArray(leaf) || leaf.length !== 3) {
+                throw new Error('Leaf must be present and have 3 elements')
+            }
 
-        // If no verifier provided, create one using dynamic trust store
-        if (!verifier) {
-            const trustStore = new DynamicTrustStore()
-            const publicKeyJwk = await trustStore.getKey(inclusionReceipt)
+            // Compute initial accumulator from leaf
+            // accumulator = sha256(leaf[0] + sha256(leaf[1].encode()).digest() + leaf[2]).digest()
+            const leafMiddleHash = hashFunction(new TextEncoder().encode(leaf[1]))
+            const leafHash = hashFunction(new Uint8Array([...leaf[0], ...leafMiddleHash, ...leaf[2]]))
+            let accumulator = leafHash
 
-            verifier = cose.detached.verifier({
-                resolver: {
-                    resolve: async () => {
-                        return jwkToCoseKey(publicKeyJwk)
-                    }
+            // Extract path (CCF_PROOF_PATH_LABEL = 2) - handle Map structure
+            let path
+            if (proofDecoded instanceof Map) {
+                path = proofDecoded.get(2)
+            } else {
+                path = proofDecoded[2]
+            }
+
+            if (!path || !Array.isArray(path)) {
+                throw new Error('Path must be present')
+            }
+
+            // Compute Merkle root following the path
+            for (let j = 0; j < path.length; j++) {
+                const [left, digest] = path[j]
+                if (typeof left !== 'boolean' || !(digest instanceof Uint8Array)) {
+                    throw new Error('Invalid path element')
                 }
-            })
+
+                if (left) {
+                    // Left sibling: hash(digest + accumulator)
+                    accumulator = hashFunction(new Uint8Array([...digest, ...accumulator]))
+                } else {
+                    // Right sibling: hash(accumulator + digest)
+                    accumulator = hashFunction(new Uint8Array([...accumulator, ...digest]))
+                }
+            }
+
+            // Verify COSE signature using computed Merkle root as payload
+            try {
+                const result = await verifier.verify({
+                    coseSign1: inclusionReceipt,
+                    payload: accumulator  // Use computed Merkle root as payload
+                })
+
+                const verified = result !== undefined
+                if (!verified) {
+                    return false
+                }
+
+                // Verify claim digest matches leaf data
+                if (!areUint8ArraysEqual(claimDigest, leaf[2])) {
+                    throw new Error('Claim digest mismatch')
+                }
+
+            } catch (error) {
+                console.log(`       ❌ CCF verification error:`, error)
+                return false
+            }
         }
 
-        // Verify the COSE signature using the computed root as payload
-        const verificationResult = await verifier.verify({
-            coseSign1: inclusionReceipt,
-            payload: computedRoot
-        })
+        console.log(`       ✅ CCF verification: SUCCESS`)
+        console.log(`       ✅ Claim digest matches leaf data`)
+        return true
 
-        return verificationResult
     } catch (error) {
-        console.error('CCF inclusion receipt verification failed:', error)
-        return false
+        console.log(`       ❌ CCF verification error:`, error)
+
+        // Let structural errors (parsing/validation) throw, only catch signature errors
+        if (error instanceof Error && error.message.includes('Signature verification failed')) {
+            return false
+        }
+
+        // Re-throw all other errors (structural validation errors should propagate)
+        throw error
     }
+}
+
+
+
+// Helper function to compare Uint8Arrays
+function areUint8ArraysEqual(a: Uint8Array, b: Uint8Array): boolean {
+    if (a.length !== b.length) return false
+    for (let i = 0; i < a.length; i++) {
+        if (a[i] !== b[i]) return false
+    }
+    return true
 }
 
 /**
@@ -147,13 +207,15 @@ export async function verifyCCFReceiptWithTrustStore(
 }
 
 /**
- * Creates a CCF inclusion receipt
+ * Creates a CCF inclusion receipt in standard CBOR format
  */
 export async function createCCFInclusionReceipt(
     proof: CCFInclusionProof,
     signer: any, // COSE signer interface
     hashFunction: (data: Uint8Array) => Uint8Array,
-    publicKeyJwk: any
+    publicKeyJwk: any,
+    issuer?: string,
+    subject?: string
 ): Promise<Uint8Array> {
     // Validate the proof
     if (!validateCCFInclusionProof(proof)) {
@@ -163,23 +225,62 @@ export async function createCCFInclusionReceipt(
     // Compute the root
     const root = computeCCFRoot(proof, hashFunction)
 
-    // Encode the proof
-    const proofData = cbor.encode(proof)
+    // Encode the proof in CCF standard format
+    // CCF uses CBOR Map with:
+    // - Key 1: Leaf (3-element array: [internal_hash, internal_data, claim_digest])
+    // - Key 2: Path (array of [left_bool, hash] pairs)
+    const ccfProofMap = new Map()
+    ccfProofMap.set(1, [
+        proof.leaf.internal_transaction_hash,
+        proof.leaf.internal_evidence,
+        proof.leaf.data_hash
+    ])
+    ccfProofMap.set(2, proof.path.map(element => [element.left, element.hash]))
+    const proofData = cbor.encode(ccfProofMap)
+
+    // Prepare protected header
+    // Dynamically determine algorithm from the provided key
+    let algorithmId: number
+    switch (publicKeyJwk.alg) {
+        case 'ES256':
+            algorithmId = algorithm.es256
+            break
+        case 'ES384':
+            algorithmId = algorithm.es384
+            break
+        case 'ES512':
+            algorithmId = algorithm.es512
+            break
+        default:
+            throw new Error(`Unsupported algorithm: ${publicKeyJwk.alg}`)
+    }
+
+    const protectedHeaderItems: [number, any][] = [
+        [header.kid, publicKeyJwk.kid],
+        [header.alg, algorithmId],
+        [draft_headers.verifiable_data_structure, 2] // CCF Ledger SHA-256
+    ]
+
+    // Add CWT claims if provided
+    if (issuer && subject) {
+        protectedHeaderItems.push([
+            header.cwt_claims,
+            new Map([
+                [cwt_claims.iss, issuer],
+                [cwt_claims.sub, subject]
+            ])
+        ])
+    }
 
     // Create the receipt
     const receipt = await signer.sign({
-        protectedHeader: ProtectedHeader([
-            [header.kid, publicKeyJwk.kid],
-            [header.alg, algorithm.es256],
-            [draft_headers.verifiable_data_structure, 2], // CCF Ledger SHA-256
-            [draft_headers.verifiable_data_proofs, -1]    // Inclusion proof
-        ]),
+        protectedHeader: ProtectedHeader(protectedHeaderItems),
         unprotectedHeader: UnprotectedHeader([
             [draft_headers.verifiable_data_proofs, new Map([
                 [-1, [proofData]]
             ])]
         ]),
-        payload: null // Detached payload
+        payload: new Uint8Array(0) // Empty buffer for detached signature
     })
 
     return receipt

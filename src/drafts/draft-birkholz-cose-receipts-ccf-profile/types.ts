@@ -73,7 +73,7 @@ export function encodeCCFInclusionProof(proof: CCFInclusionProof): Uint8Array {
 }
 
 // CBOR decoding for CCF Inclusion Proof
-export function decodeCCFInclusionProof(data: Uint8Array | Map<any, any>): CCFInclusionProof {
+export function decodeCCFInclusionProof(data: Uint8Array | Map<any, any> | any): CCFInclusionProof {
     let value: any
     if (data instanceof Uint8Array) {
         const decoded = cbor.decode(data)
@@ -81,44 +81,73 @@ export function decodeCCFInclusionProof(data: Uint8Array | Map<any, any>): CCFIn
     } else if (data instanceof Map) {
         value = data
     } else {
-        throw new Error('decodeCCFInclusionProof: input must be Uint8Array or Map')
+        // If it's already decoded, use it directly
+        value = data
     }
-    // Diagnostics
-    const leafRaw = value.get(1)
-    const pathRaw = value.get(2)
-    console.log('[DEBUG] decodeCCFInclusionProof leafRaw:', leafRaw)
-    console.log('[DEBUG] decodeCCFInclusionProof pathRaw:', pathRaw)
-    // Robust decoding
+
+    // Handle different possible structures
     let leaf: CCFLeaf
-    if (leafRaw instanceof Uint8Array) {
-        leaf = decodeCCFLeaf(leafRaw)
-    } else if (Array.isArray(leafRaw)) {
-        // Already decoded array
-        leaf = {
-            internal_transaction_hash: leafRaw[0],
-            internal_evidence: leafRaw[1],
-            data_hash: leafRaw[2]
+    let path: CCFProofElement[]
+
+    // Check if it's a Map structure (keys 1 and 2)
+    if (value instanceof Map) {
+        const leafRaw = value.get(1)
+        const pathRaw = value.get(2)
+
+        if (leafRaw instanceof Uint8Array) {
+            leaf = decodeCCFLeaf(leafRaw)
+        } else if (Array.isArray(leafRaw)) {
+            leaf = {
+                internal_transaction_hash: leafRaw[0],
+                internal_evidence: leafRaw[1],
+                data_hash: leafRaw[2]
+            }
+        } else {
+            throw new Error('decodeCCFInclusionProof: unexpected leaf format in Map')
+        }
+
+        if (Array.isArray(pathRaw)) {
+            path = pathRaw.map((element: any) => {
+                if (element instanceof Uint8Array) {
+                    return decodeCCFProofElement(element)
+                } else if (Array.isArray(element)) {
+                    return {
+                        left: element[0],
+                        hash: element[1]
+                    }
+                } else {
+                    throw new Error('decodeCCFInclusionProof: unexpected path element format in Map')
+                }
+            })
+        } else {
+            throw new Error('decodeCCFInclusionProof: unexpected path format in Map')
+        }
+    } else if (value.leaf && value.path) {
+        // Handle direct object structure with leaf and path properties
+        if (value.leaf.internal_transaction_hash && value.leaf.internal_evidence && value.leaf.data_hash) {
+            leaf = value.leaf
+        } else {
+            throw new Error('decodeCCFInclusionProof: invalid leaf structure in object')
+        }
+
+        if (Array.isArray(value.path)) {
+            path = value.path.map((element: any) => {
+                if (element.left !== undefined && element.hash) {
+                    return {
+                        left: element.left,
+                        hash: element.hash
+                    }
+                } else {
+                    throw new Error('decodeCCFInclusionProof: invalid path element structure in object')
+                }
+            })
+        } else {
+            throw new Error('decodeCCFInclusionProof: invalid path structure in object')
         }
     } else {
-        throw new Error('decodeCCFInclusionProof: unexpected leaf format')
+        throw new Error('decodeCCFInclusionProof: unsupported data structure')
     }
-    let path: CCFProofElement[]
-    if (Array.isArray(pathRaw)) {
-        path = pathRaw.map((element: any) => {
-            if (element instanceof Uint8Array) {
-                return decodeCCFProofElement(element)
-            } else if (Array.isArray(element)) {
-                return {
-                    left: element[0],
-                    hash: element[1]
-                }
-            } else {
-                throw new Error('decodeCCFInclusionProof: unexpected path element format')
-            }
-        })
-    } else {
-        throw new Error('decodeCCFInclusionProof: unexpected path format')
-    }
+
     return {
         leaf,
         path
