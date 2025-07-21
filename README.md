@@ -372,6 +372,55 @@ const verification = await verify_transparent_statement(
 );
 ```
 
+### COSE Receipts with CCF Profile
+
+The library also supports the [COSE Receipts with CCF Profile](https://www.ietf.org/archive/id/draft-birkholz-cose-receipts-ccf-profile-04.txt) draft, which provides stronger tamper-evidence guarantees for transaction ledgers produced via Trusted Execution Environments (TEEs).
+
+```ts
+import crypto from 'crypto'
+import * as cose from '@transmute/cose'
+
+// Create a CCF leaf structure
+const ccfLeaf: cose.CCFLeaf = {
+  internal_transaction_hash: new Uint8Array(32).fill(1),
+  internal_evidence: 'ccf-commit-evidence-12345',
+  data_hash: new Uint8Array(32).fill(2)
+}
+
+// Validate the leaf
+if (!cose.validateCCFLeaf(ccfLeaf)) {
+  throw new Error('Invalid CCF leaf')
+}
+
+// Create hash function
+const hashFunction = (data: Uint8Array) => {
+  return new Uint8Array(crypto.createHash('sha256').update(data).digest())
+}
+
+// Create CCF inclusion proof
+const ccfProof: cose.CCFInclusionProof = {
+  leaf: ccfLeaf,
+  path: [
+    { left: true, hash: new Uint8Array(32).fill(3) }
+  ]
+}
+
+// Compute Merkle root
+const root = cose.computeCCFRoot(ccfProof, hashFunction)
+
+// Extract index from proof
+const index = cose.extractIndexFromCCFProof(ccfProof)
+
+// CBOR encoding/decoding
+const encodedLeaf = cose.encodeCCFLeaf(ccfLeaf)
+const decodedLeaf = cose.decodeCCFLeaf(encodedLeaf)
+
+const encodedProof = cose.encodeCCFInclusionProof(ccfProof)
+const decodedProof = cose.decodeCCFInclusionProof(encodedProof)
+```
+
+See `examples/ccf-profile-example.ts` for a complete working example.
+
 Example of a transparent signed statement with multiple receipts in extended diagnostic notation:
 
 #### Transparent Statement
